@@ -1,0 +1,1 @@
+In the components folder put your react components

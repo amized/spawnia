@@ -1,0 +1,13 @@
+
+
+
+
+export const LIFESTATE_UNBORN = "UNBORN";
+export const LIFESTATE_CHILD = "SEEDLING";
+export const LIFESTATE_MATURE = "MATURE";
+export const LIFESTATE_DEAD = "DEAD";
+
+
+export const COLLISION_CATEGORY_DEFAULT = 0x0001
+export const COLLISION_CATEGORY_UNITS = 0x0002
+export const COLLISION_CATEGORY_FOOD = 0x0004

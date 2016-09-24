@@ -1,0 +1,31 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background: #EEE;
+
+	font-family: 'Raleway', sans-serif;
+
+	/* Prep for add class */
+	&.someclass-add {
+		transition: background-color 1s;
+		background: green;
+	} 
+	/* Class added */
+	&.someclass {
+		background: yellow;
+	}
+
+	/* Prep for remove class */
+	&.someclass-remove {
+		transition: background-color 1s;
+	}
+
+	/* Default (no class) */
+	&:not(.someclass),
+	&:not(.someclass-remove),
+	&:not(.someclass-add) {
+		//background: white;
+	}
+}

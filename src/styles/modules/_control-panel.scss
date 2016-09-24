@@ -1,0 +1,307 @@
+
+
+
+.control-panel {
+	background-color: #333;
+	color: #FFF;
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	height: $control-panel-height;
+	padding-top: 5px;
+}
+
+.control-panel__top {
+	background: #000;
+	color: #bddff5;
+	//padding: 5px;
+}
+
+.control-panel__main {
+	@include display(flex);
+	@include align-items(stretch);
+	height: 100%;
+	
+}
+
+.unit-panel {
+	background: #000;
+	position: relative;
+}
+
+.unit-panel__heading,
+.species-panel__heading {
+	@include type_h2;
+	text-align: center;
+	padding: 10px 5px 0px 5px;
+}
+
+.unit-panel__inner {
+	min-width: 400px;
+	> span {
+		@include display(flex);
+		margin: 20px;
+		display: block;
+		position: relative;
+	}
+}
+
+.unit-panel__close {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	cursor: pointer;
+}
+
+.unit-panel__unit {
+	@include display(flex);
+	position: relative;
+	&.unit-panel-content-enter,
+	&.unit-panel-content-leave {
+		position: absolute;
+		top: 0;
+		left: 0;
+		opacity: 0;
+		@include transform(translateY(10px));
+		@include transition(all 0.4s 0.2s);
+	}
+
+	&.unit-panel-content-enter-active {
+		opacity:1;
+		@include transform(translateY(0px));
+	}
+
+	&.unit-panel-content-leave {
+		opacity: 1;
+		@include transform(translateY(0px));
+		@include transition(all 0.4s 0.0s);
+	}
+
+	&.unit-panel-content-leave-active {
+		opacity: 0;
+		@include transform(translateY(-10px));
+
+	}
+}
+
+.unit-panel__stats {
+	padding: 0px;
+}
+
+
+.unit-panel__dead {
+	@include display(flex);
+	@include flex-direction(column);
+	@include align-items(center);
+	@include justify-content(center);
+	width: 100%;
+	height: 70%;
+	font-size: 22px;
+	position: relative;
+	&:before {
+		content: "";
+		background-image: url(../img/rip-tombstone.svg);
+		background-size: contain;
+		width: 90px;
+    	height: 111px;
+    	margin-bottom: 10px;
+	}
+}
+
+.unit-panel__dead-tomb {
+	position: absolute;
+	left: 50%;
+	top: 43%;
+	@include transform(translateX(-50%));
+    color: #000;
+    font-size: 13px;
+    font-weight: bold;
+    font-family: "Comic Sans MS", cursive, sans-serif;	
+	max-width: 65px;
+    word-wrap: break-word;
+    text-align: center;
+    margin-left: -3px;
+}
+
+
+
+
+/*------------- SPECIES PANEL -------------*/
+
+
+.species-panel {
+	@include flex-grow(1);
+	//min-height: 100%;
+	//height: 100%;
+}
+
+
+
+.species-panel__heading {
+	@include type_h2;
+}
+
+.species-panel__list {
+	//@include display(flex);
+	//@include flex-wrap(no-wrap);
+	max-height: 100%;
+	width: 100%;
+	height: 218px;
+	overflow-x: scroll;
+	position: relative;	
+	&:after {
+		//content: "";
+		//min-width: 100%;
+		//height: 40px;
+	}
+}
+
+.species-panel__item-wrapper {
+	@include transition(all 0.6s);
+	position: absolute;
+	top: 0;
+	left: 0;	
+	overflow: hidden;
+	height: 100%;
+	width: 240px;
+	@include transform(translateX(0px));
+	&-enter {
+		width: 0px;
+		opacity: 0;
+	}
+
+	&-enter-active {
+		width: 240px;
+		opacity: 1;
+	}
+
+	&-leave,
+	&-leave-active {
+		width: 0px;
+		opacity: 0;
+	}	
+}
+
+.species-panel__item {
+	//@include flex(33.3%);
+	position: absolute;
+	top: 0;
+	left: 0;
+	max-width: 200px;
+	width: 200px;
+	margin: 20px 20px;
+	min-height: 218px;
+
+	.dna-blueprint {
+		background: #FFF;
+		border-top-right-radius: 0px;
+		border-bottom-right-radius: 0px;
+	}
+
+
+
+}
+
+.species-panel__item-inner{
+	@include display(flex);
+	@include justify-content(center);
+	height: 100px;
+	>* {
+		max-width: 100px;
+		width: 50%;
+		height: 100%;
+	}
+}
+
+.species-panel__item-title {
+	text-align: center;
+	letter-spacing: 2px;
+	padding: 0px;
+	font-size: 11px;
+	margin-top: 10px;
+	word-break: break-all;
+	color: #AAA;
+}
+
+
+.species-panel__item-name {
+	text-align: center;
+    font-size: 20px;
+    margin: 15px 0px;
+}
+
+
+.species-panel__stats {
+	min-width: 100px;
+	background: rgba(#000, 0.5);
+	text-align: center;
+	@include display(flex);
+	@include align-items(center);
+	@include justify-content(center);
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+	>* {
+		@include flex-grow(1);
+	}
+}
+
+.species-panel__stats-pop-title {
+	font-size: 11px;
+	margin-bottom: 2px;
+	width: 100%;
+}
+
+.species-panel__stats-pop {
+	font-size: 40px;
+	width: 100%;
+}
+
+.species-name__input {
+	padding: 10px 0px;
+	text-align: center;
+	border: none;
+	border-bottom: 1px solid rgba(#FFF, 0.5);
+	background: none;
+	outline: none;
+	display: block;
+	width: 100%;
+	font-size: 16px;
+	color: #999;
+
+	@include placeholder() {
+		color: #666;
+		font-style: italic;
+	}
+}
+
+
+
+
+// Stats //
+.stats-container {
+	min-width: 200px;
+	@include display(flex);
+	@include flex-direction(column);
+	@include justify-content(space-between);
+	max-height: 160px;
+	padding: 0px 0px 0px 20px;
+}
+
+.stats-item {
+	padding: 7px 0px;
+	@include display(flex);
+	@include justify-content(space-between);
+	width: 100%;
+	color: #AAA;
+	border-bottom: 1px solid #222;
+	span:last-child {
+		font-weight: bold;
+		color: #CCC;
+	}
+
+	&:first-child {
+		border-top: 1px solid #222;
+	}
+}
+

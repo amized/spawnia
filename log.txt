@@ -1,0 +1,35 @@
+[16:21:21] Using gulpfile ~/Sites/spawnia1.0/gulpfile.js
+[16:21:21] Starting 'sprite'...
+[16:21:21] Finished 'sprite' after 17 ms
+[16:21:21] Starting 'iconfont'...
+[16:21:21] Starting 'scripts'...
+== New list of scripts to bundle ==
+[16:21:21] Finished 'scripts' after 27 ms
+[16:21:21] Starting 'styles'...
+[16:21:21] Finished 'styles' after 8.55 ms
+[16:21:21] Starting 'ejs'...
+Updating ejs
+[16:21:21] Starting 'browserSync'...
+[16:21:21] Finished 'browserSync' after 28 ms
+[16:21:21] Starting 'watch'...
+[16:21:21] Finished 'watch' after 14 ms
+[16:21:21] gulp-imagemin: Minified 0 images
+[16:21:22] gulp-svgicons2svgfont: Font created
+[BS] Access URLs:
+ -------------------------------------
+       Local: http://localhost:3000
+    External: http://172.16.42.43:3000
+ -------------------------------------
+          UI: http://localhost:3001
+ UI External: http://172.16.42.43:3001
+ -------------------------------------
+[BS] Serving files from: .
+[16:21:22] Finished 'iconfont' after 932 ms
+[16:21:23] Starting 'styles'...
+[16:21:23] Finished 'styles' after 2.25 ms
+[BS] 1 file changed (styles.css)
+[16:21:23] Finished 'ejs' after 1.96 s
+[16:21:23] Starting 'build'...
+[16:21:23] Finished 'build' after 2.05 μs
+[16:21:23] Starting 'default'...
+[16:21:23] Finished 'default' after 5.59 μs
