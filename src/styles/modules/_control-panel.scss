@@ -188,10 +188,15 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	max-width: 200px;
-	width: 200px;
-	margin: 20px 20px;
-	min-height: 218px;
+	margin: 10px 10px;
+	min-height: 200px;
+	border: 5px solid transparent;
+	border-radius: 5px;
+
+	@include transition(border 0.4s);
+	&:hover {
+		border-color: rgba(#e9e9ff,0.2);
+	}
 
 	.dna-blueprint {
 		background: #FFF;
@@ -200,18 +205,19 @@
 	}
 
 
-
 }
 
 .species-panel__item-inner{
 	@include display(flex);
 	@include justify-content(center);
-	height: 100px;
+	@include align-items(center);
+	max-width: 200px;
+	width: 200px;
 	>* {
 		max-width: 100px;
 		width: 50%;
 		height: 100%;
-	}
+	}	
 }
 
 .species-panel__item-title {
@@ -234,6 +240,8 @@
 
 .species-panel__stats {
 	min-width: 100px;
+	width: 100px;
+	height: 100px;
 	background: rgba(#000, 0.5);
 	text-align: center;
 	@include display(flex);

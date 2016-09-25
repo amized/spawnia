@@ -45,7 +45,9 @@ class Unit {
     }
 
     makeBody() {
-        return Body.create({
+
+
+        let body = Body.create({
             label: "unit:" + this.id,
             restitution: 1,
             force: {
@@ -54,9 +56,16 @@ class Unit {
             },
             collisionFilter: {
                 category: COLLISION_CATEGORY_UNITS
-            }
-
+            },
+            render: {}
         });
+
+        // Makes sure if the unit was previously selected it remains so
+        if (this.body) {
+            body.render.isSelected = this.body.render.isSelected;
+        }
+
+        return body;
     }
 
     build(dna, x, y) {
