@@ -5,10 +5,10 @@ import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 
 import App from './components/App.jsx'
-import Game from "./lib/Game.js"
+import Game from './lib/Game.js'
 
-import DelayChain from "./lib/utils/DelayChain.js"
-import TransitionClass from "./lib/utils/TransitionClass.js"
+import DelayChain from './lib/utils/DelayChain.js'
+import TransitionClass from './lib/utils/TransitionClass.js'
 
 
 Game.init();
@@ -23,3 +23,5 @@ render(
     <App engine={Game.getEngine()} universe={Game.getUniverse()} dispatch={dispatch} />,
   rootEl
 )
+
+export default Game

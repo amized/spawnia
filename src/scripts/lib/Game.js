@@ -12,7 +12,7 @@ import { createStore } from 'redux'
 import reducers from '../reducers'
 import Universe from "./Universe.js"
 import Simulation from "./Simulation.js";
-import { Engine } from 'matter-js';
+import { Engine, MouseConstraint, World  } from 'matter-js';
 import { default as C } from "../constants"
 
 var map;
@@ -43,6 +43,9 @@ const Game = {
 		this.universe = new Universe(this.engine.world);
 		// The simulation is responsible for running the engine
 		this.simulation = new Simulation(this.engine, this.universe);
+		this.mouseConstraint = MouseConstraint.create(this.engine);
+		
+		World.add(this.engine.world, this.mouseConstraint);
 
 		let dispatch = this.simulation.dispatch;
 		

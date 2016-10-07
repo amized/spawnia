@@ -4,20 +4,15 @@ var ClassNames = require('classnames');
 
 
 // module aliases
-import { Composite, Mouse, Bounds, Events } from "matter-js"
+import { Composite, Mouse, MouseConstraint, World } from "matter-js"
 import Render from "../lib/Render.js"
 
 
 
 
 
-var World = React.createClass({
+var SpawniaWorld = React.createClass({
 
-	getDefaultProps: function () {
-		return {
-			
-		}
-	},
 
     getInitialState: function () {
     	return {
@@ -68,27 +63,26 @@ var World = React.createClass({
             }
         });
 
-        this.mouse = Mouse.create(this.render.canvas);
         Render.run(this.render);
     },
 
-    click: function () {
-        let mouse = this.mouse;
-        this.props.onClick(mouse);
-    },
-
     render: function () {
+
     	return (
             <div className="map-wrapper">
-                <div className="map" ref="container" onClick={this.click}></div>
+                <div className="map" ref="container"></div>
             </div>
     		
     	)
     }
-})
+});
+
+module.exports = SpawniaWorld;
 
 
-module.exports = World;
+
+
+
 
 
 

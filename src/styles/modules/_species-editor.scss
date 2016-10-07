@@ -1,0 +1,95 @@
+
+
+.species-editor {
+	top: 0;
+	left: 0;	
+
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	background: #333;
+}
+
+
+.species-editor__close {
+	position: absolute;
+	top: 30px;
+	right: 30px;
+	font-size: 30px;
+	cursor: pointer;
+}
+
+.species-editor__save {
+	color: #333;
+	border: 1px solid #333;
+	border-radius: 3px;
+	padding: 10px 20px;
+}
+
+.species-editor__heading {
+	padding: 30px;
+	text-align: center;
+	font-size: 33px;
+	border-bottom: 1px solid #444;
+}
+
+
+.species-editor__cell-empty {
+	stroke: #444;
+	stroke-width: 3px;
+	fill: #333;
+	stroke-dasharray: 3, 3;
+	cursor: pointer;
+}
+
+.species-editor__cell {
+	stroke: #000;
+	stroke-width: 3px;
+	cursor: pointer;
+}
+
+
+.species-editor__cell-menu {
+	position: absolute;
+	top: 94px;
+	//left: 50%;
+	width: 100%;
+	//@include transform(translateX(-50%));
+	background: #FFF;
+	padding: 30px;
+	border-radius: 5px;
+	box-shadow: 2px 2px 5px 1px rgba(#000, 0.5);
+	.species-editor--cell-menu-open & {
+		display: block;
+	}
+}
+
+.species-editor__cell-menu-list {
+	@include display(flex);
+	@include justify-content(space-between);
+	width: 100%;
+}
+
+.species-editor__cell-menu-cell {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	border: 2px solid #222;
+	color: #222;
+	@include display(flex);
+	@include justify-content(center);
+	@include align-items(center);
+	font-size: 30px;
+}
+
+
+.species-editor__path {
+	stroke: #444;
+	stroke-width: 5px;
+}
+
+.species-editor__path--connected {
+	stroke: #FFF;
+	stroke-width: 5px;
+}
+

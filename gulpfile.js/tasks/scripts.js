@@ -45,7 +45,7 @@ var getBundler = function(inputFile, watch)
     {
         browserifyBundle = browserifyBundle.plugin(watchify, {delay: 0}) // Watchify to watch source file changes
     }
-    browserifyBundle = browserifyBundle.transform(babel, {presets: ["es2015", "react"], compact: false});
+    browserifyBundle = browserifyBundle.transform(babel, {presets: ["es2015", "react", "stage-0"], compact: false});
     return browserifyBundle;
 }
 

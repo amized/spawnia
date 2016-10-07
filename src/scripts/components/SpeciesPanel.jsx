@@ -5,6 +5,7 @@ import ReactDOM from "react-dom"
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import _ from "underscore"
 import DnaBlueprint from "./DnaBlueprint"
+import ClassNames from 'classnames'
 import { 
 	ENERGY_COST_PER_CELL, 
 	UNIT_START_ENERGY_PER_CELL, 
@@ -39,6 +40,7 @@ export default class SpeciesPanel extends React.Component {
 									key={species.encodedDna} 
 									index={species.sortedIndex}
 									selectSpecies={this.props.selectSpecies}
+									isSelected={this.props.selectedSpecies === species}
 								/>
 							);
 						})
@@ -74,11 +76,20 @@ class SpeciesItem extends React.Component {
 	}
 
 	onMouseEnter(e) {
-		this.props.selectSpecies(this.props.species);
+		//this.props.selectSpecies(this.props.species);
 	}
 
 	onMouseLeave(e) {
-		this.props.selectSpecies(null);
+		//this.props.selectSpecies(null);
+	}
+
+	onClick(e) {
+		if (this.props.isSelected) {
+			this.props.selectSpecies(null);
+		}
+		else {
+			this.props.selectSpecies(this.props.species);
+		}
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -118,21 +129,25 @@ class SpeciesItem extends React.Component {
 	}
 
 	render() {
-		let { species, index } = this.props;
+		let { species, index, isSelected } = this.props;
 		//console.log("This is the state:", this.state);
 		let isEdit = this.state.mode === "edit";
 		let style = {
 			transform: "translateX(" + index * 220	 + "px)"	
 		}
+		let classnames = ClassNames({
+			'species-panel__item': true,
+			'species-panel__item--selected': isSelected
+		})
 		return (
 			<div className="species-panel__item-wrapper" 
 				style={style} 
 				onMouseEnter={this.onMouseEnter.bind(this)}
 				onMouseLeave={this.onMouseLeave.bind(this)}
 			>
-				<div className="species-panel__item">   
+				<div className={classnames}>   
 					
-					<div className="species-panel__item-inner">
+					<div className="species-panel__item-inner" onClick={this.onClick.bind(this)}>
 						<DnaBlueprint body={species.bodyTemplate} width={100} height={100} />
 						<div className="species-panel__stats">
 							<div>

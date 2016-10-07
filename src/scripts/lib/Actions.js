@@ -149,20 +149,25 @@ function runAction(action, universe, dispatch) {
    		    var unit = action.unit;
    		    var cell = action.cell;
 		    var newUnit = new Unit();
+
+		    // Save the child-parent connection for stats
 		    unit.addChild(newUnit);
 
 		    // Get the Matter JS body object
 		    var unitBody = newUnit.build(DNA.copyDNA(unit.DNA), cell.body.position.x, cell.body.position.y);
 
-		    // Add it to the world
-		    World.add(universe.world, unitBody);
+		    // Apply correct render state
+		    if (unit.body.render.isSelected) {
+		    	newUnit.applySelected();
+		    }
 
 		    Body.setVelocity(unitBody, {
 		      x: Math.cos(unit.body.angle + cell.angle),
 		      y: Math.sin(unit.body.angle + cell.angle)         
 		    })
 
-		    // Update the list of bodies
+		    // Add it to the world
+		    World.add(universe.world, unitBody);
 		    universe.addUnit(newUnit);
 		    cell.isReproducing = false;
 

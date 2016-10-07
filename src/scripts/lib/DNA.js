@@ -10,15 +10,15 @@ function CoinFlip() {
 
 let probabilities = {
 
-    EXTEND: 50,
-    DUPLICATE: 10, 
+    EXTEND: 10,
+    DUPLICATE: 2, 
     SWAP: 10,
     DIE: 2,
     MORPH: 0,
-    SPAWN: 50
+    SPAWN: 10
 }
 
-let mutationProbability = 0.03;
+let mutationProbability = 0.02;
 
 
 function getProbTiers() {
@@ -210,18 +210,22 @@ class DNA {
             // No mutation
             case "SPAWN":
                 console.log("SPAWN MUTATION");
+                let spawnedCell = {
+                    type: cell.type
+                }
                 if (cell.children) {
                     newCell.children = cell.children.map((childCell) => {
-                        return (childCell) ? this.copyCell(childCell) : { type: "B"};
+                        return (childCell) ? this.copyCell(childCell) : spawnedCell;
                     });
                 } else {
                     if (CoinFlip()) {
-                        newCell.children = [{type: "B"}, null];
+                        newCell.children = [spawnedCell, null];
                     }
                     else {
-                        newCell.children = [null, {type: "B"}];
+                        newCell.children = [null, spawnedCell];
                     }
                 }
+                console.log("The new cells children:", newCell.children, spawnedCell);
                 return newCell;
             default:
                 if (cell.children) {
