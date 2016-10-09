@@ -7,7 +7,7 @@ import { Composite, Mouse, Bounds, Events } from "matter-js"
 import World from './World.jsx';
 import MapEvents from "./MapEvents.jsx";
 import ControlPanel from './ControlPanel.jsx';
-
+import MapUpdater from './MapUpdater.jsx';
 
 
 
@@ -30,20 +30,6 @@ export default class App extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-
-        if (prevState.selectedSpecies != this.state.selectedSpecies) {
-            this.props.universe.applySelectedSpecies(this.state.selectedSpecies);
-        }
-
-        let unit = this.state.selectedUnit;
-        if (prevState.selectedUnit !== unit) {
-            if (unit) {
-                unit.applySelected();
-            }
-            if (prevState.selectedUnit) {
-                prevState.selectedUnit.deselect();
-            }
-        }
 
 
     }
@@ -134,6 +120,7 @@ export default class App extends React.Component {
     	return (
             <div style={style}>
                 <World 
+                    universe={this.props.universe}
                     engine={this.props.engine}
                     onMouseDown={this.onWorldClick.bind(this)}
                     onMouseMove={this.onWorldMove.bind(this)}
@@ -145,6 +132,10 @@ export default class App extends React.Component {
                     onUnitClick={this.onUnitClick.bind(this)}
                     onUnitHover={this.onUnitHover.bind(this)}
                 />
+                <MapUpdater
+                    {...this.props}
+                    {...this.state}
+                />                
                 <ControlPanel {...this.props}
                     dispatch={dispatch} 
                     selectedUnit={selectedUnit}

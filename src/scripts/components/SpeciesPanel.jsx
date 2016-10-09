@@ -130,7 +130,6 @@ class SpeciesItem extends React.Component {
 
 	render() {
 		let { species, index, isSelected } = this.props;
-		//console.log("This is the state:", this.state);
 		let isEdit = this.state.mode === "edit";
 		let style = {
 			transform: "translateX(" + index * 220	 + "px)"	
@@ -148,7 +147,7 @@ class SpeciesItem extends React.Component {
 				<div className={classnames}>   
 					
 					<div className="species-panel__item-inner" onClick={this.onClick.bind(this)}>
-						<DnaBlueprint body={species.bodyTemplate} width={100} height={100} />
+						<DnaBlueprint dna={species.dna} width={100} height={100} />
 						<div className="species-panel__stats">
 							<div>
 							<div className="species-panel__stats-pop-title">Population: </div>

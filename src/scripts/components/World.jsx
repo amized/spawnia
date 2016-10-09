@@ -11,27 +11,25 @@ import Render from "../lib/Render.js"
 
 
 
-var SpawniaWorld = React.createClass({
+export default class SpawniaWorld extends React.Component {
 
 
-    getInitialState: function () {
-    	return {
+    constructor(props) {
+    	super(props);
+    }
 
-    	}
-    },
+    shouldComponentUpdate() {
+        return true;
+    }
 
-    shouldComponentUpdate: function () {
-        return false;
-    },
-
-    componentDidMount: function () {
+    componentDidMount() {
         //this.refs.container.appendChild(canvas);
         // create a renderer
 
         let { engine } = this.props;
         let vw = window.innerWidth;
         
-        this.render = Render.create({
+        this.mapRender = Render.create({
             element: this.refs.container,
             engine: engine,
             options: {
@@ -63,22 +61,44 @@ var SpawniaWorld = React.createClass({
             }
         });
 
-        Render.run(this.render);
-    },
+        Render.run(this.mapRender);
 
-    render: function () {
+        if (this.props.onRenderCreate) {
+            this.props.onRenderCreate(this.mapRender);
+        }
+    }
+
+
+    componentDidUpdate(prevProps) {
+        console.log("render updated", this.props);
+        let { selectedSpecies, universe, selectedUnit } = this.props;
+
+
+        if (selectedSpecies !== prevProps.selectedSpecies) {
+            Render.setUiState(this.mapRender, {
+                selectedSpecies: selectedSpecies
+            });
+        }
+
+        if (selectedUnit !== prevProps.selectedUnit) {
+            Render.setUiState(this.mapRender, {
+                selectedUnit: selectedUnit
+            });
+        }
+    }
+
+
+
+    render() {
 
     	return (
             <div className="map-wrapper">
-                <div className="map" ref="container"></div>
+                <div className="map" ref="container" key={1}></div>
             </div>
     		
     	)
     }
-});
-
-module.exports = SpawniaWorld;
-
+}
 
 
 

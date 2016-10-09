@@ -8,6 +8,7 @@ import Unit from "./Unit";
 import Food from "./Food";
 import CellTypes from "./CellTypes";
 import DNA from "./DNA";
+import UnitBuilder from "./UnitBuilder";
 
 import { 
 	ENERGY_COST_PER_CELL, 
@@ -109,7 +110,14 @@ function runAction(action, universe, dispatch) {
 
 		case "MATURE_UNIT":
 
-	    	let newBody = action.unit.getBodyTemplate();
+			let currBody = action.unit.body;
+
+	    	let newBody = UnitBuilder.buildBody(
+	    		action.unit.DNA, 
+	    		currBody.position.x, 
+	    		currBody.position.y
+	    	);
+
 	    	// Check collision
 	    	var bounds  = newBody.bounds;
 			var intruding = Query.region(universe.world.bodies, bounds);
@@ -134,8 +142,8 @@ function runAction(action, universe, dispatch) {
 				return false;
 			}
 
-			let v = action.unit.body.velocity;
-			World.remove(universe.world, action.unit.body);
+			let v = currBody.velocity;
+			World.remove(universe.world, currBody);
 			universe.addToSpecies(action.unit);
 	    	newBody = action.unit.mature();
 	    	//

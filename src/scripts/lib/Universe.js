@@ -30,7 +30,6 @@ class Universe {
 			species = {
 				dna: unit.DNA,
 				encodedDna: unit.encodedDna,
-				bodyTemplate: unit.getBodyTemplate(),
 				population: 1,
 				totalPopulation: 1
 			}
@@ -51,6 +50,10 @@ class Universe {
 		return this.speciesData[unit.encodedDna];
 	}
 
+	getUnitsOfSpecies(species) {
+		return this.getUnitsArr().filter(unit => unit.encodedDna === species.encodedDna );
+	}	
+
 	getSpeciesArr() {
 		return Object.keys(this.speciesData).map(key => this.speciesData[key]).filter(species => species.population > 0); 
 	}
@@ -69,6 +72,8 @@ class Universe {
 			});
 		}
 	}
+
+
 
 
 	/* Units */

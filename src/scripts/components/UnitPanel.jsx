@@ -47,6 +47,8 @@ export default class UnitPanel extends React.Component {
 			species = this.props.universe.getSpeciesOfUnit(unit);
 
 			name = (species && species.name) ? "" + species.name + unit.speciesIndex : "Unit " + unit.id;
+
+			//console.log("The unit we clicked on's dna:", unit.DNA);
 			
 		}
 		
@@ -72,7 +74,7 @@ export default class UnitPanel extends React.Component {
 									</div>
 								:
 									<div className="unit-panel__unit" key={unit.id}>
-										<DnaBlueprint body={unit.getBodyTemplate()} width={160} height={160} />   
+										<DnaBlueprint dna={unit.DNA} width={160} height={160} />   
 										<div className="unit-panel__stats stats-container"> 
 							                <div className="stats-item">Age: <span>{ age }</span></div>
 							                <div className="stats-item">Generation <span>{ unit.generation }</span></div>

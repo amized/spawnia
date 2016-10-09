@@ -8,6 +8,7 @@ import UnitPanel from "./UnitPanel.jsx"
 import SpeciesPanel from "./SpeciesPanel.jsx"
 import SpeciesEditor from "./SpeciesEditor.jsx"
 import CommandPanel from "./CommandPanel.jsx"
+import SpeciesViewerPanel from "./SpeciesViewerPanel"
 
 class ControlPanel extends React.Component {
 
@@ -56,6 +57,12 @@ class ControlPanel extends React.Component {
                 <div className="control-panel__top"></div>
                 <div className="control-panel__main">
                     <UnitPanel unit={ this.props.selectedUnit } unselectUnit={this.props.unselectUnit} universe={this.props.universe} />
+                    {
+                        selectedSpecies ?
+                            <SpeciesViewerPanel species={selectedSpecies} />
+                        :
+                            null
+                    }
                     <SpeciesPanel 
                         selectedSpecies={selectedSpecies} 
                         selectSpecies={this.props.selectSpecies} 

@@ -49,6 +49,7 @@ import { Common, Composite, Bounds, Events, Grid, Vector, Mouse } from "matter-j
             canvas: null,
             mouse: null,
             frameRequestId: null,
+            uiState: null,
             options: {
                 width: 800,
                 height: 600,
@@ -89,6 +90,7 @@ import { Common, Composite, Bounds, Events, Grid, Vector, Mouse } from "matter-j
         render.canvas = render.canvas || _createCanvas(render.options.width, render.options.height);
         render.context = render.canvas.getContext('2d');
         render.textures = {};
+        render.uiState = {};
 
         render.bounds = render.bounds || { 
             min: { 
@@ -134,6 +136,11 @@ import { Common, Composite, Bounds, Events, Grid, Vector, Mouse } from "matter-j
     Render.stop = function(render) {
         _cancelAnimationFrame(render.frameRequestId);
     };
+
+
+    Render.setUiState = function (render, state) {
+        Object.assign(render.uiState, state);
+    }
 
     /**
      * Sets the pixel ratio of the renderer and updates the canvas.
@@ -453,10 +460,16 @@ import { Common, Composite, Bounds, Events, Grid, Vector, Mouse } from "matter-j
     Render.bodies = function(render, bodies, context) {
         var c = context;
         var i, body;
+        var uiState = render.uiState;
         var selected = [];
         for (i = 0; i < bodies.length; i++) {
             body = bodies[i];
-            if (body.render.isSelected) {
+            if (uiState.selectedUnit && 
+                body === uiState.selectedUnit.body) {
+                selected.push(body);
+            }
+            else if (uiState.selectedSpecies && 
+                body.render.encodedDna === uiState.selectedSpecies.encodedDna) {
                 selected.push(body);
             }
             else {

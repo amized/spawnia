@@ -24,16 +24,35 @@ export default class MapEvents extends React.Component {
         let canvas = $("canvas")[0];
 
         this.mouse = Mouse.create(canvas);
-        
         this.mouseConstraint = MouseConstraint.create(engine, {
             mouse: this.mouse
         });
+
+        console.log(this.mouse);
     
         Events.on(this.mouseConstraint, "mousemove", this.onMouseMove);
         Events.on(this.mouseConstraint, "mouseup", this.onMouseUp);
         Events.on(this.mouseConstraint, "mousedown", this.onMouseDown);
+        Events.on(engine, 'tick', this.onTick);
 
-        World.add(engine.world, this.mouseConstraint);
+        //World.add(engine.world, this.mouseConstraint);
+    }
+
+    onTick = (e) => {
+        let bodies = this.getBodiesAtMouse(this.mouse);
+        let unitHover = null;
+        for (let i = 0; i < bodies.length; i++) {
+            let split = bodies[i].label.split(":");
+            if (split[0] === "unit") {
+                unitHover = parseInt(split[1]);
+                break;
+            }
+        }        
+
+        if (this.unitHover !== unitHover) {
+            this.unitHover = unitHover;
+            this.props.onUnitHover(unitHover);
+        }        
     }
 
     onMouseUp = (e) => {
@@ -63,20 +82,7 @@ export default class MapEvents extends React.Component {
     }
 
     onMouseMove = (e) => {
-        let bodies = this.getBodiesAtMouse(e.mouse);
-        let unitHover = null;
-        for (let i = 0; i < bodies.length; i++) {
-            let split = bodies[i].label.split(":");
-            if (split[0] === "unit") {
-                unitHover = parseInt(split[1]);
-                break;
-            }
-        }        
 
-        if (this.unitHover !== unitHover) {
-            this.unitHover = unitHover;
-            this.props.onUnitHover(unitHover);
-        }
     }
 
     getBodiesAtMouse(mouse) {
