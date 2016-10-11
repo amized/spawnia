@@ -1,8 +1,8 @@
 
 import Cell from "./Cell"
 import { COLLISION_CATEGORY_UNITS } from "../constants"
-import { Body, Query } from "matter-js"
-
+import { Body, Query, Composite } from "matter-js"
+import _ from 'underscore'
 
 export default class UnitBuilder {
 
@@ -42,7 +42,17 @@ export default class UnitBuilder {
             },
             render: {}
         });
-        Body.setParts(body, cells.map(item => { return item.body }));
+
+		let cellBodies = cells.map(item => { return item.body });
+		let c = Composite.create();
+
+        Body.setParts(body, cellBodies);
+
+
+        let parts = _.partition(cells, (cell) => {
+        	return cell.type === "G";
+        });
+
         return body;
     }
 

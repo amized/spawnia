@@ -39,6 +39,25 @@ CellTypes.S = {
 }
 
 
+// Grounding cell
+CellTypes.G = {
+  name: "Grounding",
+  id: "G",
+  bodyColor: "#733a00",
+  onCreate: function(cell, unit) {
+    console.log("setting static...");
+    let body = cell.body;
+    body.frictionAir = 100;
+    Body.setStatic(body);
+    console.log(cell.body);
+  },
+  onStep: function (cell, unit, universe) {
+    return;
+  }
+}
+
+
+
 CellTypes.E = {
   name: "Eat",
   id: "E",

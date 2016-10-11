@@ -18,6 +18,7 @@ export default class SpeciesPanel extends React.Component {
 	render() {
 
 		// Sort the list by population and save the sorted index as a property on each item to allow ordering via css
+		/*
 		let sortByPop = _.sortBy(this.props.allSpecies, (species)=>{
 			return -species.population;
 		}).map((species,index) => {
@@ -26,6 +27,9 @@ export default class SpeciesPanel extends React.Component {
 		});
 		// Re-sort the list by it's key, this will ensure that React never reorders the DOM elements
 		let allSpecies = _.sortBy(sortByPop, "encodedDna");
+		*/
+		
+		let allSpecies = this.props.allSpecies;
 		return (
 			<div className="species-panel">
 				<div className="species-panel__heading">Species</div>
@@ -38,7 +42,7 @@ export default class SpeciesPanel extends React.Component {
 									dispatch={this.props.dispatch} 
 									species={species} 
 									key={species.encodedDna} 
-									index={species.sortedIndex}
+									index={index}
 									selectSpecies={this.props.selectSpecies}
 									isSelected={this.props.selectedSpecies === species}
 								/>

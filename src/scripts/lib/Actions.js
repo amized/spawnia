@@ -9,6 +9,7 @@ import Food from "./Food";
 import CellTypes from "./CellTypes";
 import DNA from "./DNA";
 import UnitBuilder from "./UnitBuilder";
+import _ from "underscore";
 
 import { 
 	ENERGY_COST_PER_CELL, 
@@ -146,9 +147,31 @@ function runAction(action, universe, dispatch) {
 			World.remove(universe.world, currBody);
 			universe.addToSpecies(action.unit);
 	    	newBody = action.unit.mature();
-	    	//
-	    	Body.setVelocity(newBody, v);
 	    	World.add(universe.world, newBody);
+	    	Body.setVelocity(newBody, v);
+
+		    let grounding = action.unit.cells.filter(cell => cell.type === "G");
+		    let parts = _.partition(action.unit.cells, (cell) => cell.type === "G");
+		    console.log("parts", parts);
+
+		    if (parts[0].length > 0) {
+		    	let cell = parts[0][0];
+		    	console.log("Found grouding cell", cell);
+		    	let offset = {
+		    		x: cell.body.position.x - newBody.position.x,
+		    		y: cell.body.position.y - newBody.position.y
+		    	}
+
+		    	Body.setStatic(cell.body, true);
+		    	Body.setParts(newBody, parts[1].map(cell => cell.body));
+		    	let c = Constraint.create({
+		    		pointA: { x: cell.body.position.x, y: cell.body.position.y },
+		    		bodyB: newBody,
+		    		pointB: offset,
+		    		stiffness: 1
+		    	});
+		    	World.add(universe.world, c);
+		    }
 	    	
 	    	return;
 
@@ -164,18 +187,14 @@ function runAction(action, universe, dispatch) {
 		    // Get the Matter JS body object
 		    var unitBody = newUnit.build(DNA.copyDNA(unit.DNA), cell.body.position.x, cell.body.position.y);
 
-		    // Apply correct render state
-		    if (unit.body.render.isSelected) {
-		    	newUnit.applySelected();
-		    }
-
 		    Body.setVelocity(unitBody, {
 		      x: Math.cos(unit.body.angle + cell.angle),
 		      y: Math.sin(unit.body.angle + cell.angle)         
-		    })
+		    });
 
-		    // Add it to the world
 		    World.add(universe.world, unitBody);
+		    // Add it to the world
+		    
 		    universe.addUnit(newUnit);
 		    cell.isReproducing = false;
 

@@ -8,8 +8,7 @@
 	position: fixed;
 	bottom: 0;
 	left: 0;
-	height: $control-panel-height;
-	padding-top: 5px;
+	height: $control-panel-height+2;
 }
 
 .control-panel__top {
@@ -25,9 +24,59 @@
 	
 }
 
-.unit-panel {
+
+/*-------------- LEFT PANEL --------------- */
+
+.control-panel__left {
+	width: 400px;
+	height: 100%;
 	background: #000;
 	position: relative;
+	overflow: hidden;
+
+}
+
+
+
+.unit-panel,
+.species-viewer-panel {
+	background: #000;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+
+	&.panel__left-enter {
+
+	}
+
+	&.panel__left-enter,
+	&.panel__left-leave {
+		position: absolute;
+		top: 0;
+		left: 0;
+		opacity: 0;
+		@include transform(translateY(10px));
+		@include transition(all 0.4s 0.0s linear);
+	}
+
+	&.panel__left-enter-active {
+		opacity:1;
+		@include transform(translateY(0px));
+	}
+
+	&.panel__left-leave {
+		opacity: 1;
+		@include transform(translateY(0px));
+		@include transition(all 0.4s 0.0s linear);
+	}
+
+	&.panel__left-leave-active {
+		opacity: 0;
+		@include transform(translateY(-10px));
+	}
+
 }
 
 .unit-panel__heading,
@@ -39,12 +88,13 @@
 
 .unit-panel__inner {
 	min-width: 400px;
-	> span {
-		@include display(flex);
-		margin: 20px;
-		display: block;
-		position: relative;
-	}
+}
+
+.unit-panel__content {
+	@include display(flex);
+	margin: 20px;
+	display: block;
+	position: relative;
 }
 
 .unit-panel__close {
@@ -124,7 +174,27 @@
     margin-left: -3px;
 }
 
+/*------------- SPECIES VIEWER PANEL -------------*/
 
+.species-viewer-panel {
+	position: absolute;
+	background: #000;
+	border-left: 1px solid rgba(#FFF, 0.2);
+}
+
+.species-viewer-panel__name {
+	font-size: 12px;
+	letter-spacing: 2.2px;
+	text-align: center;
+	padding: 10px 10px 0px 10px;
+	color: #AAA;
+}
+
+.species-viewer-panel__main {
+	@include display(flex);
+	position: relative;
+	padding: 20px;
+}
 
 
 /*------------- SPECIES PANEL -------------*/
@@ -221,7 +291,7 @@
 	.species-panel__item--selected &,
 	.species-panel__item--selected:hover & {
 		//border-color: rgba(#e9e9ff,0.2);
-		border-color: rgb(166, 255, 221);
+		border-color: $color-hilight;
 	}
 
 	>* {
@@ -302,7 +372,7 @@
 	min-width: 200px;
 	@include display(flex);
 	@include flex-direction(column);
-	@include justify-content(space-between);
+	@include justify-content(center);
 	max-height: 160px;
 	padding: 0px 0px 0px 20px;
 }
@@ -322,5 +392,15 @@
 	&:first-child {
 		border-top: 1px solid #222;
 	}
+	span.stats-item__link {
+		color: $color-hilight;
+		text-decoration: underline;
+		cursor: pointer;
+		font-size: 12px;
+		text-align: right;
+		width: 100%;
+	}	
 }
+
+
 

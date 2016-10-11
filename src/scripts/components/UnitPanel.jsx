@@ -30,6 +30,10 @@ function getTimeRemaining(endtime) {
 
 
 export default class UnitPanel extends React.Component {
+	selectSpecies = (e) => {
+		let species = this.props.universe.getSpeciesOfUnit(this.props.unit);
+		this.props.selectSpecies(species);
+	}
 
 	render() {
 		let name, age, species;
@@ -55,45 +59,43 @@ export default class UnitPanel extends React.Component {
 		return (
 			<div className="unit-panel"> 
 				<div className="unit-panel__heading">{ name ? name : "Selected Unit" }</div>  
-				{ 
-					unit ? 
-						<div className="unit-panel__inner">
-							<div className="unit-panel__close" onClick={this.props.unselectUnit}>
-								&#10005;
+				<div className="unit-panel__inner">
+					<div className="unit-panel__close" onClick={this.props.unselectUnit}>
+						&#10005;
+					</div>
+					<div className="unit-panel__content">
+					<ReactCSSTransitionGroup 
+						transitionName="unit-panel-content" 
+  						transitionEnterTimeout={500} 
+  						transitionLeaveTimeout={500}
+  					>
+					{
+						(unit.lifeState === LIFESTATE_DEAD) ? 
+							<div key={-1} className="unit-panel__dead">
+								<div className="unit-panel__dead-tomb">{name}</div>
+								<div>He was a good kid.</div>
 							</div>
-							<ReactCSSTransitionGroup 
-								transitionName="unit-panel-content" 
-          						transitionEnterTimeout={500} 
-          						transitionLeaveTimeout={500}
-          					>
-							{
-								(unit.lifeState === LIFESTATE_DEAD) ? 
-									<div key={-1} className="unit-panel__dead">
-										<div className="unit-panel__dead-tomb">{name}</div>
-										<div>He was a good kid.</div>
-									</div>
-								:
-									<div className="unit-panel__unit" key={unit.id}>
-										<DnaBlueprint dna={unit.DNA} width={160} height={160} />   
-										<div className="unit-panel__stats stats-container"> 
-							                <div className="stats-item">Age: <span>{ age }</span></div>
-							                <div className="stats-item">Generation <span>{ unit.generation }</span></div>
-							                <div className="stats-item">Energy: <span>{ unit.energy + "/" + unit.energyStorage }</span></div>
-							                <div className="stats-item">Children: <span>{ unit.children.length }</span></div>
-							                <div className="stats-item">Status: <span>{ unit.lifeState }</span></div>
-						                </div>
+						:
+							<div className="unit-panel__unit" key={1}>
+								<DnaBlueprint dna={unit.DNA} width={160} height={160} />   
+								<div className="unit-panel__stats stats-container"> 
+					                <div className="stats-item">Age: <span>{ age }</span></div>
+					                <div className="stats-item">Generation <span>{ unit.generation }</span></div>
+					                <div className="stats-item">Energy: <span>{ unit.energy + "/" + unit.energyStorage }</span></div>
+					                <div className="stats-item">Children: <span>{ unit.children.length }</span></div>
+					                <div className="stats-item">Status: <span>{ unit.lifeState }</span></div>
+					                <div className="stats-item"> 
+					                	<span className="stats-item__link" onClick={this.selectSpecies}>
+					                		View species...
+					                	</span>
 					                </div>
-							}
-							</ReactCSSTransitionGroup>
+				                </div>
+			                </div>
+					}
+					</ReactCSSTransitionGroup>
+					</div>
 
-		                </div>
-		              :
-		              	<div className="unit-panel__inner">
-		              		Click on a unit to view stats
-		              	</div>
-
-				}
-
+                </div>
             </div>
        	);
 	}

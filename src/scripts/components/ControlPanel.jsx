@@ -9,6 +9,7 @@ import SpeciesPanel from "./SpeciesPanel.jsx"
 import SpeciesEditor from "./SpeciesEditor.jsx"
 import CommandPanel from "./CommandPanel.jsx"
 import SpeciesViewerPanel from "./SpeciesViewerPanel"
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 class ControlPanel extends React.Component {
 
@@ -51,18 +52,40 @@ class ControlPanel extends React.Component {
     render() {
 
         let allSpecies = this.props.universe.getSpeciesArr();
-        let selectedSpecies = this.props.selectedSpecies;
+        let { selectedUnit, selectedSpecies } = this.props;
     	return (
             <div className="control-panel">
                 <div className="control-panel__top"></div>
                 <div className="control-panel__main">
-                    <UnitPanel unit={ this.props.selectedUnit } unselectUnit={this.props.unselectUnit} universe={this.props.universe} />
-                    {
-                        selectedSpecies ?
-                            <SpeciesViewerPanel species={selectedSpecies} />
-                        :
-                            null
-                    }
+                    <div className="control-panel__left">
+                        <ReactCSSTransitionGroup 
+                            transitionName="panel__left" 
+                            transitionEnterTimeout={500} 
+                            transitionLeaveTimeout={500}
+                        >
+                        {
+                            selectedUnit ?
+                                 <UnitPanel 
+                                 key={"unit:" + this.props.selectedUnit.id }
+                                 unit={ this.props.selectedUnit } 
+                                 unselectUnit={this.props.unselectUnit} 
+                                 selectSpecies={this.props.selectSpecies} 
+                                 universe={this.props.universe} />
+                            :
+                                null
+                        }
+                        {
+                            selectedSpecies ?
+                                <SpeciesViewerPanel 
+                                key={ selectedSpecies.encodedDna }
+                                species={selectedSpecies} 
+                                selectSpecies={this.props.selectSpecies} 
+                                universe={this.props.universe} />
+                            :
+                                null
+                        }
+                        </ReactCSSTransitionGroup>
+                    </div>
                     <SpeciesPanel 
                         selectedSpecies={selectedSpecies} 
                         selectSpecies={this.props.selectSpecies} 

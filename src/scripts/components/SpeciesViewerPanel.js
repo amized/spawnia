@@ -31,14 +31,21 @@ function getTimeRemaining(endtime) {
 
 export default class SpeciesViewerPanel extends React.Component {
 
-	render() {
-		let name, age, species;
-		let unit = this.props.unit;
 
+
+	close = (e) => {
+		this.props.selectSpecies(null);
+	}
+
+	render() {
+		let age;
+		let species = this.props.species;
+		let universe = this.props.universe;
+		let name = (species && species.name) ? species.name : species.encodedDna;
+		let adam = species.adam;
 		
-		/*
-		if (unit) {
-			let t = Math.floor(moment().diff(unit.bornAt));
+		if (adam) {
+			let t = Math.floor(moment().diff(adam.bornAt));
 			let seconds = Math.floor((t / 1000) % 60);
 			let minutes = Math.floor((t / 1000 / 60) % 60);
 			let hours = Math.floor((t / (1000 * 60 * 60)) % 24);
@@ -46,40 +53,28 @@ export default class SpeciesViewerPanel extends React.Component {
 			hours = ('0' + hours).slice(-2);
 			minutes = ('0' + minutes).slice(-2);
 			age = minutes + ":" + seconds;
-
-			species = this.props.universe.getSpeciesOfUnit(unit);
-
-			name = (species && species.name) ? "" + species.name + unit.speciesIndex : "Unit " + unit.id;
-			
 		}
-		*/
-		species = this.props.species;
-		name = (species && species.name) ? species.name : species.encodedDna;
-		if (true) return <div></div>;
+
+		let popPercent = Math.floor(species.population/universe.getNumMaturedUnits() * 100) + "%";
+		
+
 		return (
-			<div className="species-viewer-panel" key={species.encodedDna}> 
-				<div className="unit-panel__heading">{ name }</div>  
+			<div className="species-viewer-panel"> 
+				<div className="unit-panel__heading">SPECIES</div> 
+				<div className="species-viewer-panel__name">{ name }</div>  
 				<div className="unit-panel__inner">
-					<div className="unit-panel__close" onClick={this.props.unselectUnit}>
+					<div className="unit-panel__close" onClick={this.close}>
 						&#10005;
 					</div>
-					<ReactCSSTransitionGroup 
-						transitionName="unit-panel-content" 
-  						transitionEnterTimeout={500} 
-  						transitionLeaveTimeout={500}
-  					>
-						<div className="unit-panel__unit" >
-							<DnaBlueprint body={null} width={160} height={160} />   
-							<div className="unit-panel__stats stats-container"> 
-				                <div className="stats-item">Age: <span>{ age }</span></div>
-				                <div className="stats-item">Generation <span>{ unit.generation }</span></div>
-				                <div className="stats-item">Energy: <span>{ unit.energy + "/" + unit.energyStorage }</span></div>
-				                <div className="stats-item">Children: <span>{ unit.children.length }</span></div>
-				                <div className="stats-item">Status: <span>{ unit.lifeState }</span></div>
-			                </div>
+					<div className="species-viewer-panel__main" key={species.encodedDna} >
+						<DnaBlueprint dna={species.dna} width={160} height={160} />   
+						<div className="unit-panel__stats stats-container"> 
+			                <div className="stats-item">Current pop: <span>{species.population}</span></div>
+			                <div className="stats-item">Percentage pop: <span>{popPercent}</span></div>
+			                <div className="stats-item">Total ever: <span>{species.totalPopulation}</span></div>
+			                <div className="stats-item">Age: <span>{age}</span></div>
 		                </div>
-					</ReactCSSTransitionGroup>
-
+	                </div>
                 </div>
             </div>
        	);

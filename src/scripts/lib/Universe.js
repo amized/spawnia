@@ -31,7 +31,8 @@ class Universe {
 				dna: unit.DNA,
 				encodedDna: unit.encodedDna,
 				population: 1,
-				totalPopulation: 1
+				totalPopulation: 1,
+				adam: unit
 			}
 			this.speciesData[unit.encodedDna] = species;
 		}
@@ -83,6 +84,10 @@ class Universe {
 
 	getNumUnits() {
 		return Object.keys(this.units).length;
+	}
+
+	getNumMaturedUnits() {
+		return this.getUnitsArr().filter(unit => unit.isMature()).length;
 	}
 
 	getUnit(unitId) {
