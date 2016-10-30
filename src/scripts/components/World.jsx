@@ -6,7 +6,7 @@ var ClassNames = require('classnames');
 // module aliases
 import { Composite, Mouse, MouseConstraint, World } from "matter-js"
 import Render from "../lib/Render.js"
-
+import $ from "jquery"
 
 
 
@@ -28,14 +28,15 @@ export default class SpawniaWorld extends React.Component {
 
         let { engine } = this.props;
         let vw = window.innerWidth;
+        let h = window.innerHeight - $(".control-panel").height();
         
         this.mapRender = Render.create({
             element: this.refs.container,
             engine: engine,
             options: {
                 delta: 500,
-                width: 1200,
-                height: 600,
+                width: vw,
+                height: h,
                 pixelRatio: 1,
                 background: '#fafafa',
                 wireframeBackground: '#222',
@@ -70,7 +71,6 @@ export default class SpawniaWorld extends React.Component {
 
 
     componentDidUpdate(prevProps) {
-        console.log("render updated", this.props);
         let { selectedSpecies, universe, selectedUnit } = this.props;
 
 

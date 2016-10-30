@@ -31,10 +31,6 @@ class Cell {
                  cellType: cellType
             }
         });
-
-        if (cellType.onCreate) {
-            cellType.onCreate(this);
-        }
     }
 }
 

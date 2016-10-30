@@ -99,7 +99,6 @@ class SpeciesItem extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		// Got a name update
 		if (nextProps.species.name !== this.props.species.name) {
-			console.log("resetting to stuf");
 			this.setState({
 				nameValue: nextProps.species.name
 			});

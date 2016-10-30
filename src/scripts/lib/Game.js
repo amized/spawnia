@@ -1,17 +1,7 @@
 
-var $         = require('jQuery');
-var ReactDOM  = require('react-dom');
-var React     = require('react');
-
-var App = require("../components/App.jsx");
-
-
-
-import { createStore } from 'redux'
-
-import reducers from '../reducers'
 import Universe from "./Universe.js"
 import Simulation from "./Simulation.js";
+import Channel from "./Channel.js";
 import { Engine, MouseConstraint, World  } from 'matter-js';
 import { default as C } from "../constants"
 
@@ -21,32 +11,29 @@ var stepManager;
 var store;
 var world;
 
+let gameIds = 0;
+
 import { Dna1, Dna2, Dna3, Dna4, Dna5, Dna6 } from "../mock/dna";
 
-const Game = {
+export default class Game {
 
-	isInitialised: false,
-	
-	init: function () {
+	constructor () {
 		console.log("initialising the game");
 		// The third argument here is a callback for when an action is dispatched
 		// and we may need to update the UI
-
-		this.store       = createStore(reducers);
+		this.id = gameIds++;
 		this.engine = Engine.create({
 			timing: {
 				timeScale: 0.3
 			}
 		});
 
+		this.channel = new Channel(this.id);
+
 		// The universe is an object that holds the game state
 		this.universe = new Universe(this.engine.world);
 		// The simulation is responsible for running the engine
 		this.simulation = new Simulation(this.engine, this.universe);
-		this.mouseConstraint = MouseConstraint.create(this.engine);
-		
-		World.add(this.engine.world, this.mouseConstraint);
-
 		let dispatch = this.simulation.dispatch;
 		
 		dispatch({
@@ -109,7 +96,7 @@ const Game = {
 			x: 350,
 			y: 200
 		}, 120);
-/*
+
 		dispatch({
 			type: "ADD_UNIT",
 			DNA: Dna1,
@@ -126,7 +113,6 @@ const Game = {
 			y: 100
 		}, 120);			
 
-*/
 /*
 		dispatch({
 			type: "ADD_UNIT",
@@ -134,7 +120,7 @@ const Game = {
 			x: 250,
 			y: 400
 		}, 220);
-*/
+
 
 		dispatch({
 			type: "ADD_UNIT",
@@ -144,14 +130,13 @@ const Game = {
 		}, 140);
 
 
-		/*
+
 		dispatch({
 			type: "ADD_UNIT",
 			DNA: Dna1,
 			x: 700,
 			y: 200
 		}, 220);
-*/
 
 		dispatch({
 			type: "ADD_UNIT",
@@ -187,7 +172,7 @@ const Game = {
 		}, 160);		
 */
 
-		window.setInterval(()=>{
+		setInterval(()=>{
 			dispatch({
 				type: "STEP"
 			});
@@ -195,34 +180,27 @@ const Game = {
 
 		this.simulation.start();
 		this.isInitialised = true;
-	},
+	}
 
-	simulationOne() {
-
-
-
-	},
-
-	getDispatchFn: function () {
+	getDispatchFn () {
 		return this.simulation.dispatch;
-	},
+	}
 
-	getEngine: function () {
+	getEngine () {
 		return this.engine;
-	},
+	}
 
-	getUniverse: function () {
+	getUniverse () {
 		return this.universe;
-	},
+	}
 
-	getStore: function () {
+	getStore () {
 		return store;
-	},
+	}
 
 
-	getMap: function () {
+	getMap () {
 		return map;
 	}
 }
 
-export default Game

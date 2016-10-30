@@ -2,6 +2,8 @@
 import DNA from "./DNA";
 import {LIFESTATE_MATURE} from "../constants"
 
+
+
 class Universe {
 	constructor(world) {
 		this.units = {};
@@ -16,6 +18,22 @@ class Universe {
 		// species that currently exist on the map. It gets updated when
 		// units are added or deleted.
 		this.speciesData = {};
+	}
+
+	inject(data) {
+
+	}
+
+	getData() {
+		//return new Serializer().serializeObject(this);
+		/*
+		return {
+			//foods: this.foods.map(food=>food.getData()),
+			world: this.world,
+			//units: this.getUnitsArr().map(unit=>unit.getData()), 
+			//speciesData: this.speciesData
+		}
+		*/
 	}
 
 

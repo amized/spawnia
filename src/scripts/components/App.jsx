@@ -34,33 +34,13 @@ export default class App extends React.Component {
 
     }
 
-    onWorldClick (e) {
-        let mouse = e.mouse;
-        let engine = this.props.engine;
-        if (!mouse) {
-            return;
-        }
-        let allBodies = Composite.allBodies(engine.world);
-        allBodies.forEach((body, index)=>{
-            if (Bounds.contains(body.bounds, mouse.position)) {
-                console.log("Clicked on", body.label);
-
-                let split = body.label.split(":");
-
-                if (split[0] === "unit") {
-                    let id = split[1];
-                    this.onUnitClick(this.props.universe.getUnit(id));
-                }
-
-            }
-        });
-    }
-
     onWorldMove(e) {
-        console.log("on world move", e);
     }
 
     onUnitClick (unitId) {
+        if (this.state.newSpecies) {
+            return;
+        }
         if (this.state.selectedUnit !== null && this.state.selectedUnit.id === unitId) {
             this.setState({
                 selectedUnit: null
@@ -73,8 +53,38 @@ export default class App extends React.Component {
         })
     }
 
+    onMapClick(e) {
+
+        console.log(this.state.newSpecies);
+
+        if (this.state.newSpecies) {
+
+            let dna = {
+                seedCell: this.state.newSpecies[0]
+            }
+
+            this.props.dispatch({
+                type: "ADD_UNIT",
+                DNA: dna,
+                x: e.mouse.position.x,
+                y: e.mouse.position.y
+            });
+            
+            this.setState({
+                newSpecies: null
+            })
+        }
+
+
+        if (this.state.selectedUnit || this.state.selectedSpecies) {
+            this.setState({
+                selectedUnit: null,
+                selectedSpecies: null
+            })
+        }
+    }
+
     onUnitHover (unitId) {
-        console.log("hovering", unitId);
         let unit = this.props.universe.getUnit(unitId);
         this.setState({
             hoveredUnit: unit
@@ -122,7 +132,6 @@ export default class App extends React.Component {
                 <World 
                     universe={this.props.universe}
                     engine={this.props.engine}
-                    onMouseDown={this.onWorldClick.bind(this)}
                     onMouseMove={this.onWorldMove.bind(this)}
                     onMouseUp={()=>false}
                     {...this.state}
@@ -131,6 +140,7 @@ export default class App extends React.Component {
                     engine={this.props.engine}
                     onUnitClick={this.onUnitClick.bind(this)}
                     onUnitHover={this.onUnitHover.bind(this)}
+                    onMapClick={this.onMapClick.bind(this)}
                 />
                 <MapUpdater
                     {...this.props}

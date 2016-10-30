@@ -16,6 +16,7 @@ export default class MapEvents extends React.Component {
         this.mouseConstraint = null;
         this.unitMouseDown = null;
         this.unitHover = null;
+        this.mapMouseDown = null;
     }
 
     componentDidMount() {
@@ -28,8 +29,6 @@ export default class MapEvents extends React.Component {
             mouse: this.mouse
         });
 
-        console.log(this.mouse);
-    
         Events.on(this.mouseConstraint, "mousemove", this.onMouseMove);
         Events.on(this.mouseConstraint, "mouseup", this.onMouseUp);
         Events.on(this.mouseConstraint, "mousedown", this.onMouseDown);
@@ -56,6 +55,10 @@ export default class MapEvents extends React.Component {
     }
 
     onMouseUp = (e) => {
+        if (this.mapMouseDown !== null) {
+            this.props.onMapClick(e);
+            this.mapMouseDown = null;
+        }
         if (this.unitMouseDown !== null) {
             let bodies = this.getBodiesAtMouse(e.mouse);
             for (let i = 0; i < bodies.length; i++) {
@@ -65,20 +68,25 @@ export default class MapEvents extends React.Component {
                     this.props.onUnitClick(id);
                     break;
                 }
-            }
+            } 
             this.unitMouseDown = null;
         }
     }
 
     onMouseDown = (e) => {
         let bodies = this.getBodiesAtMouse(e.mouse);
+
         for (let i = 0; i < bodies.length; i++) {
             let split = bodies[i].label.split(":");
             if (split[0] === "unit") {
                 this.unitMouseDown = parseInt(split[1]);
-                break;
+                return;
             }
         }
+
+        this.mapMouseDown = 1;
+
+
     }
 
     onMouseMove = (e) => {

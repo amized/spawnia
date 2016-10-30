@@ -11,12 +11,9 @@
 	border-bottom: 1px solid #d6d6e2;
 	height: calc(100vh - #{$control-panel-height});
 	min-height: 640px;
-	padding: 20px 0px;
+	padding: 0px 0px;
 	background: url(../img/grass4.png);
 	background-position: center center;
-	@include display(flex);
-	@include align-items(center);
-	@include justify-content(center);
 
 	canvas {
 		box-shadow: 0px 0px 45px 11px #367d00;

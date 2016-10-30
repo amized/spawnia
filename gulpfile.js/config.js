@@ -28,8 +28,13 @@ module.exports = {
 				ext: ".html"
 			}
         },
+        server: {
+            src: 'scripts/**/*.js',
+            dest: 'assets/js',
+            output: 'server.js'
+        },
         scripts: {
-            src: 'scripts',
+            src: 'scripts/client',
             dest: 'assets/js',
             input: ['main.js'],
             output: 'app.js',

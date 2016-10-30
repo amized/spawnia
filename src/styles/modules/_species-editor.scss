@@ -21,9 +21,15 @@
 
 .species-editor__save {
 	color: #333;
-	border: 1px solid #333;
+	border: 1px solid rgba(#FFF, 0.1);
+	color: #FFF;
 	border-radius: 3px;
 	padding: 10px 20px;
+	text-align: center;
+	cursor: pointer;
+	&:hover {
+		background: #555;
+	}
 }
 
 .species-editor__heading {
@@ -33,6 +39,13 @@
 	border-bottom: 1px solid #444;
 }
 
+.species-editor__main {
+	@include display(flex);
+}
+
+.species-editor__map-container {
+	@include flex-grow(1);
+}
 
 .species-editor__cell-empty {
 	stroke: #444;
@@ -40,6 +53,9 @@
 	fill: #333;
 	stroke-dasharray: 3, 3;
 	cursor: pointer;
+	&--hover {
+		stroke: #999;
+	}
 }
 
 .species-editor__cell {
@@ -50,23 +66,20 @@
 
 
 .species-editor__cell-menu {
-	position: absolute;
-	top: 94px;
-	//left: 50%;
-	width: 100%;
-	//@include transform(translateX(-50%));
-	background: #FFF;
+	max-width: 200px;
+	background: #444;
 	padding: 30px;
-	border-radius: 5px;
-	box-shadow: 2px 2px 5px 1px rgba(#000, 0.5);
+	box-shadow: 2px 2px 2px 1px rgba(#000, 0.2);
 	.species-editor--cell-menu-open & {
 		display: block;
 	}
 }
 
 .species-editor__cell-menu-list {
+	margin-top: 20px;
 	@include display(flex);
-	@include justify-content(space-between);
+	@include justify-content(center);
+	@include flex-wrap(wrap);
 	width: 100%;
 }
 
@@ -80,6 +93,7 @@
 	@include justify-content(center);
 	@include align-items(center);
 	font-size: 30px;
+	margin: 5px;
 }
 
 
@@ -92,4 +106,12 @@
 	stroke: #FFF;
 	stroke-width: 5px;
 }
+
+
+
+
+
+
+
+
 

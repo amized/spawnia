@@ -172,14 +172,16 @@ export default class SpeciesEditor extends React.Component {
 	getCellComps(cells) {
 
 		//let items = [<CellFilled cell={cell} />];
-
+		let { currDraggingCellType } = this.state;
 		let cellEls = [];
 		let connectionEls = [];
 
-		cells.forEach((cell, index)=>{
-			cellEls.push(<CellFilled cell={cell} />);
+		let cellKey = 0;
+
+		cells.forEach((cell, cellIndex)=>{
+			cellEls.push(<CellFilled cell={cell} key={cellKey}/>);
 			if (!cell.children) {
-				cell.children = [null, null];
+				cell.children = (cellIndex === 0) ? [null,null,null] : [null, null];
 			}
 			cell.children.forEach((child, index)=> {
 				if (child) {
@@ -187,6 +189,7 @@ export default class SpeciesEditor extends React.Component {
 					return;
 				}
 				else {
+					cellKey++;
 					let newChild = this.getChildFromParent(cell, index);
 					if (newChild) {
 						connectionEls.push(<path className="species-editor__path"  d={"M" + cell.x + " " + cell.y + " L" + newChild.x + " " + newChild.y}></path>);
@@ -194,10 +197,15 @@ export default class SpeciesEditor extends React.Component {
 							<CellEmpty 
 							cell={newChild}
 							onClick={this.openCellMenu.bind(this)} 
-							onDrop={this.dropOnCell.bind(this)} />)
+							onDrop={this.dropOnCell.bind(this)}
+							isDragging={currDraggingCellType !== null}
+							key={cellKey} 
+							/>
+						)
 					}
 				}
 			});
+			cellKey++;
 		});
 		return connectionEls.concat(cellEls);
 	}
@@ -219,28 +227,31 @@ export default class SpeciesEditor extends React.Component {
 			<div className={classnames}>
 				<div className="species-editor__close" onClick={this.props.closeSpeciesEditor}>&#215;</div>
 				<div className="species-editor__heading">Species Editor</div>
-				<svg width="100%" height="100%" viewBox="0 0 1000 1000">
-					<g transform="translate(500, 500)">
+				<div className="species-editor__main">
+					<div className="species-editor__cell-menu">
+						<div className="species-editor__save" onClick={this.save.bind(this)}>
+							Save
+						</div>
+						<div className="species-editor__cell-menu-list">
+						{
 
-					 	{ cellComps }
-
-					</g>
-				</svg>
-
-				<div className="species-editor__cell-menu">
-					<div className="species-editor__cell-menu-list">
-					{
-
-						cellTypes.map((cellType) => {
-							return (
-								<CellMenuItem onDrag={this.dragCellType.bind(this)} addCell={this.addCell.bind(this)} cellType={cellType} key={cellType.id} />
-							)
-						})
-					}
+							cellTypes.map((cellType, index) => {
+								return (
+									<CellMenuItem key={index} onDrag={this.dragCellType.bind(this)} addCell={this.addCell.bind(this)} cellType={cellType} key={cellType.id} />
+								)
+							})
+						}
+						</div>
 					</div>
-					<div className="species-editor__save" onClick={this.save.bind(this)}>
-						Save
-					</div>
+					<div className="species-editor__map-container">
+						<svg width="100%" height="100%" viewBox="0 0 1000 1000">
+							<g transform="translate(500, 500)">
+
+							 	{ cellComps }
+
+							</g>
+						</svg>
+					</div>	
 				</div>
 			</div>
 
@@ -252,22 +263,55 @@ export default class SpeciesEditor extends React.Component {
 
 class CellEmpty extends React.Component {
 	
+	constructor(props) {
+		super(props);
+		this.state = {
+			draggingOver: false
+		}
+	}
+
+	onDragEnter = (e) => {
+		console.log("is dragging?", this.props.isDragging);
+		if (this.props.isDragging && !this.state.draggingOver) {
+			this.setState({
+				draggingOver: true
+			})
+		}		
+	}
+
+
+	onDragLeave = (e) => {
+		console.log("mouse leave");
+		if (this.props.isDragging) {
+			this.setState({
+				draggingOver: false
+			})
+		}		
+	}
+
+	onDragOver = (e) => {
+		e.preventDefault();
+	}
+
 	onDrop(e) {
 		e.preventDefault();
 		this.props.onDrop(this.props.cell);
 	}
 
-	onDragOver(e) {
-		e.preventDefault();
-	}
 	render() {
 		let cell = this.props.cell;
+		let classnames = ClassNames({
+			'species-editor__cell-empty': true,
+			'species-editor__cell-empty--hover': this.state.draggingOver
+		});
 		return (
 			<circle 
-				className="species-editor__cell-empty" 
+				className={classnames}
 				cx={cell.x}
 				cy={cell.y}
 				r="40" 
+				onDragEnter={this.onDragEnter}
+				onDragLeave={this.onDragLeave}
 				onDragOver={this.onDragOver}
 				onClick={this.props.onClick} 
 				onDrop={this.onDrop.bind(this)}

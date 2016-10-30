@@ -4,7 +4,8 @@
   "description": "Lifx Website website",
   "main": "Gulpfile.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/scripts/server.js --exec babel-node --presets es2015,stage-2"
   },
   "repository": {
     "type": "git",
@@ -13,6 +14,7 @@
   "author": "Deepend",
   "license": "ISC",
   "devDependencies": {
+    "babel-cli": "^6.16.0",
     "babel-preset-es2015": "^6.16.0",
     "babel-preset-es2016": "^6.16.0",
     "babel-preset-es2017": "^6.16.0",
@@ -28,6 +30,7 @@
     "gulp": "^3.9.0",
     "gulp-angular-templatecache": "^1.8.0",
     "gulp-autoprefixer": "^3.0.2",
+    "gulp-babel": "^6.1.2",
     "gulp-concat": "^2.6.0",
     "gulp-consolidate": "^0.1.2",
     "gulp-css-globbing": "^0.1.8",
@@ -49,25 +52,26 @@
     "jquery": "^2.2.0",
     "lodash": "^4.2.1",
     "magnific-popup": "^1.0.1",
+    "matter-js": "^0.10.0",
     "moment": "^2.11.1",
     "ng-mask": "^3.0.12",
     "node-bourbon": "^4.2.3",
+    "node-uuid": "^1.4.7",
+    "nodemon": "^1.11.0",
     "npm": "^3.7.1",
     "react": "^0.14.5",
+    "react-addons-css-transition-group": "^0.14.5",
     "react-dom": "^0.14.5",
     "react-input-calendar": "^0.1.20",
+    "react-redux": "^4.4.5",
+    "redux": "^3.5.2",
+    "redux-actions": "^0.10.1",
     "require-dir": "^0.3.0",
     "slick-carousel": "^1.5.8",
     "utils-merge": "^1.0.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.4.0",
-    "matter-js": "^0.10.0",
-    "node-uuid": "^1.4.7",
-    "react-addons-css-transition-group": "^0.14.5",
-    "react-redux": "^4.4.5",
-    "redux": "^3.5.2",
-    "redux-actions": "^0.10.1"    
+    "watchify": "^3.4.0"
   },
   "browser": {
     "jquery-validate": "./node_modules/jquery-validation/dist/jquery.validate.js"
@@ -92,5 +96,12 @@
         "jQuery"
       ]
     }
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "mousse": "^0.3.1",
+    "sockjs": "^0.3.18",
+    "sockjs-client": "^1.1.1"
   }
 }

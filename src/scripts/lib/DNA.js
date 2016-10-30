@@ -225,7 +225,6 @@ class DNA {
                         newCell.children = [null, spawnedCell];
                     }
                 }
-                console.log("The new cells children:", newCell.children, spawnedCell);
                 return newCell;
             default:
                 if (cell.children) {

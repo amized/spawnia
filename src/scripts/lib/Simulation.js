@@ -18,22 +18,14 @@ export default class Simulation {
 
 		// create an engine
 		this.engine = engine;
-
 		this.dispatch = this.dispatch.bind(this);
-
-		$(window).blur(()=>{
-		  this.pause();
-		});
-		$(window).focus(()=>{
-		  this.resume();
-		});
 
 	}
 
 	_step() {	
 
 		// Update the physics engine
-		//Engine.update(this.engine, stepTimeout, 1);
+		Engine.update(this.engine, stepTimeout, 1);
 
 		// Consume any outstanding events
 		let evt = this.events[0];
@@ -62,16 +54,11 @@ export default class Simulation {
 	}
 
 	start () {
+		console.log("Starting simulation");
 		this.running = true;
-		console.log("The engine", this.engine);
-		//this.engine.isFixed = true;
-		Engine.run(this.engine);
-		Events.on(this.engine, "afterUpdate", this._step.bind(this));
-		/*
-        this.timer = window.setInterval(() => {
+        this.timer = setInterval(() => {
         	this._step();
         }, stepTimeout);
-        */
 	}
 
 	pause() {

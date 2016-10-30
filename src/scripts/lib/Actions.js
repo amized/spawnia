@@ -6,6 +6,7 @@
 import { World, Body, Bodies, Composite, Constraint, Query } from "matter-js"
 import Unit from "./Unit";
 import Food from "./Food";
+import Cell from "./Cell";
 import CellTypes from "./CellTypes";
 import DNA from "./DNA";
 import UnitBuilder from "./UnitBuilder";
@@ -43,8 +44,8 @@ function runAction(action, universe, dispatch) {
 			}
 	        World.add(universe.world, [
 	            Bodies.rectangle(mapWidth/2, -offset, mapWidth + 2 * offset, 50.5, { isStatic: true, render: render }),
-	            Bodies.rectangle(mapWidth/2, mapHeight + offset, mapWidth + 2 * offset, 50.5, { isStatic: true, render: render }),
-	            Bodies.rectangle(mapWidth + offset, mapHeight/2, 50.5, mapHeight + 2 * offset, { isStatic: true, render: render }),
+	            //Bodies.rectangle(mapWidth/2, mapHeight + offset, mapWidth + 2 * offset, 50.5, { isStatic: true, render: render }),
+	            //Bodies.rectangle(mapWidth + offset, mapHeight/2, 50.5, mapHeight + 2 * offset, { isStatic: true, render: render }),
 	            Bodies.rectangle(-offset, mapHeight/2, 50.5, mapHeight + 2 * offset, { isStatic: true, render: render })
 	        ]);
 
@@ -74,7 +75,7 @@ function runAction(action, universe, dispatch) {
 						unit.energy = 0;
 						dispatch({
 							type: "KILL_UNIT",
-							unit: unit
+							unitId: unit.id
 						})
 					}
 				}
@@ -104,17 +105,17 @@ function runAction(action, universe, dispatch) {
 
 		    dispatch({
 		    	type: "MATURE_UNIT",
-		    	unit: unit
+		    	unitId: unit.id
 		    }, MATURATION_TIME);
 
 			return;
 
 		case "MATURE_UNIT":
-
-			let currBody = action.unit.body;
+			var unit = universe.getUnit(action.unitId);
+			let currBody = unit.body;
 
 	    	let newBody = UnitBuilder.buildBody(
-	    		action.unit.DNA, 
+	    		unit.DNA, 
 	    		currBody.position.x, 
 	    		currBody.position.y
 	    	);
@@ -127,17 +128,17 @@ function runAction(action, universe, dispatch) {
 			});
 
 			if (intruding.length > 1) {
-				action.unit.matureTries++;
-				if (action.unit.matureTries > 3) {
+				unit.matureTries++;
+				if (unit.matureTries > 3) {
 					dispatch({
 				    	type: "KILL_UNIT",
-				    	unit: action.unit
+				    	unitId: unit.id
 				    });
 				}
 				else {
 					dispatch({
 				    	type: "MATURE_UNIT",
-				    	unit: action.unit
+				    	unitId: unit.id
 				    }, 2000);
 				}
 				return false;
@@ -145,47 +146,47 @@ function runAction(action, universe, dispatch) {
 
 			let v = currBody.velocity;
 			World.remove(universe.world, currBody);
-			universe.addToSpecies(action.unit);
-	    	newBody = action.unit.mature();
+			universe.addToSpecies(unit);
+	    	newBody = unit.mature();
 	    	World.add(universe.world, newBody);
 	    	Body.setVelocity(newBody, v);
-
-		    let grounding = action.unit.cells.filter(cell => cell.type === "G");
-		    let parts = _.partition(action.unit.cells, (cell) => cell.type === "G");
-		    console.log("parts", parts);
-
-		    if (parts[0].length > 0) {
-		    	let cell = parts[0][0];
-		    	console.log("Found grouding cell", cell);
-		    	let offset = {
-		    		x: cell.body.position.x - newBody.position.x,
-		    		y: cell.body.position.y - newBody.position.y
-		    	}
-
-		    	Body.setStatic(cell.body, true);
-		    	Body.setParts(newBody, parts[1].map(cell => cell.body));
-		    	let c = Constraint.create({
-		    		pointA: { x: cell.body.position.x, y: cell.body.position.y },
-		    		bodyB: newBody,
-		    		pointB: offset,
-		    		stiffness: 1
-		    	});
-		    	World.add(universe.world, c);
-		    }
 	    	
+	    	setTimeout(()=>{
+	    		//Body.rotate(newBody, 45);
+	    		//Body.setAngle(newBody, 45);
+	    		//Body.setAngularVelocity(newBody, 0.02);
+	    		//Body.applyForce(newBody, {x: -5, y: 0}, {x:-.01,y:0});
+	    	}, 2000)
+	    	
+			
+		    let parts = _.partition(unit.cells, (cell) => cell.type === "G");
 	    	return;
 
-	   	case "REPRODUCE_UNIT":
 
-   		    var unit = action.unit;
-   		    var cell = action.cell;
+	    case "START_REPRODUCE":
+	    	var unit = universe.getUnit(action.unitId);
+   		    if (!unit) return;
+   		   	var cell = unit.cells[action.cellIndex];
+   		   	if (unit.energy <= (action.energyCost * 2)) {
+		      return false;
+		    }
+    		unit.energy = unit.energy - action.energyCost;
+    		cell.isReproducing = true;
+	    	return
+
+	   	case "REPRODUCE_UNIT":
+	   		console.log("REproduce unit", action);
+   		    let unit = universe.getUnit(action.unitId);
+   		    if (!unit) return;
+
+   		    var cell = unit.cells[action.cellIndex];
 		    var newUnit = new Unit();
 
 		    // Save the child-parent connection for stats
 		    unit.addChild(newUnit);
 
 		    // Get the Matter JS body object
-		    var unitBody = newUnit.build(DNA.copyDNA(unit.DNA), cell.body.position.x, cell.body.position.y);
+		    var unitBody = newUnit.build(action.dna, cell.body.position.x, cell.body.position.y);
 
 		    Body.setVelocity(unitBody, {
 		      x: Math.cos(unit.body.angle + cell.angle),
@@ -200,7 +201,7 @@ function runAction(action, universe, dispatch) {
 
 		    dispatch({
 		      type: "MATURE_UNIT",
-		      unit: newUnit
+		      unitId: newUnit.id
 		    }, MATURATION_TIME);
 
 		    return;
@@ -220,7 +221,7 @@ function runAction(action, universe, dispatch) {
 
 		case "KILL_UNIT":
 			// Get the unit
-			var unit = action.unit;
+			var unit = universe.getUnit(action.unitId);
 
 			// Remove it from the world
 			World.remove(universe.world, unit.body);

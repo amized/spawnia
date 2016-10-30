@@ -29,6 +29,10 @@ class Food {
         });
     }
 
+    getData() {
+        return Object.assign({}, this);
+    }
+
     grow(amount) {
     	if (this.amount + amount > this.growthLimit) {
     		this.amount = this.growthLimit;

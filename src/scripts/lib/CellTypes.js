@@ -1,6 +1,7 @@
 
 
 import Unit from "./Unit"
+import DNA from "./DNA"
 import { Body, Query, Composite, Vector, World } from "matter-js"
 import { 
   ENERGY_COST_PER_CELL, 
@@ -43,13 +44,9 @@ CellTypes.S = {
 CellTypes.G = {
   name: "Grounding",
   id: "G",
-  bodyColor: "#733a00",
+  bodyColor: "#95969e",
   onCreate: function(cell, unit) {
-    console.log("setting static...");
-    let body = cell.body;
-    body.frictionAir = 100;
-    Body.setStatic(body);
-    console.log(cell.body);
+    unit.body.frictionAir = Math.min(unit.body.frictionAir + 0.1, 1);
   },
   onStep: function (cell, unit, universe) {
     return;
@@ -115,13 +112,21 @@ CellTypes.R = {
       return false;
     }
 
-    unit.energy = unit.energy - energyCost;
-    cell.isReproducing = true;
+    let cellIndex = unit.cells.indexOf(cell);
+    let dna = DNA.copyDNA(unit.DNA);
+
+    dispatch({
+      type: "START_REPRODUCE",
+      unitId: unit.id,
+      cellIndex: cellIndex,
+      energyCost: energyCost,
+    });
 
     dispatch({
       type: "REPRODUCE_UNIT",
-      unit: unit,
-      cell: cell
+      unitId: unit.id,
+      cellIndex: cellIndex,
+      dna: dna
     }, REPRODUCTION_TIME);
 
   }

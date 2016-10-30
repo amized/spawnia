@@ -22,8 +22,6 @@ export default class DnaBlueprint extends React.Component {
 
 		})
 		// Draw the unit's bodies
-		//let body = this.props.body  ;
-		console.log("The props of the dna blueprint", this.props);
 		let body = UnitBuilder.buildBody(this.props.dna, 0, 0);
 		Body.setPosition(body, {
 			x: 0,
