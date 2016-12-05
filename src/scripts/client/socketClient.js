@@ -5,11 +5,20 @@ var settings = require("../settings");
 import { CONN_STATUS_WAITING } from "../constants";
 import { SERVER_URL } from "../serverConfig";
 import { socketConnected, socketDisconnected, socketWaiting } from "../actions"
+import CircularJSON from 'circular-json';
 import SockJS from "sockjs-client"
 
 var SocketClient = class {
 	
-	constructor() {
+	constructor(options) {
+
+		const defaults = {
+			onUpdate: null,
+			onDump: null
+		}
+
+		Object.assign(this, defaults, options);
+
 		this.retryInterval = 5000;
 		this.maxRetries = 20;
 		this.sock = null;
@@ -18,6 +27,13 @@ var SocketClient = class {
 		this.heatbeatTimeout = null;
 	}
 
+
+	setOnUpdate(func) {
+		this.onUpdate = func;
+	}
+	setOnDump(func) {
+		this.onDump = func;
+	}
 	reset() {
 		this.retryCount = 0;
 		clearTimeout(this.timeout);		
@@ -30,11 +46,16 @@ var SocketClient = class {
 		}));
 	}
 
-	initConnection (store, nodeUrl, sessionKey) {
+	initConnection (store, nodeUrl, sessionKey, events = null) {
 
 		this.store = store;
 		this.sessionKey = sessionKey;
 		this.nodeUrl = SERVER_URL;
+
+		if (events) {
+			this.onUpdate = events.onUpdate;
+			this.onDump = events.onDump;			
+		}
 
 		// We are only allowing one connection per client at a time,
 		// so close any existing socks
@@ -65,7 +86,7 @@ var SocketClient = class {
 		    this.heatbeatTimeout = setTimeout(this.reconnectInit.bind(this), settings.heatbeatDelay + 5000)
 		}.bind(this);
 
-		this.sock.onmessage = function(e) {
+		this.sock.onmessage = (e) => {
 
 			// Either we will get dump message, or an update with an action,
 			// which both get dispatched immediately to the local store
@@ -73,12 +94,21 @@ var SocketClient = class {
 
 			var response = JSON.parse(e.data);
 			if (response.dump) {
-				console.log("We got a dump!!", response.data);
+				let state = CircularJSON.parse(response.state);
+				if (this.onDump) {
+					this.onDump({
+						state: state,
+						currStep: response.currStep
+					});
+				}
 			}
-			else if (response.action) {
-				console.log("We got an action!!");
+			else if (response.update) {
+				if (this.onUpdate) {
+					this.onUpdate(response.data);
+				}
+				
 			}
-		}.bind(this);
+		};
 
 		this.sock.onclose = function() {
 			// Handles attempting to reconnect after being refused
@@ -114,10 +144,10 @@ var SocketClient = class {
 	}
 }
 
-var socketClient = new SocketClient();
+const socketClient = new SocketClient();
 
 
-module.exports = socketClient;
+export default socketClient
 
 
 //sock.close();

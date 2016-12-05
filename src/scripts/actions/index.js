@@ -31,4 +31,16 @@ export function	socketWaiting() {
 	}
 
 
+export function	synced() {
+	return {
+		type: "SYNCED"
+	}
+}
+
+export function	lostSync() {
+	return {
+		type: "LOST_SYNC"
+	}
+}
+
 //export default update

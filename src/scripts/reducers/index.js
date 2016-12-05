@@ -1,5 +1,11 @@
 import { combineReducers } from "redux"
-import { CONN_STATUS_CONNECTED, CONN_STATUS_DISCONNECTED, CONN_STATUS_WAITING } from "../constants"
+import { 
+  CONN_STATUS_CONNECTED, 
+  CONN_STATUS_DISCONNECTED, 
+  CONN_STATUS_WAITING, 
+  SYNC_STATUS_WAITING,
+  SYNC_STATUS_SYNCED
+} from "../constants"
 
 
 function client(state, action) {
@@ -47,17 +53,21 @@ function client(state, action) {
 }
 
 
-/*
-import { combineReducers } from 'redux'
 
-const spawniaApp = combineReducers({
-  map,
-  units
-})
-*/
+function syncStatus(state = SYNC_STATUS_WAITING, action) {
+  switch(action.type) {
+    case "SYNCED":
+      return SYNC_STATUS_SYNCED;
+    case "LOST_SYNC":
+      return SYNC_STATUS_WAITING;
+    default: 
+      return state;
+  }  
+}
 
 var app = combineReducers({
-  client: client
+  client: client,
+  syncStatus: syncStatus
 });
 
 export default app

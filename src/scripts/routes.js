@@ -1,6 +1,4 @@
-import { Serializer } from "mousse"
-
-
+import CircularJSON from 'circular-json';
 
 module.exports = function(sockRouter){
 
@@ -10,19 +8,21 @@ module.exports = function(sockRouter){
     sockRouter.on("SUBSCRIBE_TO_CHANNEL", function(data, conn, game) {
 
     	console.log("HIYYA!");
-    	console.log(data, game);
 
     	const channel = game.channel;
     	const user = null;
     	channel.requestConnection(conn, user);
 
-    	let universeData = game.universe.getData();
+    	let state = game.universe.getState();
+        let currStep = game.simulation.getCurrStep();
+        let serialized = CircularJSON.stringify(state);
 
-    	console.log(universeData);
+    	//console.log(universeData);
 
-    	conn.write(new Serializer.serializeObject({
+    	conn.write(JSON.stringify({
     		dump: true,
-    		universe: game.universe
+    		state: serialized,
+            currStep: currStep
     	}));
 
 

@@ -2,7 +2,7 @@
 import CellTypes from "./CellTypes";
 import { Bodies } from "matter-js"
 import { UNIT_START_ENERGY_PER_CELL } from "../settings"
-import { COLLISION_CATEGORY_UNITS } from "../constants"
+import { COLLISION_CATEGORY_UNITS, COLLISION_CATEGORY_DEFAULT } from "../constants"
 
 class Cell {
     constructor(x, y, type, angle) {
@@ -16,13 +16,14 @@ class Cell {
         let cellMargin = 10;
 
 
-        this.body = Bodies.circle(x, y, 5, {
+        this.body = Bodies.polygon(x, y, 6, 6, {
             friction: 0.0,
             frictionAir: 0,
             label: 1,
             restitution:1,
             collisionFilter: {
-                category: COLLISION_CATEGORY_UNITS
+                category: COLLISION_CATEGORY_UNITS,
+                mask: COLLISION_CATEGORY_DEFAULT | COLLISION_CATEGORY_UNITS
             },
             render: {
                  fillStyle: color,

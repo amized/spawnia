@@ -11,7 +11,7 @@ import MapUpdater from './MapUpdater.jsx';
 
 
 
-export default class App extends React.Component {
+class App extends React.Component {
 
 
     constructor(props) {
@@ -134,6 +134,7 @@ export default class App extends React.Component {
                     engine={this.props.engine}
                     onMouseMove={this.onWorldMove.bind(this)}
                     onMouseUp={()=>false}
+                    syncStatus={this.props.syncStatus}
                     {...this.state}
                 />
                 <MapEvents 
@@ -169,6 +170,7 @@ function select(state) {
   return state;
 }
 
+export default connect(select)(App);
 
 
 

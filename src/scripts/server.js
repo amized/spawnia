@@ -19,9 +19,12 @@ import bodyParser from "body-parser"
 import SockRouter from "./lib/SockRouter"
 import routes from "./routes"
 import sockjs from "sockjs"
-import Game from './lib/Game.js'
+import GameServer from './lib/GameServer.js'
 import path from 'path'
 import { NODE_PUBLIC_PORT } from "./serverConfig"
+import makeWorld from "./mock/mockworldA";
+
+console.log("What is makeworldD??", makeWorld);
 
 const settings = {};
 
@@ -87,11 +90,16 @@ app.get('/',
     }
 );
 
-const gameList = [];
-gameList.push(new Game());
 
+
+
+const gameList = [];
+gameList.push(new GameServer(makeWorld));
+console.log("The gane list", gameList);
 var sockRouter = new SockRouter(gameList);
 routes(sockRouter);
+
+gameList[0].run();
 
 
 

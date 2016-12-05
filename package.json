@@ -4,7 +4,7 @@
   "description": "Lifx Website website",
   "main": "Gulpfile.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/mocha/bin/mocha tests --compilers js:babel-core/register",
     "start": "nodemon src/scripts/server.js --exec babel-node --presets es2015,stage-2"
   },
   "repository": {
@@ -15,6 +15,7 @@
   "license": "ISC",
   "devDependencies": {
     "babel-cli": "^6.16.0",
+    "babel-polyfill": "^6.16.0",
     "babel-preset-es2015": "^6.16.0",
     "babel-preset-es2016": "^6.16.0",
     "babel-preset-es2017": "^6.16.0",
@@ -53,6 +54,7 @@
     "lodash": "^4.2.1",
     "magnific-popup": "^1.0.1",
     "matter-js": "^0.10.0",
+    "mocha": "^3.1.2",
     "moment": "^2.11.1",
     "ng-mask": "^3.0.12",
     "node-bourbon": "^4.2.3",
@@ -67,6 +69,7 @@
     "redux": "^3.5.2",
     "redux-actions": "^0.10.1",
     "require-dir": "^0.3.0",
+    "sinon": "^2.0.0-pre.4",
     "slick-carousel": "^1.5.8",
     "utils-merge": "^1.0.0",
     "vinyl-buffer": "^1.0.0",
@@ -99,9 +102,11 @@
   },
   "dependencies": {
     "body-parser": "^1.15.2",
+    "circular-json": "^0.3.1",
     "express": "^4.14.0",
     "mousse": "^0.3.1",
     "sockjs": "^0.3.18",
-    "sockjs-client": "^1.1.1"
+    "sockjs-client": "^1.1.1",
+    "uuid": "^2.0.3"
   }
 }

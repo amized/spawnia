@@ -144,6 +144,15 @@ var Channel = class {
         }
     }
 
+    broadcastUpdate(data) {
+        for (var id in this.connections) {
+            this.connections[id].conn.write(JSON.stringify({
+                update: true,
+                data: data
+            }));
+        }
+    }
+
     applyUpdate (action) {
         // Dispatch action to server
         this.store.dispatch(action);

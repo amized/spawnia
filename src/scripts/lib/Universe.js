@@ -1,7 +1,14 @@
 
 import DNA from "./DNA";
-import {LIFESTATE_MATURE} from "../constants"
+import {
+	MAP_OBJ_UNIT,
+	MAP_OBJ_FOOD
+} from "../constants"
+import Unit from "./Unit"
+import Food from "./Food"
+import MapObject from "./MapObject"
 
+import { World, Composite } from "matter-js"
 
 
 class Universe {
@@ -9,6 +16,7 @@ class Universe {
 		this.units = {};
 		this.foods = [];
 		this.world = world;
+		this.mapObjects = [];
 		this.world.gravity = {
 			x: 0,
 			y: 0.0
@@ -20,11 +28,108 @@ class Universe {
 		this.speciesData = {};
 	}
 
-	inject(data) {
+	getMapObject(id) {
+		return this.mapObjects.find(obj => obj.id === id);
+	}
+
+	replaceMapObjectBody(id, body) {
+		let obj = this.getMapObject(id);
+		let oldBody = obj.body;
+		World.remove(this.world, oldBody);
+		World.add(this.world, body);
+		obj.setBody(body);
+	}
+
+	deleteMapObject(id) {
+		let index = this.mapObjects.findIndex(obj => obj.id === id);
+		if (index !== -1) {
+			World.remove(this.world, this.mapObjects[index].body);
+			this.mapObjects.splice(index, 1);
+		}
+	}
+
+
+	deleteUnit(unit) {
+		unit.die();
+		this.deleteMapObject(unit.id);
+		// We only add species data once the unit matures, so remove it only
+		// if the unit is mature
+
+		/*
+		if (unit.isMature()) {
+			let species = this.speciesData[unit.encodedDna];
+			if (species) {
+				species.population = (species.population > 0) ? species.population - 1 : 0;
+			}
+		}
+		*/
+
 
 	}
 
+	clear() {
+		World.clear(this.world);
+		this.mapObjects = [];		
+	}
+
+	hydrate(state) {
+		this.clear();
+		state.mapObjects.forEach(obj => {
+			
+			let newObj;
+			let MapObjClass;
+
+			switch (obj.type) {
+				case MAP_OBJ_UNIT: {
+					MapObjClass = Unit;
+					break;
+				}
+				case MAP_OBJ_FOOD: {
+					MapObjClass = Food;
+					break;
+				}
+				default:
+					MapObjClass = MapObject;
+
+			}
+
+			newObj = new MapObjClass(obj.body, obj.id, obj);
+			
+			this.add(newObj);
+		});
+	}
+
+	add(mapObject) {
+		World.add(this.world, mapObject.body);
+		this.mapObjects.push(mapObject);
+	}
+
+	getState() {
+		return {
+			mapObjects: this.mapObjects.map(obj => Object.assign({}, obj)),
+			world: this.world
+		}
+	}
+
+	getUnits() {
+		return this.mapObjects.filter(obj => obj.type === MAP_OBJ_UNIT);
+	}
+
+	getFoods() {
+		return this.mapObjects.filter(obj => obj.type === MAP_OBJ_FOOD);
+	}
+
+
+	getMapBody(id) {
+		let body = Matter.Composite.get(this.world, id, "");
+		return body;
+	}
+
 	getData() {
+		return {
+			world: this.world,
+			mapObjects: this.mapObjects.map(o => o.getData())
+		}
 		//return new Serializer().serializeObject(this);
 		/*
 		return {
@@ -108,9 +213,7 @@ class Universe {
 		return this.getUnitsArr().filter(unit => unit.isMature()).length;
 	}
 
-	getUnit(unitId) {
-		return this.units[unitId];
-	}
+
 
 	addUnit(unit) {
 
@@ -120,22 +223,6 @@ class Universe {
 	selectUnit(unit) {
 		unit.applySelected();
 	}
-
-	deleteUnit(unit) {
-		// We only add species data once the unit matures, so remove it only
-		// if the unit is mature
-		if (unit.isMature()) {
-			let species = this.speciesData[unit.encodedDna];
-			if (species) {
-				species.population = (species.population > 0) ? species.population - 1 : 0;
-			}
-		}
-
-		unit.die();
-		delete this.units[unit.id];
-	}
-
-
 
 	/* Foood */
 	getFood(foodId) {

@@ -2,6 +2,7 @@
 
 import Unit from "./Unit"
 import DNA from "./DNA"
+import uuid from "uuid"
 import { Body, Query, Composite, Vector, World } from "matter-js"
 import { 
   ENERGY_COST_PER_CELL, 
@@ -11,9 +12,10 @@ import {
   REPRODUCTION_COST_PER_CELL,
   UNIT_START_ENERGY_PER_CELL,
   FOOD_RADIUS,
-  REPRODUCTION_TIME
+  REPRODUCTION_TIME,
 } from "../settings"
 
+import { MAP_OBJ_FOOD } from "../constants";
 
 const CellTypes = {}
 
@@ -59,27 +61,28 @@ CellTypes.E = {
   name: "Eat",
   id: "E",
   bodyColor: "#b2d572",
-  onStep: function (cell, unit, universe, dispatch) {
-    
+  onStep: function (cell, cellBody, unit, state, dispatch) {
+
+    return;
+
     // Can't eat if we're full
     if (unit.energy >= unit.energyStorage) {
       return;
     }
 
     // Check if theres any food in our vacinity
-    var foodsBodies = universe.getFoodBodies();   
-    let intersecting = Query.point(foodsBodies, cell.body.position);
+    var foodsBodies = state.mapObjects.filter(obj=>obj.type = MAP_OBJ_FOOD).map(obj=>obj.body);   
+    let intersecting = Query.point(foodsBodies, cellBody.position);
 
     if (intersecting.length > 0) {
-      let numEatIntervals = 4 // number of eats till the next tick, to spread
-      for (var i =0; i< numEatIntervals; i++) {
-        dispatch({
-          type: "EAT",
-          foodId: intersecting[0].owner.id,
-          unitId: unit.id,
-          amount: FOOD_EAT_RATE/numEatIntervals
-        }, i*(1000/numEatIntervals));
-      }
+      // Choose the first intersecting, cannot eat more than once at one time
+      let [type,foodId] = intersecting[0].label.split(":");
+      dispatch({
+        type: "EAT",
+        foodId: foodId,
+        unitId: unit.id,
+        amount: FOOD_EAT_RATE
+      });
     }
 
     intersecting.forEach((foodBody)=> {
@@ -96,7 +99,7 @@ CellTypes.R = {
   name: "Reproduce",
   id: "R",
   bodyColor: "#cb8dbd",
-  onStep: function (cell, unit, universe, dispatch) {
+  onStep: function (cell, cellBody, unit, state, dispatch) {
 
     if (cell.isReproducing)
       return;
@@ -106,7 +109,7 @@ CellTypes.R = {
     }
     */
     
-    var energyCost = UNIT_START_ENERGY_PER_CELL * unit.getCellCount();
+    var energyCost = UNIT_START_ENERGY_PER_CELL * unit.cells.length;
     // You can't kill yourself to reproduce
     if (unit.energy <= (energyCost * 2)) {
       return false;
@@ -126,7 +129,9 @@ CellTypes.R = {
       type: "REPRODUCE_UNIT",
       unitId: unit.id,
       cellIndex: cellIndex,
-      dna: dna
+      newId: uuid.v1(),
+      dna: DNA.encodeDna(dna),
+      timestamp: Date.now() + REPRODUCTION_TIME
     }, REPRODUCTION_TIME);
 
   }

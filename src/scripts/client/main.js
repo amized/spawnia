@@ -7,30 +7,26 @@ import { createStore } from 'redux'
 import { app } from '../reducers'
 
 import App from '../components/App.jsx'
-import Game from '../lib/Game.js'
+import GameClient from './GameClient.js'
 
 import DelayChain from '../lib/utils/DelayChain.js'
 import TransitionClass from '../lib/utils/TransitionClass.js'
 
 import reducers from '../reducers'
 
-var socketClient 	= require("./socketClient");
+import socketClient from "./socketClient";
 
-const game = new Game();
+const store = createStore(reducers, {});
+const game = new GameClient(store);
 
-console.log(Game);
 
-let store = createStore(reducers, {});
 let rootEl = document.getElementById("root");
-let dispatch = game.getDispatchFn();
 
 
-
-socketClient.initConnection(store, "", "1111111");
 
 render(
 	<Provider store={store}>
-    	<App engine={game.getEngine()} universe={game.getUniverse()} dispatch={dispatch} />
+    	<App engine={game.engine} universe={game.universe} dispatch={null} />
   	</Provider>,
   rootEl
 )
