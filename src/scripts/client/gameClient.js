@@ -4,7 +4,7 @@ import Universe from "../lib/Universe.js"
 import Simulation from "../lib/Simulation.js";
 import socketClient from "./socketClient";
 import { synced, lostSync } from "../actions";
-import Game from '../Game'
+import Game from '../lib/Game'
 
 
 

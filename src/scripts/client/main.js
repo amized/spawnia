@@ -17,7 +17,7 @@ import reducers from '../reducers'
 import socketClient from "./socketClient";
 
 const store = createStore(reducers, {});
-const game = new GameClient(store);
+const game = new GameClient(null, store);
 
 
 let rootEl = document.getElementById("root");
