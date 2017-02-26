@@ -1,5 +1,5 @@
 var uuid = require('node-uuid');
-
+import { World } from "matter-js";
 import { MAP_OBJ_GENERAL } from "../constants";
 
 /*
@@ -19,13 +19,19 @@ class MapObject {
     constructor(body, id, props={}) {
         this.id = id;
         this.body = body;
+        this.bodyId = body.id;
         this.type = (props.type) ? props.type : MAP_OBJ_GENERAL;
         this.body.label = this.type + ":" + id;
         Object.assign(this, props);
     }
 
+    getBody(world) {
+        return World.get(world, this.bodyId);
+    }
+
     setBody(body) {
         this.body = body;
+        this.body.label = this.type + ":" + this.id;
     }
 
     getData() {

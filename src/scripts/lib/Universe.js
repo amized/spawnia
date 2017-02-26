@@ -7,25 +7,30 @@ import {
 import Unit from "./Unit"
 import Food from "./Food"
 import MapObject from "./MapObject"
+import SpeciesData from "./SpeciesData"
 
 import { World, Composite } from "matter-js"
 
 
 class Universe {
 	constructor(world) {
-		this.units = {};
-		this.foods = [];
 		this.world = world;
 		this.mapObjects = [];
 		this.world.gravity = {
 			x: 0,
-			y: 0.0
+			y: 0
 		}
 
-		// Species data is a collection of objects representing the unique
-		// species that currently exist on the map. It gets updated when
-		// units are added or deleted.
-		this.speciesData = {};
+		this.mapSize = {
+			width: 3500,
+			height: 3500
+		}
+
+		this.speciesData = new SpeciesData();
+	}
+
+	getMapSize() {
+		return this.mapSize;
 	}
 
 	getMapObject(id) {
@@ -50,18 +55,15 @@ class Universe {
 
 
 	deleteUnit(unit) {
+		this.speciesData.unitDies(unit);		
 		unit.die();
 		this.deleteMapObject(unit.id);
+
 		// We only add species data once the unit matures, so remove it only
 		// if the unit is mature
 
 		/*
-		if (unit.isMature()) {
-			let species = this.speciesData[unit.encodedDna];
-			if (species) {
-				species.population = (species.population > 0) ? species.population - 1 : 0;
-			}
-		}
+
 		*/
 
 
@@ -74,6 +76,7 @@ class Universe {
 
 	hydrate(state) {
 		this.clear();
+		console.log("HYDRATING UNIVERSE - ", Composite.allBodies(state.world).map(b=>b.id));
 		state.mapObjects.forEach(obj => {
 			
 			let newObj;
@@ -96,7 +99,9 @@ class Universe {
 			newObj = new MapObjClass(obj.body, obj.id, obj);
 			
 			this.add(newObj);
+
 		});
+		console.log("HYDRATING UNIVERSE - ", Composite.allBodies(this.world).map(b=>b.id));
 	}
 
 	add(mapObject) {
@@ -141,46 +146,11 @@ class Universe {
 		*/
 	}
 
-
-	/* Species */
-	addToSpecies(unit) {
-		let species = this.speciesData[unit.encodedDna];
-		if (species) {
-			species.population++;
-			species.totalPopulation++;
-		}
-		else {
-			species = {
-				dna: unit.DNA,
-				encodedDna: unit.encodedDna,
-				population: 1,
-				totalPopulation: 1,
-				adam: unit
-			}
-			this.speciesData[unit.encodedDna] = species;
-		}
-		unit.speciesIndex = species.totalPopulation;		
-	}
-
-	updateSpeciesName(encodedDna, name) {
-		if (this.speciesData[encodedDna]) {
-			this.speciesData[encodedDna].name = name;
-			return true; 
-		}
-		return false;
-	}
-
-	getSpeciesOfUnit(unit) {
-		return this.speciesData[unit.encodedDna];
-	}
-
 	getUnitsOfSpecies(species) {
 		return this.getUnitsArr().filter(unit => unit.encodedDna === species.encodedDna );
 	}	
 
-	getSpeciesArr() {
-		return Object.keys(this.speciesData).map(key => this.speciesData[key]).filter(species => species.population > 0); 
-	}
+
 
 	applySelectedSpecies(species) {
 
@@ -210,7 +180,7 @@ class Universe {
 	}
 
 	getNumMaturedUnits() {
-		return this.getUnitsArr().filter(unit => unit.isMature()).length;
+		return this.getUnits().filter(unit => unit.isMature()).length;
 	}
 
 

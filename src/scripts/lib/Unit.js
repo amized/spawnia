@@ -4,7 +4,7 @@ import MapObject from "./MapObject";
 import Cell from "./Cell";
 import CellTypes from "./CellTypes";
 import UnitBuilder from "./UnitBuilder";
-
+import speciesManager from "./speciesManager";
 
 var unitIds = 0;
 
@@ -37,9 +37,6 @@ class Unit extends MapObject {
 
     makeBody() {
 
-
-
-
     }
 
 
@@ -52,19 +49,37 @@ class Unit extends MapObject {
         });
     }
 
+    getDnaAsObjects() {
+        return this.encodedDna ? DNA.decodeDna(this.encodedDna) : null;
+    }
 
-    spawn(dna, cells, parent = null, bornAt = 0) {
-        this.DNA = dna;
+    getEncodedDna() {
+        return speciesManager.getEncodedDna(this.speciesId);
+    }
+
+    getDecodedDna() {
+        return speciesManager.getDecodedDna(this.speciesId);
+    }
+
+
+    spawn(speciesId, cells, parent = null, bornAt = 0) {
+
+        this.speciesId = speciesId;
+        this.species = speciesManager.getSpecies(speciesId);
         this.cells = [];
-        this.encodedDna = DNA.encodeDna(dna);
+
         this.body.render.encodedDna = this.encodedDna;
-        this.energy = UNIT_START_ENERGY_PER_CELL * DNA.getCellCount(dna.seedCell);
+
+        this.energy = this.species.startEnergy;
         // The initial storage is their start energy, they cant get more storage
         // until the unit matures with fat cells
         this.energyStorage = 0;
         this.matureTries = 0;
         this.lifeState = LIFESTATE_CHILD;
+
+        // Born at is number of game steps since start of simulation
         this.bornAt = bornAt;
+
         this.children = [];
         // The chicken or the egg?
         if (parent) {
@@ -91,6 +106,24 @@ class Unit extends MapObject {
 
     getData() {
         return Object.assign({}, this);
+    }
+
+    getAge(currStep) {
+        /*
+        let t = Math.floor(moment().diff(this.bornAt));
+        let seconds = Math.floor((t / 1000) % 60);
+        let minutes = Math.floor((t / 1000 / 60) % 60);
+        let hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+        seconds = ('0' + seconds).slice(-2);
+        hours = ('0' + hours).slice(-2);
+        minutes = ('0' + minutes).slice(-2);
+        */
+        return currStep - this.bornAt;
+        /*
+        return "10:00";
+        age = minutes + ":" + seconds;
+        */
+
     }
 
     isMature() {
@@ -136,29 +169,15 @@ class Unit extends MapObject {
 
 
     // Creates the cells
-    mature(newCells) {
-/*
-        this.cells = UnitBuilder.buildAllCells(this.DNA, this.body.position.x, this.body.position.y);
-        this.body = UnitBuilder.buildParentBody(this.cells);
-
-        this.cells.forEach(cell => {
-            if (CellTypes[cell.type].onCreate) {
-                CellTypes[cell.type].onCreate(cell, this);
-            }
-        })
-
-        this.body.render.encodedDna = this.encodedDna;
-        this.body.label = "unit:" + this.id;
-*/
-        //this.cells = newCells;
+    mature(newCells, body) {
         this.cells = newCells;
         this.cells.forEach(cell => {
             if (CellTypes[cell.type].onCreate) {
                 CellTypes[cell.type].onCreate(cell, this);
             }
         });        
-        this.energyStorage = this.cells.filter((cell) => { 
-            return cell.type === "F"}).length * ENERGY_STORAGE_PER_FAT;
+        this.energyStorage = this.species.energyStorage;
+        body.frictionAir = this.species.bodyFrictionAir;
         this.lifeState = LIFESTATE_MATURE;
     }
 

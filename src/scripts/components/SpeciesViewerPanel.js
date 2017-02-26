@@ -31,7 +31,16 @@ function getTimeRemaining(endtime) {
 
 export default class SpeciesViewerPanel extends React.Component {
 
+	componentDidMount() {
+		this.refreshTimer = setInterval(()=>{
+			this.forceUpdate();
+		}, 500);
+	}
 
+	componentWillUnmount() {
+		console.log("Unmounting species viewpeanel");
+		clearInterval(this.refreshTimer);
+	}
 
 	close = (e) => {
 		this.props.selectSpecies(null);
@@ -67,7 +76,7 @@ export default class SpeciesViewerPanel extends React.Component {
 						&#10005;
 					</div>
 					<div className="species-viewer-panel__main" key={species.encodedDna} >
-						<DnaBlueprint dna={species.dna} width={160} height={160} />   
+						<DnaBlueprint dna={species.encodedDna} width={160} height={160} />   
 						<div className="unit-panel__stats stats-container"> 
 			                <div className="stats-item">Current pop: <span>{species.population}</span></div>
 			                <div className="stats-item">Percentage pop: <span>{popPercent}</span></div>

@@ -1,7 +1,21 @@
 
 
 .command-panel {
-	max-width: 200px;
-	min-width: 200px;
+	flex: 0 0 200px;
 	background: #000;
+	text-align: center;
+}
+
+.command-panel__create {
+	@include button;
+	margin: 20px auto;
+}
+
+.command-panel__play {
+	font-size: 30px;
+	cursor: pointer;
+	color: rgba(#FFF, 0.8);
+	&:hover {
+		color: rgba(#FFF, 1);
+	}
 }

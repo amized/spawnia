@@ -1,0 +1,18 @@
+
+.minimap {
+	flex: 0 0 $control-panel-height;
+	height: 100%;
+	padding: 20px;
+	display: flex;
+	align-items: stretch;
+}
+
+.minimap-inner {
+	background: #000;
+	flex-grow:1;
+}
+
+.minimap-bb {
+	stroke: #FFF;
+	stroke-width: 2px;
+}

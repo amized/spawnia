@@ -11,14 +11,22 @@ export default function makeWorld(dispatch) {
 	
 	dispatch({
 		type: "ADD_UNIT",
-		DNA: DNA.encodeDna(Dna1),
-		x: 250,
-		y: 150,
+		dna: "S(X(,X(F,E,R),G),F,E,R)",
+		x: 400,
+		y: 450,
 		id: unitid,
-		bornAt: now
+		bornAt: 0
 	});
-
-	
+/*
+	dispatch({
+		type: "ADD_UNIT",
+		dna: DNA.encodeDna(Dna3),
+		x: 200,
+		y: 450,
+		id: uuid.v1(),
+		bornAt: 0
+	});
+	*/
 
 	dispatch({
 		type: "BUILD_WORLD"
@@ -32,7 +40,30 @@ export default function makeWorld(dispatch) {
 
 	dispatch({
 		type: "ADD_FOOD",
-		amount: 500,
+		amount: 100,
+		x: 300,
+		y: 50,
+		id: uuid.v1()
+	});
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 100,
+		x: 500,
+		y: 50,
+		id: uuid.v1()
+	});
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 100,
+		x: 400,
+		y: 50,
+		id: uuid.v1()
+	});
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 100,
 		x: 200,
 		y: 400,
 		id: uuid.v1()
@@ -40,7 +71,40 @@ export default function makeWorld(dispatch) {
 
 	dispatch({
 		type: "ADD_FOOD",
-		amount: 500,
+		amount: 100,
+		x: 300,
+		y: 400,
+		id: uuid.v1()
+	});
+
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 100,
+		x: 400,
+		y: 300,
+		id: uuid.v1()
+	});
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 100,
+		x: 500,
+		y: 300,
+		id: uuid.v1()
+	});	
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 100,
+		x: 600,
+		y: 300,
+		id: uuid.v1()
+	});	
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 100,
 		x: 100,
 		y: 500,
 		id: uuid.v1()
@@ -48,32 +112,40 @@ export default function makeWorld(dispatch) {
 
 	dispatch({
 		type: "ADD_FOOD",
-		amount: 500,
-		x: 700,
-		y: 200,
+		amount: 200,
+		x: 400,
+		y: 450,
 		id: uuid.v1()
 	});
 
 	dispatch({
 		type: "ADD_FOOD",
-		amount: 500,
+		amount: 100,
 		x: 300,
 		y: 200,
 		id: uuid.v1()
 	});
 	dispatch({
 		type: "ADD_FOOD",
-		amount: 500,
-		x: 700,
-		y: 500,
+		amount: 100,
+		x: 50,
+		y: 50,
 		id: uuid.v1()
 	});
 	
 	dispatch({
 		type: "ADD_FOOD",
-		amount: 500,
+		amount: 600,
 		x: 900,
 		y: 100,
+		id: uuid.v1()
+	});
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 600,
+		x: 900,
+		y: 300,
 		id: uuid.v1()
 	});
 
@@ -85,6 +157,21 @@ export default function makeWorld(dispatch) {
 		y: 500,
 		id: uuid.v1()
 	});
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 800,
+		x: 900,
+		y: 700,
+		id: uuid.v1()
+	});
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 800,
+		x: 1100,
+		y: 700,
+		id: uuid.v1()
+	});
+
 	/*
 
 

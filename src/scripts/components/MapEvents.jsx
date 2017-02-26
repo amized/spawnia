@@ -24,6 +24,8 @@ export default class MapEvents extends React.Component {
         let { engine } = this.props;
         let canvas = $("canvas")[0];
 
+        console.log("The canvas", canvas);
+
         this.mouse = Mouse.create(canvas);
         this.mouseConstraint = MouseConstraint.create(engine, {
             mouse: this.mouse
@@ -32,7 +34,7 @@ export default class MapEvents extends React.Component {
         Events.on(this.mouseConstraint, "mousemove", this.onMouseMove);
         Events.on(this.mouseConstraint, "mouseup", this.onMouseUp);
         Events.on(this.mouseConstraint, "mousedown", this.onMouseDown);
-        Events.on(engine, 'tick', this.onTick);
+        Events.on(engine, 'afterUpdate', this.onTick);
 
         //World.add(engine.world, this.mouseConstraint);
     }
@@ -43,6 +45,7 @@ export default class MapEvents extends React.Component {
         for (let i = 0; i < bodies.length; i++) {
             let split = bodies[i].label.split(":");
             if (split[0] === "unit") {
+                console.log(bodies[i].label);
                 unitHover = parseInt(split[1]);
                 break;
             }
@@ -74,6 +77,7 @@ export default class MapEvents extends React.Component {
     }
 
     onMouseDown = (e) => {
+        console.log("mouse down");
         let bodies = this.getBodiesAtMouse(e.mouse);
 
         for (let i = 0; i < bodies.length; i++) {
@@ -90,7 +94,7 @@ export default class MapEvents extends React.Component {
     }
 
     onMouseMove = (e) => {
-
+        console.log("mouse move");
     }
 
     getBodiesAtMouse(mouse) {
@@ -107,7 +111,7 @@ export default class MapEvents extends React.Component {
 
     render () {
         return (
-            <div></div>
+            null
         )
     }
 

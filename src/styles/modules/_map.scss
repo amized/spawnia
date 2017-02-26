@@ -1,5 +1,6 @@
 
 .map-wrapper {
+	position: relative;
 	&:after {
 		content: "";
 		display: block;
@@ -8,15 +9,22 @@
 }
 
 .map {
-	border-bottom: 1px solid #d6d6e2;
 	height: calc(100vh - #{$control-panel-height});
-	min-height: 640px;
-	padding: 0px 0px;
-	background: url(../img/grass4.png);
-	background-position: center center;
-
 	canvas {
-		box-shadow: 0px 0px 45px 11px #367d00;
+		position: absolute;
+		top: 0;
+		left: 0;
 	}
 	
+}
+
+.map-bg-1 {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: #000;
+	background-image: url("../img/Gritstone5.png");
+	background-repeat: repeat;
+	opacity: 0.2;
+	filter: blur(6px);
 }

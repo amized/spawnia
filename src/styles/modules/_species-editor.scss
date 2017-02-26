@@ -27,34 +27,96 @@
 	padding: 10px 20px;
 	text-align: center;
 	cursor: pointer;
+	background: #00a568;
+	color: #FFF;
 	&:hover {
-		background: #555;
+		background: #01c17a;
 	}
 }
 
 .species-editor__heading {
-	padding: 30px;
+	padding: 30px 70px 30px 30px;
 	text-align: center;
-	font-size: 33px;
 	border-bottom: 1px solid #444;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	h1 {
+		font-size: 33px;
+	}
 }
+
+$canvas-background: #222;
 
 .species-editor__main {
 	@include display(flex);
+	background: $canvas-background;
 }
 
 .species-editor__map-container {
 	@include flex-grow(1);
 }
 
+
+.species-editor__cell-menu {
+	flex: 0 0 200px;
+	//max-width: 200px;
+	background: #444;
+	padding: 30px;
+	box-shadow: 2px 2px 2px 1px rgba(#000, 0.2);
+	.species-editor--cell-menu-open & {
+		display: block;
+	}
+}
+
+
+.species-editor__info {
+	flex: 0 0 200px;
+	//max-width: 200px;
+	background: #444;
+	h2 {
+		text-align: center;
+	    padding: 20px;
+	    background: #555;
+	    margin-bottom: 0px;
+	    text-transform: uppercase;
+	    font-size: 14px;
+	}	
+}
+
+.species-editor__info-item {
+	text-align: center;
+	//margin-bottom: 10px;
+	border-top: 1px solid #555;
+	&:last-child {
+		border-bottom: 1px solid #555;
+	}
+	padding: 20px 0px;
+	label {
+		text-align: center;
+		display: block;
+		font-size: 13px;
+	}
+
+	span {
+		font-size: 40px;
+		&.species-editor__info-sm {
+			font-size: 20px;
+		}
+	}
+}
+
+
+
+
 .species-editor__cell-empty {
-	stroke: #444;
+	stroke: #999;
 	stroke-width: 3px;
-	fill: #333;
+	fill: $canvas-background;
 	stroke-dasharray: 3, 3;
 	cursor: pointer;
 	&--hover {
-		stroke: #999;
+		stroke: #BBB;
 	}
 }
 
@@ -65,15 +127,6 @@
 }
 
 
-.species-editor__cell-menu {
-	max-width: 200px;
-	background: #444;
-	padding: 30px;
-	box-shadow: 2px 2px 2px 1px rgba(#000, 0.2);
-	.species-editor--cell-menu-open & {
-		display: block;
-	}
-}
 
 .species-editor__cell-menu-list {
 	margin-top: 20px;
@@ -98,7 +151,7 @@
 
 
 .species-editor__path {
-	stroke: #444;
+	stroke: #999;
 	stroke-width: 5px;
 }
 

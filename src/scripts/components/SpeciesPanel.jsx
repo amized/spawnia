@@ -15,6 +15,18 @@ import {
 
 
 export default class SpeciesPanel extends React.Component {
+
+	componentDidMount() {
+		this.refreshTimer = setInterval(()=>{
+			this.forceUpdate();
+		}, 1000);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.refreshTimer);
+	}
+
+
 	render() {
 
 		// Sort the list by population and save the sorted index as a property on each item to allow ordering via css
@@ -29,7 +41,7 @@ export default class SpeciesPanel extends React.Component {
 		let allSpecies = _.sortBy(sortByPop, "encodedDna");
 		*/
 		
-		let allSpecies = this.props.allSpecies;
+		let allSpecies = this.props.universe.speciesData.getSpeciesArr();
 		return (
 			<div className="species-panel">
 				<div className="species-panel__heading">Species</div>
@@ -58,6 +70,11 @@ export default class SpeciesPanel extends React.Component {
 
 
 class SpeciesItem extends React.Component {
+
+
+	static propTypes = {
+
+	}
 
 	constructor(props) {
 		super(props);
@@ -132,6 +149,7 @@ class SpeciesItem extends React.Component {
 	}
 
 	render() {
+
 		let { species, index, isSelected } = this.props;
 		let isEdit = this.state.mode === "edit";
 		let style = {
@@ -150,7 +168,7 @@ class SpeciesItem extends React.Component {
 				<div className={classnames}>   
 					
 					<div className="species-panel__item-inner" onClick={this.onClick.bind(this)}>
-						<DnaBlueprint dna={species.dna} width={100} height={100} />
+						<DnaBlueprint dna={species.encodedDna} width={100} height={100} />
 						<div className="species-panel__stats">
 							<div>
 							<div className="species-panel__stats-pop-title">Population: </div>

@@ -12,10 +12,10 @@ import {
 } from "../settings"
 import CellTypes from "../lib/CellTypes";
 import ClassNames from 'classnames';
-
-
-
-
+import UnitBuilder from '../lib/UnitBuilder';
+import { getNewCellPosFromParent, DIR } from '../lib/Geometry.js';
+import Species from "../lib/Species";
+import DNA from '../lib/DNA';
 
 
 
@@ -34,42 +34,54 @@ const resetCellState = [
 			y: 0
 		}
 	}
-
-	
-
-
 ]
-
-
-
-
 
 
 export default class SpeciesEditor extends React.Component {
 
-
+	static defaultProps = {
+	}
 
 	constructor(props) {
 		super(props);
 		
+		let dna = {
+			seedCell: 
+				{ 
+					type: "S", 
+					x:0, 
+					y:0, 
+					angle: 0,
+					direction: DIR.NORTH
+				}
+		}
+
+		let encodedDna = DNA.encodeDna(dna);
 
 		this.state = {
 			seedCell: { type: "S", x:0, y:0, angle: 0 },
 			cells: [
-				{ type: "S", x:0, y:0, angle: 0 }
+				{ 
+					type: "S", 
+					x:0, 
+					y:0, 
+					angle: 0,
+					direction: DIR.NORTH
+				}
 			],
 			cellMenuOpen: false,
-			currDraggingCellType: null
+			currDraggingCellType: null,
+			currSpecies: new Species(encodedDna)
 		}
 	}
 
 	save() {
+		
 		this.props.saveSpecies(this.state.cells);
 	}
 
 
 	openCellMenu(cell) {
-		console.log("hello");
 		this.setState({
 			cellMenuOpen: true,
 			currCell: cell
@@ -101,8 +113,6 @@ export default class SpeciesEditor extends React.Component {
 	}
 
 	dropOnCell(cell) {
-		console.log("on drop cell", cell);
-		console.log(this.state);
 		if (this.state.currDraggingCellType) {
 
 			let newCell = Object.assign({}, cell, { type: this.state.currDraggingCellType.id });
@@ -114,11 +124,15 @@ export default class SpeciesEditor extends React.Component {
 			let arr = this.state.cells;
 			arr.push(newCell);
 
+			let encodedDna = DNA.encodeDna({seedCell: arr[0]});
+			let species = new Species(encodedDna);
+
 			this.setState({
-				cells: arr
+				cells: arr,
+				currDraggingCellType: null,
+				currSpecies: species 
 			});
 
-			console.log(newCell);
 		}
 
 	}
@@ -129,30 +143,16 @@ export default class SpeciesEditor extends React.Component {
 		let angle = parentCell.angle;
 		let angleOffset;
 
-		switch (index) {
-	        case 0:
-	            angleOffset = angle + Math.PI * (1/3);
-	            break;
-	        case 1:
-	            angleOffset = angle - Math.PI * (1/3);
-	            break;
-	        case 2:
-	            angleOffset = angle + Math.PI;
-	            break;                      
-    	}
-
-		let newPos = {
-            x: parentCell.x +  (cellMargin * Math.cos(angleOffset)),
-            y: parentCell.y + (cellMargin*Math.sin(angleOffset))
-        }    	
+		//let newPos = UnitBuilder.transformPosFromIndex(parentCell.x, parentCell.y, index, cellMargin); 	
+		let { pos, dir } = getNewCellPosFromParent(parentCell.x, parentCell.y, parentCell.direction, index, cellMargin);
 
         // Check if already exists
         let cells = this.state.cells;
 
         for (let i = 0; i < cells.length; i++) {
         	let cell = cells[i];
-        	if (Math.round(cell.x) ===  Math.round(newPos.x) &&
-        		Math.round(cell.y) ===  Math.round(newPos.y)) {
+        	if (Math.round(cell.x) ===  Math.round(pos.x) &&
+        		Math.round(cell.y) ===  Math.round(pos.y)) {
         		console.log("found intersecting");
         		return null;
         	}
@@ -161,14 +161,17 @@ export default class SpeciesEditor extends React.Component {
         let cell = {
         	parent: parentCell,
         	type: null,
-        	x: newPos.x,
-        	y: newPos.y,
+        	x: pos.x,
+        	y: pos.y,
         	angle: angleOffset,
-        	index: index
+        	index: index,
+        	direction: dir
         }
         return cell;
 	}
 
+	// Factory function for rendering svg components to draw the cells
+	// in the species preview
 	getCellComps(cells) {
 
 		//let items = [<CellFilled cell={cell} />];
@@ -181,7 +184,7 @@ export default class SpeciesEditor extends React.Component {
 		cells.forEach((cell, cellIndex)=>{
 			cellEls.push(<CellFilled cell={cell} key={cellKey}/>);
 			if (!cell.children) {
-				cell.children = (cellIndex === 0) ? [null,null,null] : [null, null];
+				cell.children = (cellIndex === 0) ? [null,null,null,null] : [null, null,null];
 			}
 			cell.children.forEach((child, index)=> {
 				if (child) {
@@ -189,19 +192,26 @@ export default class SpeciesEditor extends React.Component {
 					return;
 				}
 				else {
+
 					cellKey++;
-					let newChild = this.getChildFromParent(cell, index);
-					if (newChild) {
-						connectionEls.push(<path className="species-editor__path"  d={"M" + cell.x + " " + cell.y + " L" + newChild.x + " " + newChild.y}></path>);
-						cellEls.push(
-							<CellEmpty 
-							cell={newChild}
-							onClick={this.openCellMenu.bind(this)} 
-							onDrop={this.dropOnCell.bind(this)}
-							isDragging={currDraggingCellType !== null}
-							key={cellKey} 
-							/>
-						)
+
+					// Check if the cell type allows children here
+					let parentCellType = CellTypes[cell.type];
+
+					if (parentCellType.connections && parentCellType.connections[index]) {
+						let newChild = this.getChildFromParent(cell, index);
+						if (newChild) {
+							connectionEls.push(<path className="species-editor__path"  d={"M" + cell.x + " " + cell.y + " L" + newChild.x + " " + newChild.y}></path>);
+							cellEls.push(
+								<CellEmpty 
+								cell={newChild}
+								onClick={this.openCellMenu.bind(this)} 
+								onDrop={this.dropOnCell.bind(this)}
+								isDragging={currDraggingCellType !== null}
+								key={cellKey} 
+								/>
+							)
+						}
 					}
 				}
 			});
@@ -214,11 +224,12 @@ export default class SpeciesEditor extends React.Component {
 
 	render() {
 
-		let { cells, seedCell } = this.state;
+		let { cells, seedCell, currSpecies } = this.state;
+		//let { cellTypes } = this.props;
 
 		let cellComps = this.getCellComps(cells);
 
-		let cellTypes = Object.keys(CellTypes).map((k) => CellTypes[k]);
+		let cellTypes = Object.keys(CellTypes).map((k) => CellTypes[k]).filter(type => type.id !== "S");
 		let classnames = ClassNames({
 			"species-editor": true,
 			"species-editor--cell-menu-open": this.state.cellMenuOpen
@@ -226,12 +237,14 @@ export default class SpeciesEditor extends React.Component {
 		return (
 			<div className={classnames}>
 				<div className="species-editor__close" onClick={this.props.closeSpeciesEditor}>&#215;</div>
-				<div className="species-editor__heading">Species Editor</div>
+				<div className="species-editor__heading">
+					<h1>Species Editor</h1>
+					<div className="species-editor__save" onClick={this.save.bind(this)}>
+						Insert into world
+					</div>
+				</div>
 				<div className="species-editor__main">
 					<div className="species-editor__cell-menu">
-						<div className="species-editor__save" onClick={this.save.bind(this)}>
-							Save
-						</div>
 						<div className="species-editor__cell-menu-list">
 						{
 
@@ -252,6 +265,39 @@ export default class SpeciesEditor extends React.Component {
 							</g>
 						</svg>
 					</div>	
+					{currSpecies ?
+						<div className="species-editor__info">
+							<h2>Species Info</h2>
+							<div className="species-editor__info-item">
+								<span className="species-editor__info-sm">{currSpecies.encodedDna}</span>
+							</div>							
+							<div className="species-editor__info-item">
+								<label>Energy cost per step</label>
+								<span>{currSpecies.energyCostPerStep}</span>
+							</div>
+
+							<div className="species-editor__info-item">
+								<label>Max energy storage</label>
+								<span>{currSpecies.energyStorage}</span>
+							</div>
+
+							<div className="species-editor__info-item">
+								<label>Starting energy</label>
+								<span>{currSpecies.startEnergy}</span>
+							</div>
+
+							<div className="species-editor__info-item">
+								<label>Energy cost to reproduce</label>
+								<span>{currSpecies.reproductionCost}</span>
+							</div>							
+							<div className="species-editor__info-item">
+								<label>Time to reproduce</label>
+								<span>{ (currSpecies.reproductionTime / 1000) + "s"}</span>
+							</div>	
+						</div>
+						:
+						null
+					}
 				</div>
 			</div>
 
@@ -271,7 +317,6 @@ class CellEmpty extends React.Component {
 	}
 
 	onDragEnter = (e) => {
-		console.log("is dragging?", this.props.isDragging);
 		if (this.props.isDragging && !this.state.draggingOver) {
 			this.setState({
 				draggingOver: true
@@ -296,6 +341,9 @@ class CellEmpty extends React.Component {
 	onDrop(e) {
 		e.preventDefault();
 		this.props.onDrop(this.props.cell);
+		this.setState({
+			draggingOver: false
+		})
 	}
 
 	render() {
@@ -355,7 +403,6 @@ class CellMenuItem extends React.Component {
 	}
 
 	onDragStart(e) {
-		console.log("On drag evenent", this.props.cellType);
 		this.props.onDrag(this.props.cellType);
 	}
 

@@ -64,6 +64,7 @@ export default class GameClient extends Game {
 
 	onDump = (data) => {
 		let { currStep, state } = data;
+		console.log("The state recieved from server:", state);
 		this.hasRecievedDump = true;
 		this.simulation.pause();
 		this.simulation.setCurrStep(currStep);

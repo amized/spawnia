@@ -1,7 +1,7 @@
 var assert = require('assert');
 
 import GameClient from "../src/scripts/client/gameClient.js"
-import Game from '../src/scripts/lib/Game.js'
+import GameServer from '../src/scripts/lib/GameServer.js'
 import Simulation from '../src/scripts/lib/Simulation'
 import { ENGINE_STEP_TIMEOUT } from '../src/scripts/settings.js' 
 import ActionBroadcaster from '../src/scripts/lib/ActionBroadcaster'
@@ -21,8 +21,8 @@ import CircularJSON from 'circular-json';
 
 function checkWorldsInSync(state1, state2) {
 
-	//console.log("Server map objects", state1.world.bodies.map(obj => obj.id));
-	//console.log("Client map objects", state2.world.bodies.map(obj => obj.id));
+	console.log("Server map objects", state1.world.bodies.map(obj => obj.id));
+	console.log("Client map objects", state2.world.bodies.map(obj => obj.id));
 	assert.equal(state1.mapObjects.length, state2.mapObjects.length);
 	assert.equal(state1.world.bodies.length, state2.world.bodies.length);
 	//assert.deepEqual(state1.world, state2.world);
@@ -59,12 +59,12 @@ describe('Sync', function () {
 	it('should sync', function(done) {
 
 
-		const game = new Game();
+		const game = new GameServer();
 
 		const { universe, engine, channel, simulation } = game;
 
 		const store = createStore(reducers, {});
-		const gameClient = new GameClient(store, {
+		const gameClient = new GameClient(null, store, {
 			bufferLength: 10,
 			bufferTimeout: 10
 		});
@@ -227,12 +227,12 @@ describe('Sync', function () {
 
 		console.log("----------------- TEST 2 ------------------");
 
-		const game = new Game();
+		const game = new GameServer();
 
 		const { universe, engine, channel, simulation } = game;
 
 		const store = createStore(reducers, {});
-		const gameClient = new GameClient(store, {
+		const gameClient = new GameClient(null, store, {
 			bufferLength: 10,
 			bufferTimeout: 10
 		});
@@ -287,7 +287,7 @@ describe('Sync', function () {
 				}
 
 				case 11: {
-					gameStateAt11 = universe.getState();
+					gameStateAt11 = CircularJSON.parse(CircularJSON.stringify(universe.getState()));
 					return;
 				}
 
@@ -444,6 +444,7 @@ describe('Sync', function () {
 				}
 
 				case 12: {
+					// be careful we not
 					checkWorldsInSync(gameStateAt12, clientUniverse.getState());
 					return;
 				}

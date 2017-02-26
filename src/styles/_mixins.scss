@@ -1,0 +1,15 @@
+
+
+@mixin button {
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #FFF;
+    border-radius: 3px;
+    padding: 10px 20px;
+    text-align: center;
+    cursor: pointer;
+    background: #00a568;
+    color: #FFF;
+    text-decoration: none;
+    display: inline-block;
+}

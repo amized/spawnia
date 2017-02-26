@@ -145,12 +145,17 @@ var Channel = class {
     }
 
     broadcastUpdate(data) {
+
+        let msg = JSON.stringify({
+            update: true,
+            data: data
+        });
+
         for (var id in this.connections) {
-            this.connections[id].conn.write(JSON.stringify({
-                update: true,
-                data: data
-            }));
+            this.connections[id].conn.write(msg);
         }
+
+        console.log("BROADCASTING UPDATE, MSG LENGTH: ", msg.length);
     }
 
     applyUpdate (action) {

@@ -12,12 +12,16 @@ import CellTypes from "./CellTypes";
 import DNA from "./DNA";
 import UnitBuilder from "./UnitBuilder";
 import _ from "underscore";
+import speciesManager from "./speciesManager";
+import { getAngleOfDirection } from "./Geometry";
+
 
 import { 
 	ENERGY_COST_PER_CELL, 
 	FOOD_GROWTH_RATE, 
 	FOOD_EAT_RATE, 
-	MATURATION_TIME 
+	MATURATION_TIME,
+	REPRODUCTION_COST_THRESHOLD
 } from "../settings"
 
 import {
@@ -27,7 +31,7 @@ import {
 } from "../constants"
 
 
-function runAction(action, universe, dispatch) {
+function runAction(action, universe, currStep) {
 
 	switch (action.type) {
 
@@ -37,8 +41,8 @@ function runAction(action, universe, dispatch) {
 				isStatic: true,
 				restitution: 1,
 				collisionFilter: {
-	                category: COLLISION_CATEGORY_DEFAULT,
-	                mask: COLLISION_CATEGORY_DEFAULT | COLLISION_CATEGORY_UNITS
+	                category: COLLISION_CATEGORY_UNITS
+	                //mask: COLLISION_CATEGORY_DEFAULT | COLLISION_CATEGORY_UNITS
 	            }
             }
 
@@ -49,26 +53,35 @@ function runAction(action, universe, dispatch) {
 
 
 			var offset = 20;
-			var mapWidth = 1200;
-			var mapHeight = 600;
+			var boundsWidth = 50;
+			var mapWidth = universe.getMapSize().width;
+			var mapHeight = universe.getMapSize().width;
 
 			const propsBarriers = {
 				isStatic: true,
 				restitution: 1,
 				collisionFilter: {
-	                category: COLLISION_CATEGORY_DEFAULT,
-	                mask: COLLISION_CATEGORY_DEFAULT | COLLISION_CATEGORY_UNITS
+	                category: COLLISION_CATEGORY_UNITS
 	            },
 	            render: {
-					fillStyle: "#367d00",
-					strokeStyle: "#367d00",
+					fillStyle: "#999",
+					strokeStyle: "#999",
 					wireframes: true
 				}
             }
 
 			let bodies = [barrier, barrier2, barrier3, barrier4, 
-				Bodies.rectangle(mapWidth/2, -offset, mapWidth + 2 * offset, 50.5, propsBarriers),
-				Bodies.rectangle(-offset, mapHeight/2, 50.5, mapHeight + 2 * offset, propsBarriers)
+				// top
+				Bodies.rectangle(mapWidth/2, 0, mapWidth, boundsWidth, propsBarriers),
+				
+				// bottom
+				Bodies.rectangle(mapWidth/2, mapHeight, mapWidth, boundsWidth, propsBarriers),
+
+				// left
+				Bodies.rectangle(0, mapHeight/2, boundsWidth, mapHeight, propsBarriers),
+				
+				// right
+				Bodies.rectangle(mapWidth, mapHeight/2, boundsWidth, mapHeight, propsBarriers)
 			];
 
 
@@ -190,11 +203,13 @@ function runAction(action, universe, dispatch) {
 		*/
 		case "ADD_UNIT": {
 			
-			let dna = DNA.decodeDna(action.DNA);
-			let body = UnitBuilder.buildSeedCell(dna, action.x, action.y);
-			let unit = new Unit(body, action.id);
+			const { dna, x, y } = action;
 
-			unit.spawn(dna, [], null, action.bornAt);
+			let dcdDna = DNA.decodeDna(dna);
+			let body = UnitBuilder.buildSeedCell(dcdDna, x, y);
+			let unit = new Unit(body, action.id);
+			let speciesId = speciesManager.add(dna);
+			unit.spawn(speciesId, [], null, currStep);
 			//console.log("World before add unit", universe.world.bodies.map(body=>body.id));
 			universe.add(unit);
 			//console.log("World after add unit", universe.world.bodies.map(body=>body.id));
@@ -207,14 +222,15 @@ function runAction(action, universe, dispatch) {
 				return;
 			}
 	    	const v = unit.body.velocity;
-			const cells = UnitBuilder.buildAllCells(unit.DNA);
+			const cells = UnitBuilder.buildAllCells(speciesManager.getDecodedDna(unit.speciesId));
 			const cellBodies = UnitBuilder.buildCellBodies(cells, unit.body.position.x, unit.body.position.y);
             const newBody = UnitBuilder.buildParentBody(cellBodies);
-	    	unit.mature(cells);            
+	    	unit.mature(cells, newBody);	    	      
 			universe.replaceMapObjectBody(unit.id, newBody);
-	    	
+
+			Body.setMass(newBody, 20);
 	    	Body.setVelocity(newBody, v);
-			universe.addToSpecies(unit);
+			universe.speciesData.addToSpecies(unit);
 	    	
 			
 		    //let parts = _.partition(unit.cells, (cell) => cell.type === "G");
@@ -223,71 +239,49 @@ function runAction(action, universe, dispatch) {
 
 
 	    case "START_REPRODUCE": {
-	    	const unit = universe.getMapObject(action.unitId);
+	    	const { unitId, cellIndex, energyCost } = action;
+	    	const unit = universe.getMapObject(unitId);
    		    if (!unit) return;
-   		   	const cell = unit.cells[action.cellIndex];
-   		   	if (unit.energy <= (action.energyCost * 2)) {
-		      return false;
-		    }
-    		unit.energy = unit.energy - action.energyCost;
-    		cell.isReproducing = true;
+
+   		   	const cell = unit.cells[cellIndex];
+   		   	if (unit.energy <= energyCost * REPRODUCTION_COST_THRESHOLD) {
+   		   		return;
+   		   	}
+    		unit.energy = unit.energy - energyCost;
+    		cell.startedReproductionAt = currStep;
 	    	return;
 	    }
 	   	case "REPRODUCE_UNIT": {
-   		    /*
-   		    var cell = unit.cells[action.cellIndex];
-		    var newUnit = new Unit();
 
-		    // Save the child-parent connection for stats
-		    unit.addChild(newUnit);
-
-		    // Get the Matter JS body object
-		    var unitBody = newUnit.spawn(action.dna, cell.body.position.x, cell.body.position.y);
-
-		    Body.setVelocity(unitBody, {
-		      x: Math.cos(unit.body.angle + cell.angle),
-		      y: Math.sin(unit.body.angle + cell.angle)         
-		    });
-
-		    World.add(universe.world, unitBody);
-		    // Add it to the world
-		    
-		    universe.addUnit(newUnit);
-		    */
-
-
-		    const { unitId, cellIndex, newId, dna, timestamp } = action;
+		    const { unitId, cellIndex, newId, dna, bornAt } = action;
 
 			let unit = universe.getMapObject(unitId);
    		    if (!unit) return;
-
+   
 		    let cell = unit.cells[cellIndex];
 
 		    if (!cell) {
 		    	throw("For some reason the cell tryibg to reproduce is null:", unit.cells, cellIndex);
 		    	return;
 		    }
-		    cell.isReproducing = false;
+		    
+		    cell.startedReproductionAt = null;
 
-			let decodedDna = DNA.decodeDna(dna);
+		    let speciesId = speciesManager.add(dna);
+			let decodedDna = speciesManager.getDecodedDna(speciesId);
 			let cellBody = unit.getCellBody(cellIndex);
 			let body = UnitBuilder.buildSeedCell(decodedDna, cellBody.position.x, cellBody.position.y);
 
+			let angle = getAngleOfDirection(cell.direction);
+			
 			Body.setVelocity(body, {
-		      x: Math.cos(unit.body.angle + cell.angle),
-		      y: Math.sin(unit.body.angle + cell.angle)         
+		      x: Math.cos(unit.body.angle + angle),
+		      y: Math.sin(unit.body.angle + angle)         
 		    });
-
-			/*
-			Body.setPosition(body, {
-		      x: cell.body.position.x,
-		      y: cell.body.position.y       
-		    });
-		    */
 
 			//console.log("The unit body", body);
 			let newUnit = new Unit(body, newId);
-			newUnit.spawn(decodedDna, [], unit, timestamp);
+			newUnit.spawn(speciesId, [], unit, bornAt);
 			universe.add(newUnit);
 		    return;
 		}
@@ -325,9 +319,10 @@ function runAction(action, universe, dispatch) {
 
 
 		case "ADD_FOOD": {
-			const body = UnitBuilder.buildFood(action.x, action.y);
-			const food = new Food(body, action.id, {
-				amount: action.amount
+			const { amount, id, x, y } = action;
+			const body = UnitBuilder.buildFood(x, y, amount);
+			const food = new Food(body, id, {
+				amount
 			});
 			universe.add(food);
 			return;

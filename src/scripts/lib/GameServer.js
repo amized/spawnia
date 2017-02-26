@@ -19,7 +19,7 @@ export default class GameServer extends Game {
 		this.simulation.onAfterUpdate = (currStep) => {
 			if (currStep % GAME_STEP_INTERVAL === 0) {
 				let state = this.universe.getState();
-				Gameloop.onStep(state, this.simulation.dispatch);
+				Gameloop.onStep(currStep, state, this.simulation.dispatch);
 			}
 			if (currStep % ACTION_BROADCAST_INTERVAL === 0) {
 				this.actionBroadcaster.onInterval();

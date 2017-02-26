@@ -11,18 +11,22 @@ import {
 
 import CellTypes from "./CellTypes"
 import UnitBuilder from "./UnitBuilder"
+import DNA from "./DNA"
+import speciesManager from "./speciesManager";
+
+import { Query, Body } from "matter-js"
+import { msToSteps } from "./Utils/utils";
 
 
-import { Query } from "matter-js"
+const MATURATION_STEPS = msToSteps(MATURATION_TIME);
 
 const Gameloop = {
 
 	// Do not mutate state, for looking only
 	// Make changes using dispatch()
-	onStep: (state, dispatch) => {
+	onStep: (step, state, dispatch) => {
 
 		const units = state.mapObjects.filter(obj => obj.type === MAP_OBJ_UNIT);
-		const now = Date.now();
 
 		dispatch({
 			type: "UPDATE_UNITS_ENERGY"
@@ -32,24 +36,28 @@ const Gameloop = {
 			type: "GROW_ALL_FOOD"
 		});
 
-
 		units.forEach((unit, index) => {
 			if (unit) {
 
 				// Maturing
-				if (unit.lifeState === LIFESTATE_CHILD && (now - unit.bornAt) > MATURATION_TIME) {
+				if (unit.lifeState === LIFESTATE_CHILD && (step - unit.bornAt) > MATURATION_STEPS) {
 
-					let age = now - unit.bornAt;
+					let age = step - unit.bornAt;
 
 					let currBody = unit.body;
+					// This is too expensive
+					/*
 			    	let newBody = UnitBuilder.buildBody(
-			    		unit.DNA, 
+			    		DNA.decodeDna(unit.encodedDna), 
 			    		currBody.position.x, 
 			    		currBody.position.y
 			    	);
+			    	*/
 
+			    	let sampleBody = speciesManager.getSampleBody(unit.speciesId);
+			    	Body.setPosition(sampleBody, { x: currBody.position.x, y: currBody.position.y});
 			    	// Check collision
-			    	var bounds  = newBody.bounds;
+			    	var bounds  = sampleBody.bounds;
 					var intruding = Query.region(state.world.bodies, bounds);
 					intruding = intruding.filter((body)=>{
 						let [type,id] = body.label.split(":");
@@ -57,7 +65,7 @@ const Gameloop = {
 					});
 
 					if (intruding.length > 1) {
-						if (age > MATURATION_TIME + 5000) {
+						if (age > MATURATION_STEPS + msToSteps(5000)) {
 							dispatch({
 						    	type: "KILL_UNIT",
 						    	unitId: unit.id
@@ -77,8 +85,8 @@ const Gameloop = {
 				unit.cells.forEach((cell, index) => {
 					var cellType = CellTypes[cell.type];
 					var cellBody = unit.body.parts[index+1];
-					if (cellType) {
-						cellType.onStep(cell, cellBody, unit, state, dispatch);
+					if (cellType && cellType.onStep) {
+						cellType.onStep(step, cell, cellBody, unit, state, dispatch);
 					}
 				});
 				// Check for any dead

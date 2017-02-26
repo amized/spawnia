@@ -13,33 +13,43 @@ import {
   UNIT_START_ENERGY_PER_CELL,
   FOOD_RADIUS,
   REPRODUCTION_TIME,
+  REPRODUCTION_COST_THRESHOLD
 } from "../settings"
 
-import { MAP_OBJ_FOOD } from "../constants";
+import { MAP_OBJ_FOOD, ALLOWED_CELLTYPE_ANY } from "../constants";
+import { msToSteps } from "./Utils/utils";
+import speciesManager from "./speciesManager";
 
 const CellTypes = {}
-
-
-// Bone
-CellTypes.B = {
-  name: "Bone",
-  id: "B",
-  bodyColor: "#FFF",
-  onStep: function (cell, unit, universe) {
-    return;
-  }
-}
-
 
 
 CellTypes.S = {
   name: "Seed",
   id: "S",
   bodyColor: "#333",
-  onStep: function (cell, unit, universe) {
-    return;
-  }
+  connections: [
+    true,
+    true,
+    true,
+    true
+  ],
+  allowedChildCellTypes: ALLOWED_CELLTYPE_ANY
 }
+
+
+// X-joint
+CellTypes.X = {
+  name: "X-joint",
+  id: "X",
+  bodyColor: "#CCCCCC",
+  connections: [
+    true,
+    true,
+    true
+  ],
+  allowedChildCellTypes: ALLOWED_CELLTYPE_ANY
+}
+
 
 
 // Grounding cell
@@ -49,9 +59,6 @@ CellTypes.G = {
   bodyColor: "#95969e",
   onCreate: function(cell, unit) {
     unit.body.frictionAir = Math.min(unit.body.frictionAir + 0.1, 1);
-  },
-  onStep: function (cell, unit, universe) {
-    return;
   }
 }
 
@@ -61,7 +68,7 @@ CellTypes.E = {
   name: "Eat",
   id: "E",
   bodyColor: "#b2d572",
-  onStep: function (cell, cellBody, unit, state, dispatch) {
+  onStep: function (step, cell, cellBody, unit, state, dispatch) {
 
     return;
 
@@ -99,51 +106,56 @@ CellTypes.R = {
   name: "Reproduce",
   id: "R",
   bodyColor: "#cb8dbd",
-  onStep: function (cell, cellBody, unit, state, dispatch) {
-
-    if (cell.isReproducing)
-      return;
+  onStep: function (step, cell, cellBody, unit, state, dispatch) {
     /*
-    if (Object.keys(universe.units).length > 100) {
+    if (cell.isReproducing === true) {
       return;
     }
-    */
+  */
+    const reproductionTime = unit.species.reproductionTime;
+    const reproductionSteps = msToSteps(reproductionTime);
+    const cellIndex = unit.cells.indexOf(cell);
+    const startedReproductionAt = cell.startedReproductionAt;
     
-    var energyCost = UNIT_START_ENERGY_PER_CELL * unit.cells.length;
-    // You can't kill yourself to reproduce
-    if (unit.energy <= (energyCost * 2)) {
-      return false;
+    if (!startedReproductionAt) {
+      const energyCost = UNIT_START_ENERGY_PER_CELL * unit.cells.length;
+
+      // You can't kill yourself to reproduce
+      if (unit.energy <= (energyCost * REPRODUCTION_COST_THRESHOLD)) {
+        return false;
+      }
+
+      dispatch({
+        type: "START_REPRODUCE",
+        unitId: unit.id,
+        cellIndex: cellIndex,
+        energyCost: energyCost
+      });
+
+      return;
     }
 
-    let cellIndex = unit.cells.indexOf(cell);
-    let dna = DNA.copyDNA(unit.DNA);
 
-    dispatch({
-      type: "START_REPRODUCE",
-      unitId: unit.id,
-      cellIndex: cellIndex,
-      energyCost: energyCost,
-    });
+    if (startedReproductionAt < step - reproductionSteps) {
+      let dna = DNA.copyDNA(speciesManager.getDecodedDna(unit.speciesId));
+      dispatch({
+        type: "REPRODUCE_UNIT",
+        unitId: unit.id,
+        cellIndex: cellIndex,
+        newId: uuid.v1(),
+        dna: DNA.encodeDna(dna),
+        bornAt: step
+      });
 
-    dispatch({
-      type: "REPRODUCE_UNIT",
-      unitId: unit.id,
-      cellIndex: cellIndex,
-      newId: uuid.v1(),
-      dna: DNA.encodeDna(dna),
-      timestamp: Date.now() + REPRODUCTION_TIME
-    }, REPRODUCTION_TIME);
-
+      return;
+    }
   }
 }
 
 CellTypes.F = {
   name: "Fat",
   id: "F",
-  bodyColor: "#e4d088",
-  onStep: function (cell, unit, universe, dispatch) {
-    return;
-  }
+  bodyColor: "#e4d088"
 }
 
 

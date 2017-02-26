@@ -1,13 +1,13 @@
 var assert = require('assert');
 
-import Game from '../src/scripts/lib/Game.js'
+import GameServer from '../src/scripts/lib/GameServer.js'
 import Simulation from '../src/scripts/lib/Simulation'
 import { ENGINE_STEP_TIMEOUT } from '../src/scripts/settings.js' 
 import ActionBroadcaster from '../src/scripts/lib/ActionBroadcaster'
 import sinon from "sinon";
 
 
-const game = new Game();
+const game = new GameServer();
 const { universe, engine, channel } = game;
 const channelSpy = sinon.spy(channel, "broadcastUpdate");
 

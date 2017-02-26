@@ -47,14 +47,18 @@ function encodeCell(cell) {
     let token = CellTypes[cell.type].id;
     let encoded = token;
     if (cell.children) {
-        encoded = encoded + "(";
-        encoded = encoded + cell.children.map((cell, index) => {
+        let children = cell.children.map((cell, index) => {
             return encodeCell(cell);
-        }).join();
-        encoded = encoded + ")";
+        });
+        if (children.filter(str => str !== "").length === 0) {
+            return encoded;
+        }
+
+        encoded = encoded + "(" + children.join() + ")";
     }
     return encoded;
 }
+
 
 class DNA {
 
@@ -65,39 +69,43 @@ class DNA {
 
     // Expects string
     static decodeDna(encodedDna) {
-        let cell = {
-            parent: null
-        };
+
+        let cell;
+        let parent = null;
         let seedCell = cell;
+        let childIndex = 0;
+
         for (let i = 0; i < encodedDna.length; i++) {
             let c = encodedDna[i];
             
+            // Open braket - move down tree
             if (c === '(') {
-                let parent = cell;
+                parent = cell;
+                // dummy cell so we can get back to the parent
                 cell = {
                     parent: parent
                 }
-                parent.children = [cell];
+                parent.children = [null,null,null];
+                childIndex = 0;
+            }
+            else if (c === ')') {
+                cell = cell.parent;
+                parent = cell ? cell.parent : null;
+                childIndex = cell.index;
             }
             else if (c.match(/^[A-Z]*$/)) {
                 if (!CellTypes[c]) {
                     throw("ERROR with decoding cell: unknown cell type " + c);
                 }
-                cell.type = c;
+                cell = {
+                    parent: parent,
+                    type: c,
+                    index: childIndex
+                }
+                if (parent) { parent.children[childIndex] = cell; }
             }
             else if (c === ',') {
-                let parent = cell.parent;
-                cell = {
-                    parent: parent
-                };
-                parent.children.push(cell);
-            }
-            else if (c === ')') {
-                let parent = cell.parent;
-                parent.children = parent.children.map((cell)=>{
-                    return (cell.type) ? cell : null;
-                })
-                cell = cell.parent;
+                childIndex++;
             }
             else {
                 throw("ERROR with decoding cell: unknown token " + c);
@@ -105,14 +113,11 @@ class DNA {
             }
         }
 
-        if (cell !== seedCell) {
-            throw("ERROR with decoding cell: incorrect format");
-            return false;
-        }
-
-        return {
+        let cellTree = {
             seedCell: cell
         }
+
+        return cellTree;
     }
 
     static copyCell(cell) {
@@ -236,6 +241,11 @@ class DNA {
 
     // Returns new DNA copy
     static copyDNA(DNA) {
+
+        return {
+            seedCell: DNA.seedCell
+        }
+
         let newDNA = {};
         newDNA.seedCell = {};
         newDNA.seedCell.type = DNA.seedCell.type;

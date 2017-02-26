@@ -1,4 +1,5 @@
 import React from "react"
+import { PropTypes } from "react"
 import ReactDOM from "react-dom"
 import moment from "moment"
 import DnaBlueprint from "./DnaBlueprint"
@@ -12,6 +13,8 @@ import {
 import {
 	LIFESTATE_DEAD
 } from "../constants"
+
+import { stepsToMs, formatTime } from "../lib/Utils/utils";
 
 
 function getTimeRemaining(endtime) {
@@ -30,33 +33,51 @@ function getTimeRemaining(endtime) {
 
 
 export default class UnitPanel extends React.Component {
+
+	static propTypes = {
+		unit: PropTypes.object,
+        universe: PropTypes.object,
+        unselectUnit: PropTypes.func,
+        selectSpecies: PropTypes.func
+	}
+
+
+	constructor(props) {
+		super(props);
+	}
+
+	componentDidMount() {
+		this.refreshTimer = setInterval(()=>{
+			this.forceUpdate();
+		}, 1000);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.refreshTimer);
+	}
+
 	selectSpecies = (e) => {
-		let species = this.props.universe.getSpeciesOfUnit(this.props.unit);
-		this.props.selectSpecies(species);
+		// TODO PUT THS BACK IN
+		//let species = this.props.universe.getSpeciesOfUnit(this.props.unit);
+		//this.props.selectSpecies(species);
 	}
 
 	render() {
-		let name, age, species;
-		let unit = this.props.unit;
-		if (unit) {
-			let t = Math.floor(moment().diff(unit.bornAt));
-			let seconds = Math.floor((t / 1000) % 60);
-			let minutes = Math.floor((t / 1000 / 60) % 60);
-			let hours = Math.floor((t / (1000 * 60 * 60)) % 24);
-			seconds = ('0' + seconds).slice(-2);
-			hours = ('0' + hours).slice(-2);
-			minutes = ('0' + minutes).slice(-2);
-			age = minutes + ":" + seconds;
+		const {unit} = this.props;
+		if (!unit) {
+			return <div></div>;
+		}
+		const ageMs = stepsToMs(unit.getAge(this.props.getCurrStep()));
+		const age = formatTime(ageMs);
+		const name = "Sme name man";
+		//const species = this.props.universe.getSpeciesOfUnit(unit);
 
-			species = this.props.universe.getSpeciesOfUnit(unit);
-
-			name = (species && species.name) ? "" + species.name + unit.speciesIndex : "Unit " + unit.id;
+		//name = (species && species.name) ? "" + species.name + unit.speciesIndex : "Unit " + unit.id;
 
 			//console.log("The unit we clicked on's dna:", unit.DNA);
-			
-		}
-		
+
 		return (
+			<div className="unit-panel"> 
 			<div className="unit-panel"> 
 				<div className="unit-panel__heading">{ name ? name : "Selected Unit" }</div>  
 				<div className="unit-panel__inner">
@@ -77,7 +98,7 @@ export default class UnitPanel extends React.Component {
 							</div>
 						:
 							<div className="unit-panel__unit" key={1}>
-								<DnaBlueprint dna={unit.DNA} width={160} height={160} />   
+								<DnaBlueprint dna={unit.getEncodedDna()} width={160} height={160} />   
 								<div className="unit-panel__stats stats-container"> 
 					                <div className="stats-item">Age: <span>{ age }</span></div>
 					                <div className="stats-item">Generation <span>{ unit.generation }</span></div>
@@ -96,6 +117,7 @@ export default class UnitPanel extends React.Component {
 					</div>
 
                 </div>
+            </div>
             </div>
        	);
 	}

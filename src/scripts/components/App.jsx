@@ -7,34 +7,98 @@ import { Composite, Mouse, Bounds, Events } from "matter-js"
 import World from './World.jsx';
 import MapEvents from "./MapEvents.jsx";
 import ControlPanel from './ControlPanel.jsx';
-import MapUpdater from './MapUpdater.jsx';
-
-
+import DNA from '../lib/DNA';
+import uuid from 'uuid'
+import { PLAYSTATE_PLAYING, PLAYSTATE_PAUSED } from "../constants";
+import { getCanvasDimensions } from "../lib/Utils/utils";
 
 class App extends React.Component {
 
 
+    static defaultProps = {
+        mapSize: {
+            width: 4000,
+            height: 4000
+        }
+    }
+
+
     constructor(props) {
         super(props);
+
+        const canvasSize = getCanvasDimensions();
+        console.log("canvas size1!!", canvasSize);
         this.state = {
             selectedUnit: null,
             selectedSpecies: null,
             newSpecies: null,
-            hoveredUnit: null
+            hoveredUnit: null,
+            playState: PLAYSTATE_PLAYING,
+            viewportBoundingBox: {
+                min: { 
+                    x: 0,
+                    y: 0
+                }, 
+                max: { 
+                    x: canvasSize.width,
+                    y: canvasSize.height
+                }
+            }
         }
     }
 
     componentDidMount() {
-
-
+        window.onresize = this.onWindowResize;
     }
 
     componentDidUpdate(prevProps, prevState) {
+        if (prevState.playState !== this.state.playState) {
 
+            if (this.state.playState === PLAYSTATE_PLAYING) {
+                this.props.simulation.resume();
+            }
+            else {
+                this.props.simulation.pause();
+            }
+        }
 
     }
 
+
+    onWindowResize = () => {
+        const canvasSize = getCanvasDimensions();
+
+        let currBB = this.state.viewportBoundingBox;
+
+        this.setState({
+            viewportBoundingBox: {
+                min: { 
+                    x: currBB.min.x,
+                    y: currBB.min.y
+                }, 
+                max: { 
+                    x: currBB.min.x + canvasSize.width,
+                    y: currBB.min.y + canvasSize.height
+                }
+            }
+        })
+    }
+
+    updateViewportBB = (newBB) => {
+        this.setState({
+            viewportBoundingBox: newBB
+        });
+    }
+
+
+    togglePlayState() {
+        this.setState({
+            playState: this.state.playState === PLAYSTATE_PAUSED ? PLAYSTATE_PLAYING : PLAYSTATE_PAUSED
+        })
+    }
+
     onWorldMove(e) {
+        console.log("world move");
     }
 
     onUnitClick (unitId) {
@@ -47,7 +111,9 @@ class App extends React.Component {
             });
             return;
         }
-        let unit = this.props.universe.getUnit(unitId);
+        let unit = this.props.universe.getMapObject(unitId);
+        console.log("UNIT ID", unitId);
+        console.log("UNIT", unit);
         this.setState({
             selectedUnit: unit
         })
@@ -55,25 +121,28 @@ class App extends React.Component {
 
     onMapClick(e) {
 
-        console.log(this.state.newSpecies);
-
         if (this.state.newSpecies) {
 
             let dna = {
                 seedCell: this.state.newSpecies[0]
             }
 
-            this.props.dispatch({
+            let encodedDna = DNA.encodeDna(dna);
+
+            this.props.simulDispatch({
                 type: "ADD_UNIT",
-                DNA: dna,
+                dna: encodedDna,
                 x: e.mouse.position.x,
-                y: e.mouse.position.y
+                y: e.mouse.position.y,
+                id: uuid.v1()
             });
             
             this.setState({
                 newSpecies: null
             })
+            
         }
+        
 
 
         if (this.state.selectedUnit || this.state.selectedSpecies) {
@@ -85,7 +154,7 @@ class App extends React.Component {
     }
 
     onUnitHover (unitId) {
-        let unit = this.props.universe.getUnit(unitId);
+        let unit = this.props.universe.getMapObject(unitId);
         this.setState({
             hoveredUnit: unit
         })
@@ -119,8 +188,17 @@ class App extends React.Component {
 
     render () {
 
-        let { dispatch } = this.props;
-        let { selectedUnit, selectedSpecies, newSpecies, hoveredUnit } = this.state;
+        let { dispatch, getCurrStep, universe } = this.props;
+        let mapSize = universe.getMapSize();
+        let { 
+            selectedUnit, 
+            selectedSpecies, 
+            newSpecies, 
+            hoveredUnit, 
+            playState, 
+            viewportBoundingBox 
+        } = this.state;
+        
         let style = {};
 
         if (hoveredUnit) {
@@ -132,21 +210,13 @@ class App extends React.Component {
                 <World 
                     universe={this.props.universe}
                     engine={this.props.engine}
-                    onMouseMove={this.onWorldMove.bind(this)}
-                    onMouseUp={()=>false}
                     syncStatus={this.props.syncStatus}
-                    {...this.state}
-                />
-                <MapEvents 
-                    engine={this.props.engine}
                     onUnitClick={this.onUnitClick.bind(this)}
                     onUnitHover={this.onUnitHover.bind(this)}
-                    onMapClick={this.onMapClick.bind(this)}
-                />
-                <MapUpdater
-                    {...this.props}
+                    onMapClick={this.onMapClick.bind(this)}  
+                    mapSize={mapSize}                  
                     {...this.state}
-                />                
+                />              
                 <ControlPanel {...this.props}
                     dispatch={dispatch} 
                     selectedUnit={selectedUnit}
@@ -155,6 +225,12 @@ class App extends React.Component {
                     saveNewSpecies={this.saveNewSpecies.bind(this)}
                     unselectUnit={this.unselectUnit.bind(this)} 
                     selectSpecies={this.selectSpecies.bind(this)}
+                    togglePlayState={this.togglePlayState.bind(this)}
+                    getCurrStep={getCurrStep}
+                    viewportBoundingBox={viewportBoundingBox}
+                    mapSize={mapSize}
+                    updateViewportBB={this.updateViewportBB}
+                    {...this.state}
                 />
             </div>
     		

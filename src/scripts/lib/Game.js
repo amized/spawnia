@@ -23,7 +23,7 @@ export default class Game {
 		this.universe = new Universe(this.engine.world);
 		this.simulation = new Simulation(this.engine, this.universe);
 
-		if (makeWorld) { 
+		if (makeWorld && typeof makeWorld === "function") { 
 			makeWorld(this.simulation.dispatch);
 		}
 	}
@@ -48,6 +48,10 @@ export default class Game {
 	getUniverse () {
 		return this.universe;
 	}
+	getSimulation () {
+		return this.getSimulation;
+	}
+
 }
 
 

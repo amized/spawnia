@@ -4,7 +4,7 @@ import runAction from "./Actions"
 import _ from "underscore";
 import $ from "jquery";
 import { ENGINE_STEP_TIMEOUT, GAME_STEP_TIMEOUT } from "../settings"
-
+import { msToSteps } from "./Utils/utils";
 
 const GAME_STEP_INTERVAL = GAME_STEP_TIMEOUT / ENGINE_STEP_TIMEOUT;
 
@@ -15,7 +15,8 @@ export default class Simulation {
 
 		const defaults = {
 			runGameLoop: true,
-			onAfterUpdate: null
+			onAfterUpdate: null,
+			cachePastEventsTo: 5000
 		}
 
 		Object.assign(this, defaults, options);
@@ -43,14 +44,19 @@ export default class Simulation {
 		// and will only check ones dispatched in the current step in the next step
 		while (evt && evt.timeout < this.curr) {
 			if (evt.timeout === this.curr - 1) {
-				console.log("running: " + evt.timeout + " " + evt.action.type);
-				runAction(evt.action, this.universe, this.dispatch.bind(this));
+				//console.log("running: " + evt.timeout + " " + evt.action.type);
+				runAction(evt.action, this.universe, this.curr);
 			}
 			else {
 				console.log("Warning we are trying to run an event of the past: ", this.curr, evt.timeout);
 			}
 			let removed = this.events.shift();
 			this.pastEvents.push(removed);
+
+			if (this.pastEvents.length > 200) {
+				this.pastEvents = [];
+			}
+
 			evt = this.events[0];
 		}
 
@@ -69,7 +75,7 @@ export default class Simulation {
 		return this.engine;
 	}
 
-	getCurrStep() {
+	getCurrStep = () => {
 		return this.curr;
 	}
 
@@ -108,6 +114,7 @@ export default class Simulation {
 
 	start () {
 		console.log("Starting simulation");
+		clearInterval(this.timer);
 		this.running = true;
         this.timer = setInterval(() => {
         	this._step();
@@ -139,9 +146,10 @@ export default class Simulation {
 	 */
 	dispatch (action, delay = 0, absTimeout = null) {
 		let evt = {
-			timeout: (absTimeout) ? absTimeout : this.curr + (Math.floor(delay/ENGINE_STEP_TIMEOUT)),
+			timeout: (absTimeout) ? absTimeout : this.curr + msToSteps(delay),
 			action: action
 		};
+
 		let sortedIndex = _.sortedIndex(this.events, evt, 'timeout');
 		this.events.splice(sortedIndex, 0, evt);
 	}

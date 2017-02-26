@@ -5,13 +5,22 @@ import UnitBuilder from "../lib/UnitBuilder"
 
 export default class DnaBlueprint extends React.Component {
 	
+
+	static propTypes = {
+		dna: React.PropTypes.string,
+		width: React.PropTypes.number,
+		height: React.PropTypes.number
+	}
+
+
 	shouldComponentUpdate() {
 		return false;
 	}
 
 
 	componentDidMount() {
-		let {width, height} = this.props;
+		let {width, height, dna} = this.props;
+
 		this.unitRender = Render.create({
 			element: this.refs.canvas,
 			options: {
@@ -22,7 +31,7 @@ export default class DnaBlueprint extends React.Component {
 
 		})
 		// Draw the unit's bodies
-		let body = UnitBuilder.buildBody(this.props.dna, 0, 0);
+		let body = UnitBuilder.buildBody(dna, 0, 0);
 		Body.setPosition(body, {
 			x: 0,
 			y: 0
