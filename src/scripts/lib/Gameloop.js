@@ -45,14 +45,6 @@ const Gameloop = {
 					let age = step - unit.bornAt;
 
 					let currBody = unit.body;
-					// This is too expensive
-					/*
-			    	let newBody = UnitBuilder.buildBody(
-			    		DNA.decodeDna(unit.encodedDna), 
-			    		currBody.position.x, 
-			    		currBody.position.y
-			    	);
-			    	*/
 
 			    	let sampleBody = speciesManager.getSampleBody(unit.speciesId);
 			    	Body.setPosition(sampleBody, { x: currBody.position.x, y: currBody.position.y});
@@ -98,17 +90,6 @@ const Gameloop = {
 				}
 			}
 		});
-
-		// Update the food
-		/*
-		var foods = universe.foods;
-
-		foods.forEach((food, index)=>{
-			food.grow(FOOD_GROWTH_RATE);
-		});
-		return;
-		*/
-
 	}
 
 };

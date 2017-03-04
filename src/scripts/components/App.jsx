@@ -16,10 +16,6 @@ class App extends React.Component {
 
 
     static defaultProps = {
-        mapSize: {
-            width: 4000,
-            height: 4000
-        }
     }
 
 
@@ -34,6 +30,7 @@ class App extends React.Component {
             newSpecies: null,
             hoveredUnit: null,
             playState: PLAYSTATE_PLAYING,
+            zoom: 1,
             viewportBoundingBox: {
                 min: { 
                     x: 0,
@@ -84,9 +81,64 @@ class App extends React.Component {
         })
     }
 
-    updateViewportBB = (newBB) => {
+    onZoom = (factor, focalPoint) => {
+        const bb = this.state.viewportBoundingBox;
+        let zoom = this.state.zoom * factor;
+
+        console.log("The focal point", focalPoint);
+
+        const canvasSize = getCanvasDimensions();
+        if (zoom > 2) {
+            zoom = 2;
+        }
+
+        else if ( zoom < 0.5) {
+            zoom = 0.5;
+        }
+
+        focalPoint = {x: (bb.min.x + bb.max.x) / 2, y:(bb.min.y + bb.max.y) / 2};
+
+
+        const bbWidth = canvasSize.width * zoom;
+        const bbHeight = canvasSize.height * zoom;
+
+        bb.min.x = focalPoint.x - (bbWidth/2);
+        bb.min.y = focalPoint.y - (bbHeight/2);
+
+        bb.max.x = focalPoint.x + (bbWidth/2);
+        bb.max.y = focalPoint.y + (bbHeight/2);
+
+        this.updateViewportBB(bb, zoom);
+    }
+
+    updateViewportBB = (bb, zoom=this.state.zoom) => {
+
+        const mapSize = this.props.universe.getMapSize();
+
+        if (bb.min.x < 0) {
+            bb.max.x -= bb.min.x;
+            bb.min.x = 0;
+        }
+
+        if (bb.min.y < 0) {
+            bb.max.y -= bb.min.y;
+            bb.min.y = 0;
+        }
+
+        if (bb.max.x > mapSize.width) {
+            bb.min.x -= (bb.max.x - mapSize.width);
+            bb.max.x = mapSize.width;
+        }
+
+        if (bb.max.y > mapSize.height) {
+            bb.min.y -= (bb.max.y - mapSize.height);
+            bb.max.y = mapSize.height;
+        }  
+
+
         this.setState({
-            viewportBoundingBox: newBB
+            viewportBoundingBox: bb,
+            zoom: zoom
         });
     }
 
@@ -119,7 +171,7 @@ class App extends React.Component {
         })
     }
 
-    onMapClick(e) {
+    onMapClick(pos) {
 
         if (this.state.newSpecies) {
 
@@ -132,8 +184,8 @@ class App extends React.Component {
             this.props.simulDispatch({
                 type: "ADD_UNIT",
                 dna: encodedDna,
-                x: e.mouse.position.x,
-                y: e.mouse.position.y,
+                x: pos.x,
+                y: pos.y,
                 id: uuid.v1()
             });
             
@@ -214,7 +266,9 @@ class App extends React.Component {
                     onUnitClick={this.onUnitClick.bind(this)}
                     onUnitHover={this.onUnitHover.bind(this)}
                     onMapClick={this.onMapClick.bind(this)}  
-                    mapSize={mapSize}                  
+                    mapSize={mapSize}  
+                    updateViewportBB={this.updateViewportBB}  
+                    onZoom={this.onZoom}              
                     {...this.state}
                 />              
                 <ControlPanel {...this.props}

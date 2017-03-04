@@ -38,6 +38,30 @@ export default function makeWorld(dispatch) {
     }, MATURATION_TIME);
 	*/
 
+
+
+
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 2000,
+		x: 1500,
+		y: 600,
+		id: uuid.v1()
+	});
+
+
+	dispatch({
+		type: "ADD_FOOD",
+		amount: 5000,
+		x: 2500,
+		y: 300,
+		id: uuid.v1()
+	});
+
+
+
+
 	dispatch({
 		type: "ADD_FOOD",
 		amount: 100,

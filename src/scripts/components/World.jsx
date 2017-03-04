@@ -14,11 +14,15 @@ import { getCanvasDimensions } from "../lib/Utils/utils";
 export default class SpawniaWorld extends React.Component {
 
     static propTypes = {
-        viewportBoundingBox: PropTypes.object
+        viewportBoundingBox: PropTypes.object,
+        updateViewportBB: PropTypes.func,
+        mapSize: PropTypes.func,
+        onZoom: PropTypes.func
     }
 
     constructor(props) {
     	super(props);
+        this.currMousePos = { x:0, y:0};
     }
 
     shouldComponentUpdate() {
@@ -66,20 +70,9 @@ export default class SpawniaWorld extends React.Component {
             }
         });
 
-
         let canvas = this.canvas;
-
-        this.mouse = Mouse.create(canvas);
-        this.mouseConstraint = MouseConstraint.create(engine, {
-            mouse: this.mouse
-        });
-
-        Events.on(this.mouseConstraint, "mousemove", this.onMouseMove);
-        Events.on(this.mouseConstraint, "mouseup", this.onMouseUp);
-        Events.on(this.mouseConstraint, "mousedown", this.onMouseDown);
         Events.on(engine, 'afterUpdate', this.onTick);
-
-
+        this.canvas.addEventListener("wheel", this.onMouseWheel);
         Render.run(this.mapRender);
 
         if (this.props.onRenderCreate) {
@@ -90,7 +83,6 @@ export default class SpawniaWorld extends React.Component {
 
     componentDidUpdate(prevProps) {
         let { selectedSpecies, universe, selectedUnit, engine, viewportBoundingBox } = this.props;
-
 
         if (selectedSpecies !== prevProps.selectedSpecies) {
             Render.setUiState(this.mapRender, {
@@ -112,9 +104,20 @@ export default class SpawniaWorld extends React.Component {
 
     }
 
+    onMouseWheel = (e) => {
+        console.log("On mouse hweeel!!", e.wheelDelta);
+        const focalPoint = this.getMapPositionFromMouseEvent(e);
+        if (e.wheelDelta > 0) {
+            this.props.onZoom(1.2, focalPoint);
+        }
+        else {
+            this.props.onZoom(1/1.2, focalPoint);
+        }
+    }
+
 
     onTick = (e) => {
-        let bodies = this.getBodiesAtMouse(this.mouse);
+        let bodies = this.getBodiesAtMouse(this.currMousePos);
         let unitHover = null;
         for (let i = 0; i < bodies.length; i++) {
             let split = bodies[i].label.split(":");
@@ -131,13 +134,24 @@ export default class SpawniaWorld extends React.Component {
         }        
     }
 
+    getMapPositionFromMouseEvent = (e) => {
+        const bb = this.props.viewportBoundingBox;
+        return {
+            x: e.pageX + bb.min.x,
+            y: e.pageY + bb.min.y
+        }
+    }
+
     onMouseUp = (e) => {
+
+        let pos = this.getMapPositionFromMouseEvent(e);
+
         if (this.mapMouseDown !== null) {
-            this.props.onMapClick(e);
+            this.props.onMapClick(pos);
             this.mapMouseDown = null;
         }
         if (this.unitMouseDown !== null) {
-            let bodies = this.getBodiesAtMouse(e.mouse);
+            let bodies = this.getBodiesAtMouse(pos);
             for (let i = 0; i < bodies.length; i++) {
                 let split = bodies[i].label.split(":");
                 let id = split[1];
@@ -151,8 +165,11 @@ export default class SpawniaWorld extends React.Component {
     }
 
     onMouseDown = (e) => {
-        console.log("mouse down");
-        let bodies = this.getBodiesAtMouse(e.mouse);
+
+        let pos = this.getMapPositionFromMouseEvent(e);
+        let bodies = this.getBodiesAtMouse(pos);
+
+        this.currMousePos = pos;
 
         for (let i = 0; i < bodies.length; i++) {
             let split = bodies[i].label.split(":");
@@ -163,27 +180,49 @@ export default class SpawniaWorld extends React.Component {
         }
 
         this.mapMouseDown = 1;
+        this.mouseDownPos = {x:e.pageX, y:e.pageY};
+        window.addEventListener("mousemove", this.onMapDrag);
+        window.addEventListener("mouseup", this.onStopMouseDrag);
+    }
 
+    onStopMouseDrag = (e) => {
+        window.removeEventListener("mousemove", this.onMapDrag);
+        window.removeEventListener("mouseup", this.onStopMouseDrag);
+    }
 
+    onMapDrag = (e) => {
+        const { mapSize } = this.props;
+        let delta = { x: this.mouseDownPos.x - e.pageX, y: this.mouseDownPos.y - e.pageY};
+        let bb =  Object.assign({}, this.props.viewportBoundingBox);
+        Bounds.translate(bb, delta);
+        this.props.updateViewportBB(bb);
+        this.mouseDownPos = {x:e.pageX, y:e.pageY};
+        e.preventDefault();        
     }
 
     onMouseMove = (e) => {
+        this.currMousePos = this.getMapPositionFromMouseEvent(e);
     }
 
-    getBodiesAtMouse(mouse) {
+    getBodiesAtMouse(pos) {
         let engine = this.props.engine;
         let allBodies = Composite.allBodies(engine.world);
         return allBodies.filter((body)=>{
-            return Bounds.contains(body.bounds, mouse.position) &&
-                   Vertices.contains(body.vertices, mouse.position);
+            return Bounds.contains(body.bounds, pos) &&
+                   Vertices.contains(body.vertices, pos);
         });
     }
 
 
     render() {
         const bb = this.props.viewportBoundingBox;
+        const canvasSize = getCanvasDimensions();
+        const canvasWidth = canvasSize.width;
+        const canvasHeight = canvasSize.height;
+        /*
         const canvasWidth = Math.floor(bb.max.x - bb.min.x);
         const canvasHeight = Math.floor(bb.max.y - bb.min.y);
+        */
         const bg1style = {
             width: canvasWidth,
             height: canvasHeight,
@@ -194,7 +233,14 @@ export default class SpawniaWorld extends React.Component {
                 <div className="map" ref="container" key={1}>
                     <div className="map-bg-1" style={bg1style}>
                     </div>
-                    <canvas width={canvasWidth} height={canvasHeight} ref={(el)=>{this.canvas=el;}} />
+                    <canvas 
+                        width={canvasWidth} 
+                        height={canvasHeight} 
+                        ref={(el)=>{this.canvas=el;}} 
+                        onMouseDown={this.onMouseDown}
+                        onMouseUp={this.onMouseUp}
+                        onMouseMove={this.onMouseMove}
+                    />
                 </div>
                 {
                     this.props.syncStatus === SYNC_STATUS_WAITING ?

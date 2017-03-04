@@ -46,11 +46,13 @@ function runAction(action, universe, currStep) {
 	            }
             }
 
-			var barrier = Bodies.rectangle(500, 300, 20, 200, props);
-			var barrier2 = Bodies.circle(200, 300, 20, props);
-			var barrier3 = Bodies.circle(100, 400, 30, props);
-			var barrier4 = Bodies.rectangle(200, 200, 20, 200, props);
+            let bodies = [];
 
+			bodies.push(Bodies.rectangle(500, 300, 20, 200, props));
+			bodies.push(Bodies.circle(200, 300, 20, props));
+			bodies.push(Bodies.circle(100, 400, 20, props));
+			bodies.push(Bodies.rectangle(200, 200, 20, 200, props));
+			bodies.push(Bodies.rectangle(500, 500, 300, 30));
 
 			var offset = 20;
 			var boundsWidth = 50;
@@ -70,32 +72,11 @@ function runAction(action, universe, currStep) {
 				}
             }
 
-			let bodies = [barrier, barrier2, barrier3, barrier4, 
-				// top
-				Bodies.rectangle(mapWidth/2, 0, mapWidth, boundsWidth, propsBarriers),
-				
-				// bottom
-				Bodies.rectangle(mapWidth/2, mapHeight, mapWidth, boundsWidth, propsBarriers),
+            bodies.push(Bodies.rectangle(mapWidth/2, 0, mapWidth, boundsWidth, propsBarriers));
+            bodies.push(Bodies.rectangle(mapWidth/2, mapHeight, mapWidth, boundsWidth, propsBarriers));
+            bodies.push(Bodies.rectangle(0, mapHeight/2, boundsWidth, mapHeight, propsBarriers));
+            bodies.push(Bodies.rectangle(mapWidth, mapHeight/2, boundsWidth, mapHeight, propsBarriers));
 
-				// left
-				Bodies.rectangle(0, mapHeight/2, boundsWidth, mapHeight, propsBarriers),
-				
-				// right
-				Bodies.rectangle(mapWidth, mapHeight/2, boundsWidth, mapHeight, propsBarriers)
-			];
-
-
-			/*
-	        World.add(universe.world, [
-	            Bodies.rectangle(mapWidth/2, -offset, mapWidth + 2 * offset, 50.5, { isStatic: true, render: render }),
-	            //Bodies.rectangle(mapWidth/2, mapHeight + offset, mapWidth + 2 * offset, 50.5, { isStatic: true, render: render }),
-	            //Bodies.rectangle(mapWidth + offset, mapHeight/2, 50.5, mapHeight + 2 * offset, { isStatic: true, render: render }),
-	            Bodies.rectangle(-offset, mapHeight/2, 50.5, mapHeight + 2 * offset, { isStatic: true, render: render })
-	        ]);
-
-	        World.add(universe.world, [barrier, barrier2, barrier3, barrier4]);
-			//World.add(universe.world, [ground, side, side2, top, barrier, barrier2, barrier3, barrier4]);
-			*/
 			bodies.forEach((body, index) => {
 				const m = new MapObject(body, index);
 				universe.add(m);
@@ -117,6 +98,7 @@ function runAction(action, universe, currStep) {
 				      return;
 				    }
 
+				    let eatIndex = 0;
 					const eatCells = unit.cells.filter(cell=>cell.type === "E");
 					eatCells.forEach((cell, index) => {
 					    // Check if theres any food in our vacinity
@@ -130,26 +112,32 @@ function runAction(action, universe, currStep) {
 					      eats.push({
 					      	foodId: foodId,
 					      	unit: unit,
-					      	amount: FOOD_EAT_RATE
+					      	amount: FOOD_EAT_RATE,
+					      	eatIndex: eatIndex++
 					      })
-					    }
-					})
+					  	}
+					});
 				}
 			});
 
+			// Sort the eats by eatIndex. This makes sure the eats are distributed fairly
+			// across all units who are eating.
+			eats = _.sortBy(eats, 'eatIndex');
+
 			// Run the eats
+			
 			eats.forEach(eat => {
 				const unit = eat.unit;
 				const food = universe.getMapObject(eat.foodId);
 
 				if (unit && food && food.amount > 0) {
 		          let amount = Math.min(food.amount, eat.amount);
+		          // Can only eat up to the amount of storage we have left...
 		          amount = Math.min(amount, unit.energyStorage - unit.energy);
 		          food.getConsumedBy(amount);
 		          unit.energy = unit.energy + amount;
 		        }
 			})
-
 
 			return;
 		}

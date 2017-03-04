@@ -82,8 +82,6 @@ export default class MiniMap extends Component {
 		}
 
 		this.props.updateViewportBB(newBB);
-
-		console.log("new dimesn", newMiddleX, newMiddleY);
 	}
 
 	render() {

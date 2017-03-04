@@ -9,8 +9,10 @@
 }
 
 .map {
+	user-select: none;
 	height: calc(100vh - #{$control-panel-height});
 	canvas {
+		user-select: none;
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -25,6 +27,6 @@
 	background: #000;
 	background-image: url("../img/Gritstone5.png");
 	background-repeat: repeat;
-	opacity: 0.2;
-	filter: blur(6px);
+	opacity: 0.3;
+	filter: blur(2px);
 }
