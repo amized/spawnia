@@ -9,6 +9,7 @@
 	bottom: 0;
 	left: 0;
 	height: $control-panel-height+2;
+	border-top: 3px solid #000;
 }
 
 .control-panel__top {
@@ -36,17 +37,26 @@
 
 }
 
+.control-panel__middle {
+	flex-grow: 1;
+	height: 100%;
+	background: #000;
+	position: relative;
+	overflow: hidden;	
+}
+
 
 
 .unit-panel,
 .species-viewer-panel {
-	background: #000;
+	background: transparent;
 	position: absolute;
-	top: 0px;
+	bottom: 0px;
 	left: 0px;
 	width: 100%;
-	height: 100%;
-
+	height: calc(100% - #{$species-panel-height});
+	display: flex;
+	justify-content: center;
 	&.panel__left-enter {
 
 	}
@@ -54,7 +64,7 @@
 	&.panel__left-enter,
 	&.panel__left-leave {
 		position: absolute;
-		top: 0;
+		bottom: 0;
 		left: 0;
 		opacity: 0;
 		@include transform(translateY(10px));
@@ -88,11 +98,11 @@
 
 .unit-panel__inner {
 	min-width: 400px;
+	padding: 12px;
 }
 
 .unit-panel__content {
 	@include display(flex);
-	margin: 20px;
 	display: block;
 	position: relative;
 }
@@ -102,6 +112,7 @@
 	top: 10px;
 	right: 10px;
 	cursor: pointer;
+    z-index: 1;	
 }
 
 .unit-panel__unit {
@@ -153,7 +164,8 @@
 		content: "";
 		background-image: url(../img/rip-tombstone.svg);
 		background-size: contain;
-		width: 90px;
+		background-position: center center;
+		width: 87px;
     	height: 111px;
     	margin-bottom: 10px;
 	}
@@ -193,23 +205,40 @@
 .species-viewer-panel__main {
 	@include display(flex);
 	position: relative;
-	padding: 20px;
+	padding: 0px;
 }
 
 
 /*------------- SPECIES PANEL -------------*/
 
+$species-item-width: 50px;
 
 .species-panel {
 	@include flex-grow(1);
-	//min-height: 100%;
-	//height: 100%;
+	height: $species-panel-height;
+	display: flex;
+	align-items: center;
+    background: #333;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
+.species-panel__name {
+	display: none;
 }
 
 
 
 .species-panel__heading {
 	@include type_h2;
+	padding: 0 20px;
+	text-align: left;
+	display: flex;
+	align-items: center;
+	max-width: 200px;
+	font-size: 20px;
+	color: #AAA;
+	margin-right: 20px;
 }
 
 .species-panel__list {
@@ -217,8 +246,8 @@
 	//@include flex-wrap(no-wrap);
 	max-height: 100%;
 	width: 100%;
-	height: 218px;
-	overflow-x: scroll;
+	height: 100%;
+	overflow-x: auto;
 	position: relative;	
 	&:after {
 		//content: "";
@@ -234,7 +263,9 @@
 	left: 0;	
 	overflow: hidden;
 	height: 100%;
-	width: 240px;
+	width: ($species-item-width * 2) + 20px;
+	display: flex;
+	align-items: center;
 	@include transform(translateX(0px));
 	&-enter {
 		width: 0px;
@@ -256,14 +287,14 @@
 .species-panel__item {
 	//@include flex(33.3%);
 	position: absolute;
-	top: 0;
+	top: 50%;
 	left: 0;
-	margin: 10px 10px;
-	min-height: 200px;
+	transform: translateY(-50%);
+	display: flex;
 
 
 	.dna-blueprint {
-		background: #FFF;
+		background: rgba(#000, 0.5);
 		border-top-right-radius: 0px;
 		border-bottom-right-radius: 0px;
 	}
@@ -271,11 +302,12 @@
 
 }
 
+
 .species-panel__item-inner{
 	@include display(flex);
 	@include justify-content(center);
 	@include align-items(center);
-	max-width: 200px;
+	max-width: $species-item-width * 2;
 	box-sizing: content-box;
 	width: 200px;
 	border: 3px solid transparent;
@@ -295,9 +327,8 @@
 	}
 
 	>* {
-		max-width: 100px;
-		width: 50%;
-		height: 100%;
+		flex: 0 0 $species-item-width;
+		height: $species-item-width;
 	}	
 }
 
@@ -320,9 +351,8 @@
 
 
 .species-panel__stats {
-	min-width: 100px;
-	width: 100px;
-	height: 100px;
+	flex: 0 0 $species-item-width;
+	height: $species-item-width;
 	background: rgba(#000, 0.5);
 	text-align: center;
 	@include display(flex);
@@ -342,7 +372,7 @@
 }
 
 .species-panel__stats-pop {
-	font-size: 40px;
+	font-size: 28px;
 	width: 100%;
 }
 
@@ -369,7 +399,7 @@
 
 // Stats //
 .stats-container {
-	min-width: 200px;
+	min-width: 250px;
 	@include display(flex);
 	@include flex-direction(column);
 	@include justify-content(center);
@@ -384,6 +414,7 @@
 	width: 100%;
 	color: #AAA;
 	border-bottom: 1px solid #222;
+	font-size: 14px;
 	span:last-child {
 		font-weight: bold;
 		color: #CCC;

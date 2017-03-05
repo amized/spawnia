@@ -121,7 +121,7 @@ function runAction(action, universe, currStep) {
 			});
 
 			// Sort the eats by eatIndex. This makes sure the eats are distributed fairly
-			// across all units who are eating.
+			// so all units get their first round of eating before anyone gets their second.
 			eats = _.sortBy(eats, 'eatIndex');
 
 			// Run the eats
@@ -131,9 +131,9 @@ function runAction(action, universe, currStep) {
 				const food = universe.getMapObject(eat.foodId);
 
 				if (unit && food && food.amount > 0) {
-		          let amount = Math.min(food.amount, eat.amount);
-		          // Can only eat up to the amount of storage we have left...
-		          amount = Math.min(amount, unit.energyStorage - unit.energy);
+			      // Can only eat up to the amount of storage we have left, or
+			      // the amount of food available
+		          let amount = Math.min(food.amount, eat.amount, unit.energyStorage - unit.energy);
 		          food.getConsumedBy(amount);
 		          unit.energy = unit.energy + amount;
 		        }

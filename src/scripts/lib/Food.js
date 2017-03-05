@@ -14,8 +14,8 @@ class Food extends MapObject {
     }
 
     grow(amount) {
-
-        this.amount = Math.min(this.growthLimit, this.amount + amount);
+        const growBy = this.growthLimit/2;
+        this.amount = Math.min(this.growthLimit, this.amount + growBy);
     	this.body.render.text = this.amount;
 
     }

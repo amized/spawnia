@@ -58,18 +58,10 @@ export default class MiniMap extends Component {
 		let y = (e.pageY - r.top) * scale;
 
 		const bb = this.props.viewportBoundingBox;
-
-
 		let w = (bb.max.x - bb.min.x);
 		let h = (bb.max.y - bb.min.y);
-
 		let newMiddleX = Math.max(w/2, x);
-		newMiddleX = Math.min(mapSize.width - (w/2), newMiddleX);
-
 		let newMiddleY = Math.max(h/2, y);
-		newMiddleY = Math.min(mapSize.height - (h/2), newMiddleY);
-
-
 		let newBB = {
 			min: {
 				x: newMiddleX - w/2,

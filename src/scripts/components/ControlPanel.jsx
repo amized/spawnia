@@ -88,7 +88,14 @@ class ControlPanel extends Component {
                 <div className="control-panel__top"></div>
                 <div className="control-panel__main">
                     <MiniMap updateViewportBB={updateViewportBB} viewportBoundingBox={viewportBoundingBox} mapSize={mapSize} />
-                    <div className="control-panel__left">
+                    <div className="control-panel__middle">
+                        
+                        <SpeciesPanel 
+                            universe={this.props.universe}
+                            selectedSpecies={selectedSpecies} 
+                            selectSpecies={this.props.selectSpecies} 
+                            dispatch={this.props.dispatch} 
+                        />
                         <ReactCSSTransitionGroup 
                             transitionName="panel__left" 
                             transitionEnterTimeout={500} 
@@ -120,12 +127,6 @@ class ControlPanel extends Component {
                         }
                         </ReactCSSTransitionGroup>
                     </div>
-                    <SpeciesPanel 
-                        universe={this.props.universe}
-                        selectedSpecies={selectedSpecies} 
-                        selectSpecies={this.props.selectSpecies} 
-                        dispatch={this.props.dispatch} 
-                    />
                     {
                         this.state.speciesEditorOpen ?
                             <SpeciesEditor 

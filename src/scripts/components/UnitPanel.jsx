@@ -77,9 +77,8 @@ export default class UnitPanel extends React.Component {
 			//console.log("The unit we clicked on's dna:", unit.DNA);
 
 		return (
+
 			<div className="unit-panel"> 
-			<div className="unit-panel"> 
-				<div className="unit-panel__heading">{ name ? name : "Selected Unit" }</div>  
 				<div className="unit-panel__inner">
 					<div className="unit-panel__close" onClick={this.props.unselectUnit}>
 						&#10005;
@@ -100,6 +99,7 @@ export default class UnitPanel extends React.Component {
 							<div className="unit-panel__unit" key={1}>
 								<DnaBlueprint dna={unit.getEncodedDna()} width={160} height={160} />   
 								<div className="unit-panel__stats stats-container"> 
+									<div className="stats-item">Name: <span>{ name ? name : "Selected Unit" }</span></div>
 					                <div className="stats-item">Age: <span>{ age }</span></div>
 					                <div className="stats-item">Generation <span>{ unit.generation }</span></div>
 					                <div className="stats-item">Energy: <span>{ unit.energy + "/" + unit.energyStorage }</span></div>
@@ -117,7 +117,6 @@ export default class UnitPanel extends React.Component {
 					</div>
 
                 </div>
-            </div>
             </div>
        	);
 	}

@@ -69,13 +69,12 @@ export default class SpeciesViewerPanel extends React.Component {
 
 		return (
 			<div className="species-viewer-panel"> 
-				<div className="unit-panel__heading">SPECIES</div> 
-				<div className="species-viewer-panel__name">{ name }</div>  
 				<div className="unit-panel__inner">
 					<div className="unit-panel__close" onClick={this.close}>
 						&#10005;
 					</div>
 					<div className="species-viewer-panel__main" key={species.encodedDna} >
+						<div className="species-panel__heading">{name}</div>
 						<DnaBlueprint dna={species.encodedDna} width={160} height={160} />   
 						<div className="unit-panel__stats stats-container"> 
 			                <div className="stats-item">Current pop: <span>{species.population}</span></div>

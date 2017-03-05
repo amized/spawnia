@@ -17,7 +17,8 @@ export default class SpawniaWorld extends React.Component {
         viewportBoundingBox: PropTypes.object,
         updateViewportBB: PropTypes.func,
         mapSize: PropTypes.func,
-        onZoom: PropTypes.func
+        onZoom: PropTypes.func,
+        zoom: PropTypes.number
     }
 
     constructor(props) {
@@ -105,13 +106,16 @@ export default class SpawniaWorld extends React.Component {
     }
 
     onMouseWheel = (e) => {
-        console.log("On mouse hweeel!!", e.wheelDelta);
         const focalPoint = this.getMapPositionFromMouseEvent(e);
+        const offset = {
+            x: e.pageX/this.canvas.width - 0.5,
+            y: e.pageY/this.canvas.height - 0.5
+        }
         if (e.wheelDelta > 0) {
-            this.props.onZoom(1.2, focalPoint);
+            this.props.onZoom("in", focalPoint);
         }
         else {
-            this.props.onZoom(1/1.2, focalPoint);
+            this.props.onZoom("out", focalPoint);
         }
     }
 
@@ -135,10 +139,20 @@ export default class SpawniaWorld extends React.Component {
     }
 
     getMapPositionFromMouseEvent = (e) => {
+        const zoom = this.props.zoom;
         const bb = this.props.viewportBoundingBox;
+
+        const screen = {
+            x: e.pageX/this.canvas.width,
+            y: e.pageY/this.canvas.height
+        }
+
+        const bbWidth = bb.max.x - bb.min.x;
+        const bbHeight = bb.max.y - bb.min.y;
+
         return {
-            x: e.pageX + bb.min.x,
-            y: e.pageY + bb.min.y
+            x: (screen.x * bbWidth) + bb.min.x,
+            y: (screen.y * bbHeight) + bb.min.y,
         }
     }
 

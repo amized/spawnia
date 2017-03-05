@@ -153,7 +153,7 @@ class SpeciesItem extends React.Component {
 		let { species, index, isSelected } = this.props;
 		let isEdit = this.state.mode === "edit";
 		let style = {
-			transform: "translateX(" + index * 220	 + "px)"	
+			transform: "translateX(" + index * 120	 + "px)"	
 		}
 		let classnames = ClassNames({
 			'species-panel__item': true,
@@ -168,14 +168,14 @@ class SpeciesItem extends React.Component {
 				<div className={classnames}>   
 					
 					<div className="species-panel__item-inner" onClick={this.onClick.bind(this)}>
-						<DnaBlueprint dna={species.encodedDna} width={100} height={100} />
+						<DnaBlueprint dna={species.encodedDna} width={50} height={50} />
 						<div className="species-panel__stats">
 							<div>
-							<div className="species-panel__stats-pop-title">Population: </div>
 							<span className="species-panel__stats-pop">{species.population}</span>
 							</div>
 						</div>
 					</div>
+					<div className="species-panel__name">
 					{
 						species.name && !isEdit ?
 							<div onClick={this.editName.bind(this)} className="species-panel__item-name">{ this.state.nameValue }</div>
@@ -196,7 +196,7 @@ class SpeciesItem extends React.Component {
 							)
 							
 					}
-					<div className="species-panel__item-title">{species.encodedDna}</div>
+					</div>
 	            </div>
             </div>
        	);

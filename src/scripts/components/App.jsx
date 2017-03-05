@@ -23,7 +23,6 @@ class App extends React.Component {
         super(props);
 
         const canvasSize = getCanvasDimensions();
-        console.log("canvas size1!!", canvasSize);
         this.state = {
             selectedUnit: null,
             selectedSpecies: null,
@@ -66,7 +65,7 @@ class App extends React.Component {
         const canvasSize = getCanvasDimensions();
 
         let currBB = this.state.viewportBoundingBox;
-
+        let zoom = this.state.zoom;
         this.setState({
             viewportBoundingBox: {
                 min: { 
@@ -74,39 +73,41 @@ class App extends React.Component {
                     y: currBB.min.y
                 }, 
                 max: { 
-                    x: currBB.min.x + canvasSize.width,
-                    y: currBB.min.y + canvasSize.height
+                    x: currBB.min.x + canvasSize.width*zoom,
+                    y: currBB.min.y + canvasSize.height*zoom
                 }
             }
         })
     }
 
     onZoom = (factor, focalPoint) => {
-        const bb = this.state.viewportBoundingBox;
-        let zoom = this.state.zoom * factor;
+        const bb = Object.assign({}, this.state.viewportBoundingBox);
+        const maxZoom = Math.pow(1.2, 3);
+        const minZoom = 1/maxZoom;
+        let zoom = factor === "in" ? this.state.zoom * 1.2 : this.state.zoom / 1.2;
 
-        console.log("The focal point", focalPoint);
+        if (zoom > maxZoom) {
+            zoom = maxZoom;
+        }
+        else if (zoom < minZoom) {
+            zoom = minZoom;
+        }
+
+        let offset = {
+            x: (focalPoint.x-bb.min.x)/(bb.max.x-bb.min.x), 
+            y: (focalPoint.y-bb.min.y)/(bb.max.y-bb.min.y)
+        }
 
         const canvasSize = getCanvasDimensions();
-        if (zoom > 2) {
-            zoom = 2;
-        }
-
-        else if ( zoom < 0.5) {
-            zoom = 0.5;
-        }
-
-        focalPoint = {x: (bb.min.x + bb.max.x) / 2, y:(bb.min.y + bb.max.y) / 2};
-
-
         const bbWidth = canvasSize.width * zoom;
         const bbHeight = canvasSize.height * zoom;
+ 
 
-        bb.min.x = focalPoint.x - (bbWidth/2);
-        bb.min.y = focalPoint.y - (bbHeight/2);
+        bb.min.x = focalPoint.x - bbWidth * (offset.x);
+        bb.min.y = focalPoint.y - bbHeight * (offset.y);
 
-        bb.max.x = focalPoint.x + (bbWidth/2);
-        bb.max.y = focalPoint.y + (bbHeight/2);
+        bb.max.x = focalPoint.x + bbWidth * (1 - offset.x);
+        bb.max.y = focalPoint.y + bbHeight * (1 - offset.y);
 
         this.updateViewportBB(bb, zoom);
     }
@@ -164,10 +165,9 @@ class App extends React.Component {
             return;
         }
         let unit = this.props.universe.getMapObject(unitId);
-        console.log("UNIT ID", unitId);
-        console.log("UNIT", unit);
         this.setState({
-            selectedUnit: unit
+            selectedUnit: unit,
+            selectedSpecies: null
         })
     }
 
@@ -227,7 +227,8 @@ class App extends React.Component {
 
     selectSpecies (species) {
         this.setState({
-            selectedSpecies: species
+            selectedSpecies: species,
+            selectedUnit: null
         });
     }
 
@@ -248,7 +249,8 @@ class App extends React.Component {
             newSpecies, 
             hoveredUnit, 
             playState, 
-            viewportBoundingBox 
+            viewportBoundingBox,
+            zoom
         } = this.state;
         
         let style = {};
@@ -268,7 +270,8 @@ class App extends React.Component {
                     onMapClick={this.onMapClick.bind(this)}  
                     mapSize={mapSize}  
                     updateViewportBB={this.updateViewportBB}  
-                    onZoom={this.onZoom}              
+                    onZoom={this.onZoom} 
+                    zoom={zoom}             
                     {...this.state}
                 />              
                 <ControlPanel {...this.props}
