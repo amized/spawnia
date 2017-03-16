@@ -11,6 +11,7 @@ import Cell from "./Cell";
 import CellTypes from "./CellTypes";
 import DNA from "./DNA";
 import UnitBuilder from "./UnitBuilder";
+import { buildStaticCircle, buildStaticBlock } from "./MapBuilder";
 import _ from "underscore";
 import speciesManager from "./speciesManager";
 import { getAngleOfDirection } from "./Geometry";
@@ -37,24 +38,9 @@ function runAction(action, universe, currStep) {
 
 		case "BUILD_WORLD":
 
-			const props = {
-				isStatic: true,
-				restitution: 1,
-				collisionFilter: {
-	                category: COLLISION_CATEGORY_UNITS
-	                //mask: COLLISION_CATEGORY_DEFAULT | COLLISION_CATEGORY_UNITS
-	            }
-            }
+			let bodies = [];
 
-            let bodies = [];
-
-			bodies.push(Bodies.rectangle(500, 300, 20, 200, props));
-			bodies.push(Bodies.circle(200, 300, 20, props));
-			bodies.push(Bodies.circle(100, 400, 20, props));
-			bodies.push(Bodies.rectangle(200, 200, 20, 200, props));
-			bodies.push(Bodies.rectangle(500, 500, 300, 30));
-
-			var offset = 20;
+			/*
 			var boundsWidth = 50;
 			var mapWidth = universe.getMapSize().width;
 			var mapHeight = universe.getMapSize().width;
@@ -81,6 +67,7 @@ function runAction(action, universe, currStep) {
 				const m = new MapObject(body, index);
 				universe.add(m);
 			});
+			*/
 			return;
 
 		case "UPDATE_UNITS_ENERGY": {
@@ -210,7 +197,7 @@ function runAction(action, universe, currStep) {
 				return;
 			}
 	    	const v = unit.body.velocity;
-			const cells = UnitBuilder.buildAllCells(speciesManager.getDecodedDna(unit.speciesId));
+			const cells = UnitBuilder.buildAllCells(unit.getDecodedDna());
 			const cellBodies = UnitBuilder.buildCellBodies(cells, unit.body.position.x, unit.body.position.y);
             const newBody = UnitBuilder.buildParentBody(cellBodies);
 	    	unit.mature(cells, newBody);	    	      
@@ -305,6 +292,35 @@ function runAction(action, universe, currStep) {
 
 			return;
 
+		case "ADD_STATIC_BLOCK": {
+
+			const { x, y, width, height } = action;
+			const props = {
+				isStatic: true,
+				restitution: 1,
+				collisionFilter: {
+		            category: COLLISION_CATEGORY_UNITS
+		            //mask: COLLISION_CATEGORY_DEFAULT | COLLISION_CATEGORY_UNITS
+		        }
+		    }
+
+		    const m = new MapObject(Bodies.rectangle(x, y, width, height, props), -1);
+			universe.add(m);
+			return
+		}
+
+		case "ADD_STATIC_BLOCK": {
+			const { x, y, width, height } = action;
+			const m = new MapObject(buildStaticBlock(x, y, width, height), -1);
+			universe.add(m);			
+			return
+		}
+		case "ADD_STATIC_CIRCLE": {
+			const { x, y, r } = action;
+			const m = new MapObject(buildStaticCircle(x, y, r), -1);
+			universe.add(m);			
+			return
+		}
 
 		case "ADD_FOOD": {
 			const { amount, id, x, y } = action;

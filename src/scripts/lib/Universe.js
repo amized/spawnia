@@ -22,8 +22,8 @@ class Universe {
 		}
 
 		this.mapSize = {
-			width: 3500,
-			height: 3500
+			width: 3200,
+			height: 3200
 		}
 
 		this.speciesData = new SpeciesData();
@@ -55,7 +55,7 @@ class Universe {
 
 
 	deleteUnit(unit) {
-		this.speciesData.unitDies(unit);		
+		this.speciesData.unitDies(unit);	
 		unit.die();
 		this.deleteMapObject(unit.id);
 
@@ -76,7 +76,6 @@ class Universe {
 
 	hydrate(state) {
 		this.clear();
-		console.log("HYDRATING UNIVERSE - ", Composite.allBodies(state.world).map(b=>b.id));
 		state.mapObjects.forEach(obj => {
 			
 			let newObj;
@@ -101,7 +100,6 @@ class Universe {
 			this.add(newObj);
 
 		});
-		console.log("HYDRATING UNIVERSE - ", Composite.allBodies(this.world).map(b=>b.id));
 	}
 
 	add(mapObject) {
@@ -176,7 +174,7 @@ class Universe {
 	}
 
 	getNumUnits() {
-		return Object.keys(this.units).length;
+		return Object.keys(this.getUnits()).length;
 	}
 
 	getNumMaturedUnits() {

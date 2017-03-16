@@ -7,7 +7,6 @@ import _ from "underscore"
 
 import UnitPanel from "./UnitPanel.jsx"
 import SpeciesPanel from "./SpeciesPanel.jsx"
-import SpeciesEditor from "./SpeciesEditor.jsx"
 import CommandPanel from "./CommandPanel.jsx"
 import SpeciesViewerPanel from "./SpeciesViewerPanel"
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
@@ -127,15 +126,6 @@ class ControlPanel extends Component {
                         }
                         </ReactCSSTransitionGroup>
                     </div>
-                    {
-                        this.state.speciesEditorOpen ?
-                            <SpeciesEditor 
-                                closeSpeciesEditor={this.closeSpeciesEditor.bind(this)}
-                                saveSpecies={this.saveSpecies.bind(this)}
-                            />
-                        :
-                            null
-                    }
                     <div className="command-panel">
                         <a href="#" className="command-panel__create" onClick={this.openSpeciesEditor.bind(this)}>Create unit...</a>
                         <div className="command-panel__play" onClick={this.props.togglePlayState}>

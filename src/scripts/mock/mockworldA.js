@@ -3,8 +3,86 @@ import DNA from '../lib/DNA'
 import { Dna1, Dna2, Dna3, Dna4, Dna5, Dna6 } from "../mock/dna";
 import uuid from 'uuid'
 import { MATURATION_TIME } from "../settings"
+import { Bodies } from "matter-js"
+import {
+	COLLISION_CATEGORY_DEFAULT,
+	COLLISION_CATEGORY_UNITS,
+	MAP_OBJ_FOOD
+} from "../constants"
+import { Food } from "../lib/Food"
+
 
 export default function makeWorld(dispatch) {
+
+
+	/*
+
+	const props = {
+		isStatic: true,
+		restitution: 1,
+		collisionFilter: {
+            category: COLLISION_CATEGORY_UNITS
+            //mask: COLLISION_CATEGORY_DEFAULT | COLLISION_CATEGORY_UNITS
+        }
+    }
+
+    let bodies = [];
+
+	bodies.push(Bodies.rectangle(500, 300, 20, 200, props));
+	bodies.push(Bodies.circle(200, 300, 20, props));
+	bodies.push(Bodies.circle(100, 400, 20, props));
+	bodies.push(Bodies.rectangle(200, 200, 20, 200, props));
+	bodies.push(Bodies.rectangle(500, 500, 300, 30));
+
+	const worldObjects = bodies.map((body,index) => new MapObject(body, index));
+	
+	const foods = [new Food(body, 400)]
+
+
+
+
+	return bodies.map((body,index) => new MapObject(body, index));
+
+
+
+	*/
+	dispatch({
+		type: "ADD_STATIC_BLOCK",
+		x: 500,
+		y: 300,
+		width: 20,
+		height: 200
+	});
+
+	dispatch({
+		type: "ADD_STATIC_BLOCK",
+		x: 200,
+		y: 200,
+		width: 20,
+		height: 200
+	});
+
+	dispatch({
+		type: "ADD_STATIC_BLOCK",
+		x: 500,
+		y: 500,
+		width: 300,
+		height: 30
+	});
+
+	dispatch({
+		type: "ADD_STATIC_CIRCLE",
+		x: 200,
+		y: 300,
+		r: 20
+	});
+
+	dispatch({
+		type: "ADD_STATIC_CIRCLE",
+		x: 100,
+		y: 400,
+		r: 20
+	});	
 
 	let unitid = uuid.v1();
 	let now = Date.now();

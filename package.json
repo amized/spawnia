@@ -107,6 +107,8 @@
     "matter-js": "^0.12.0",
     "mousse": "^0.3.1",
     "react-addons-css-transition-group": "^0.14.8",
+    "react-bootstrap": "^0.30.8",
+    "react-overlays": "^0.6.12",
     "sockjs": "^0.3.18",
     "sockjs-client": "^1.1.1",
     "underscore": "^1.8.3",

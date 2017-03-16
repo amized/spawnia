@@ -150,6 +150,16 @@
 	padding: 0px;
 }
 
+.unit-panel__options {
+	margin: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	button {
+		@include  button-outline;
+	}
+}
+
 
 .unit-panel__dead {
 	@include display(flex);
@@ -195,11 +205,19 @@
 }
 
 .species-viewer-panel__name {
-	font-size: 12px;
+	font-size: 16px;
 	letter-spacing: 2.2px;
 	text-align: center;
-	padding: 10px 10px 0px 10px;
+	padding: 10px;
 	color: #AAA;
+
+    word-break: break-all;
+    text-align: center;
+    line-height: 1.2;
+	display: flex;
+    align-items: center;
+
+
 }
 
 .species-viewer-panel__main {
@@ -291,15 +309,11 @@ $species-item-width: 50px;
 	left: 0;
 	transform: translateY(-50%);
 	display: flex;
-
-
 	.dna-blueprint {
 		background: rgba(#000, 0.5);
 		border-top-right-radius: 0px;
 		border-bottom-right-radius: 0px;
 	}
-
-
 }
 
 

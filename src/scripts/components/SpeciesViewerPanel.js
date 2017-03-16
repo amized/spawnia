@@ -64,7 +64,7 @@ export default class SpeciesViewerPanel extends React.Component {
 			age = minutes + ":" + seconds;
 		}
 
-		let popPercent = Math.floor(species.population/universe.getNumMaturedUnits() * 100) + "%";
+		let popPercent = Math.floor(species.population/universe.getNumUnits() * 100) + "%";
 		
 
 		return (
@@ -74,7 +74,7 @@ export default class SpeciesViewerPanel extends React.Component {
 						&#10005;
 					</div>
 					<div className="species-viewer-panel__main" key={species.encodedDna} >
-						<div className="species-panel__heading">{name}</div>
+						<div className="species-viewer-panel__name">{name}</div>
 						<DnaBlueprint dna={species.encodedDna} width={160} height={160} />   
 						<div className="unit-panel__stats stats-container"> 
 			                <div className="stats-item">Current pop: <span>{species.population}</span></div>

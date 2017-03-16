@@ -58,8 +58,9 @@ export default class UnitPanel extends React.Component {
 
 	selectSpecies = (e) => {
 		// TODO PUT THS BACK IN
-		//let species = this.props.universe.getSpeciesOfUnit(this.props.unit);
-		//this.props.selectSpecies(species);
+		let species = this.props.unit.getSpecies();// this.props.universe.getSpeciesOfUnit(this.props.unit);
+		console.log("The units species! (maybe?)", species);
+		this.props.selectSpecies(species);
 	}
 
 	render() {
@@ -105,12 +106,12 @@ export default class UnitPanel extends React.Component {
 					                <div className="stats-item">Energy: <span>{ unit.energy + "/" + unit.energyStorage }</span></div>
 					                <div className="stats-item">Children: <span>{ unit.children.length }</span></div>
 					                <div className="stats-item">Status: <span>{ unit.lifeState }</span></div>
-					                <div className="stats-item"> 
-					                	<span className="stats-item__link" onClick={this.selectSpecies}>
-					                		View species...
-					                	</span>
-					                </div>
 				                </div>
+				                <div className="unit-panel__options">
+		                		<button onClick={this.selectSpecies}>
+			                		View species...
+			                	</button>
+			                	</div>
 			                </div>
 					}
 					</ReactCSSTransitionGroup>

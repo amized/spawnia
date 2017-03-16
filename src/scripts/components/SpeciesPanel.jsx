@@ -11,7 +11,7 @@ import {
 	UNIT_START_ENERGY_PER_CELL, 
 	ENERGY_STORAGE_PER_FAT 
 } from "../settings"
-
+import speciesManager from "../lib/SpeciesManager"
 
 
 export default class SpeciesPanel extends React.Component {
@@ -41,7 +41,9 @@ export default class SpeciesPanel extends React.Component {
 		let allSpecies = _.sortBy(sortByPop, "encodedDna");
 		*/
 		
-		let allSpecies = this.props.universe.speciesData.getSpeciesArr();
+		//let allSpecies = this.props.universe.speciesData.getSpeciesArr();
+		let allSpecies = speciesManager.getSpeciesArr(); 
+		console.log("HEres all species:", allSpecies);
 		return (
 			<div className="species-panel">
 				<div className="species-panel__heading">Species</div>

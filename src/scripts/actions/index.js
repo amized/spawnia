@@ -3,6 +3,11 @@ const UPDATE = 'UPDATE'
 //const REMOVE_TODO = 'REMOVE_TODO'
 //const LOAD_ARTICLE = 'LOAD_ARTICLE'
 
+//import * as gameState from "./gameState";
+
+
+
+export * from "./gameState";
 
 export function updateMap(mapState) {
   return {
@@ -42,5 +47,12 @@ export function	lostSync() {
 		type: "LOST_SYNC"
 	}
 }
+
+
+
+
+
+
+
 
 //export default update

@@ -22,6 +22,14 @@ export const MAP_OBJ_FOOD = "FOOD";
 export const MAP_OBJ_UNIT = "UNIT";
 
 
+export const GAME_MODE_INTRO = "INTRO";
+export const GAME_MODE_SETUP = "SETUP";
+export const GAME_MODE_STARTED = "STARTED";
+
+export const GAME_STAGE_NOGAME = 0;
+export const GAME_STAGE_BUILDINGSPECIES = 1;
+export const GAME_STAGE_PLACESPECIES = 2;
+export const GAME_STAGE_WATCHING= 3;
 
 export const CONN_STATUS_WAITING = 1
 

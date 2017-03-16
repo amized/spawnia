@@ -16,7 +16,7 @@ export default class SpawniaWorld extends React.Component {
     static propTypes = {
         viewportBoundingBox: PropTypes.object,
         updateViewportBB: PropTypes.func,
-        mapSize: PropTypes.func,
+        mapSize: PropTypes.object,
         onZoom: PropTypes.func,
         zoom: PropTypes.number
     }

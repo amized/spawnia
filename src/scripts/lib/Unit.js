@@ -61,6 +61,10 @@ class Unit extends MapObject {
         return speciesManager.getDecodedDna(this.speciesId);
     }
 
+    getSpecies() {
+        return speciesManager.getSpecies(this.speciesId);
+    }
+
 
     spawn(speciesId, cells, parent = null, bornAt = 0) {
 
@@ -79,6 +83,8 @@ class Unit extends MapObject {
 
         // Born at is number of game steps since start of simulation
         this.bornAt = bornAt;
+        this.species.unitIsBorn(this);        
+
 
         this.children = [];
         // The chicken or the egg?
@@ -179,9 +185,11 @@ class Unit extends MapObject {
         this.energyStorage = this.species.energyStorage;
         body.frictionAir = this.species.bodyFrictionAir;
         this.lifeState = LIFESTATE_MATURE;
+        this.species.unitMatured(this);    
     }
 
     die() {
+        this.species.unitDies(this);
         this.DNA = null;
         this.cells = null;
         this.lifeState = LIFESTATE_DEAD;

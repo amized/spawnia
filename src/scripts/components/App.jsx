@@ -1,312 +1,79 @@
-var React = require("react");
-var ReactDOM = require('react-dom');
-var ClassNames = require('classnames');
-var connect = require("react-redux").connect;
-import { Composite, Mouse, Bounds, Events } from "matter-js"
 
-import World from './World.jsx';
-import MapEvents from "./MapEvents.jsx";
-import ControlPanel from './ControlPanel.jsx';
-import DNA from '../lib/DNA';
-import uuid from 'uuid'
-import { PLAYSTATE_PLAYING, PLAYSTATE_PAUSED } from "../constants";
-import { getCanvasDimensions } from "../lib/Utils/utils";
-
-class App extends React.Component {
+import React from "react"
+import {
+  GAME_MODE_INTRO,
+  GAME_MODE_SETUP,
+  GAME_MODE_STARTED
+} from "../constants";
+import GameStandalone from "../lib/GameStandalone";
+import Game from "./Game.jsx"
+import makeWorld from "../mock/mockworldA";
 
 
-    static defaultProps = {
+
+export default class App extends React.Component {
+
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      gameMode: GAME_MODE_INTRO,
+      currGame: null
     }
 
+  }
 
-    constructor(props) {
-        super(props);
-
-        const canvasSize = getCanvasDimensions();
-        this.state = {
-            selectedUnit: null,
-            selectedSpecies: null,
-            newSpecies: null,
-            hoveredUnit: null,
-            playState: PLAYSTATE_PLAYING,
-            zoom: 1,
-            viewportBoundingBox: {
-                min: { 
-                    x: 0,
-                    y: 0
-                }, 
-                max: { 
-                    x: canvasSize.width,
-                    y: canvasSize.height
-                }
-            }
-        }
-    }
-
-    componentDidMount() {
-        window.onresize = this.onWindowResize;
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        if (prevState.playState !== this.state.playState) {
-
-            if (this.state.playState === PLAYSTATE_PLAYING) {
-                this.props.simulation.resume();
-            }
-            else {
-                this.props.simulation.pause();
-            }
-        }
-
-    }
+  onNewGame = () => {
+    const game = new GameStandalone(makeWorld);
+    this.setState({
+      game: game,
+      gameMode: GAME_MODE_SETUP
+    })
+  }
 
 
-    onWindowResize = () => {
-        const canvasSize = getCanvasDimensions();
+  render() {
+    const { gameMode, game } = this.state;
+    console.log("The game", game);
+    return (
+      <div className="app-wrapper">
+        {
+          (()=>{
+            switch(gameMode) {
+              case GAME_MODE_INTRO:
+                return (
+                  <div className="intro">
+                    <h1>Welcome to Spawnia!</h1>
+                    <p>The game where you design a species to dominate the world.</p>
 
-        let currBB = this.state.viewportBoundingBox;
-        let zoom = this.state.zoom;
-        this.setState({
-            viewportBoundingBox: {
-                min: { 
-                    x: currBB.min.x,
-                    y: currBB.min.y
-                }, 
-                max: { 
-                    x: currBB.min.x + canvasSize.width*zoom,
-                    y: currBB.min.y + canvasSize.height*zoom
-                }
-            }
-        })
-    }
+                    <button onClick={this.onNewGame}>New game</button>
+                  </div>
 
-    onZoom = (factor, focalPoint) => {
-        const bb = Object.assign({}, this.state.viewportBoundingBox);
-        const maxZoom = Math.pow(1.2, 3);
-        const minZoom = 1/maxZoom;
-        let zoom = factor === "in" ? this.state.zoom * 1.2 : this.state.zoom / 1.2;
-
-        if (zoom > maxZoom) {
-            zoom = maxZoom;
-        }
-        else if (zoom < minZoom) {
-            zoom = minZoom;
-        }
-
-        let offset = {
-            x: (focalPoint.x-bb.min.x)/(bb.max.x-bb.min.x), 
-            y: (focalPoint.y-bb.min.y)/(bb.max.y-bb.min.y)
-        }
-
-        const canvasSize = getCanvasDimensions();
-        const bbWidth = canvasSize.width * zoom;
-        const bbHeight = canvasSize.height * zoom;
- 
-
-        bb.min.x = focalPoint.x - bbWidth * (offset.x);
-        bb.min.y = focalPoint.y - bbHeight * (offset.y);
-
-        bb.max.x = focalPoint.x + bbWidth * (1 - offset.x);
-        bb.max.y = focalPoint.y + bbHeight * (1 - offset.y);
-
-        this.updateViewportBB(bb, zoom);
-    }
-
-    updateViewportBB = (bb, zoom=this.state.zoom) => {
-
-        const mapSize = this.props.universe.getMapSize();
-
-        if (bb.min.x < 0) {
-            bb.max.x -= bb.min.x;
-            bb.min.x = 0;
-        }
-
-        if (bb.min.y < 0) {
-            bb.max.y -= bb.min.y;
-            bb.min.y = 0;
-        }
-
-        if (bb.max.x > mapSize.width) {
-            bb.min.x -= (bb.max.x - mapSize.width);
-            bb.max.x = mapSize.width;
-        }
-
-        if (bb.max.y > mapSize.height) {
-            bb.min.y -= (bb.max.y - mapSize.height);
-            bb.max.y = mapSize.height;
-        }  
-
-
-        this.setState({
-            viewportBoundingBox: bb,
-            zoom: zoom
-        });
-    }
-
-
-    togglePlayState() {
-        this.setState({
-            playState: this.state.playState === PLAYSTATE_PAUSED ? PLAYSTATE_PLAYING : PLAYSTATE_PAUSED
-        })
-    }
-
-    onWorldMove(e) {
-        console.log("world move");
-    }
-
-    onUnitClick (unitId) {
-        if (this.state.newSpecies) {
-            return;
-        }
-        if (this.state.selectedUnit !== null && this.state.selectedUnit.id === unitId) {
-            this.setState({
-                selectedUnit: null
-            });
-            return;
-        }
-        let unit = this.props.universe.getMapObject(unitId);
-        this.setState({
-            selectedUnit: unit,
-            selectedSpecies: null
-        })
-    }
-
-    onMapClick(pos) {
-
-        if (this.state.newSpecies) {
-
-            let dna = {
-                seedCell: this.state.newSpecies[0]
-            }
-
-            let encodedDna = DNA.encodeDna(dna);
-
-            this.props.simulDispatch({
-                type: "ADD_UNIT",
-                dna: encodedDna,
-                x: pos.x,
-                y: pos.y,
-                id: uuid.v1()
-            });
-            
-            this.setState({
-                newSpecies: null
-            })
-            
-        }
-        
-
-
-        if (this.state.selectedUnit || this.state.selectedSpecies) {
-            this.setState({
-                selectedUnit: null,
-                selectedSpecies: null
-            })
-        }
-    }
-
-    onUnitHover (unitId) {
-        let unit = this.props.universe.getMapObject(unitId);
-        this.setState({
-            hoveredUnit: unit
-        })
-    }
-
-    unselectUnit () {
-        this.setState({
-            selectedUnit: null
-        });
-    }
-
-    saveNewSpecies(species) {
-        this.setState({
-            newSpecies: species
-        });
-    }
-
-
-    selectSpecies (species) {
-        this.setState({
-            selectedSpecies: species,
-            selectedUnit: null
-        });
-    }
-
-    isUnitSelected(unit) {
-        return (
-            this.state.selectedUnit === unit ||
-            (this.state.selectedSpecies && this.state.selectedSpecies.encodedDna === unit.encodedDna)
-        );
-    }
-
-    render () {
-
-        let { dispatch, getCurrStep, universe } = this.props;
-        let mapSize = universe.getMapSize();
-        let { 
-            selectedUnit, 
-            selectedSpecies, 
-            newSpecies, 
-            hoveredUnit, 
-            playState, 
-            viewportBoundingBox,
-            zoom
-        } = this.state;
-        
-        let style = {};
-
-        if (hoveredUnit) {
-            style.cursor="pointer";
-        }
-
-    	return (
-            <div style={style}>
-                <World 
-                    universe={this.props.universe}
-                    engine={this.props.engine}
-                    syncStatus={this.props.syncStatus}
-                    onUnitClick={this.onUnitClick.bind(this)}
-                    onUnitHover={this.onUnitHover.bind(this)}
-                    onMapClick={this.onMapClick.bind(this)}  
-                    mapSize={mapSize}  
-                    updateViewportBB={this.updateViewportBB}  
-                    onZoom={this.onZoom} 
-                    zoom={zoom}             
-                    {...this.state}
-                />              
-                <ControlPanel {...this.props}
-                    dispatch={dispatch} 
-                    selectedUnit={selectedUnit}
-                    selectedSpecies={selectedSpecies}
-                    newSpecies={newSpecies}
-                    saveNewSpecies={this.saveNewSpecies.bind(this)}
-                    unselectUnit={this.unselectUnit.bind(this)} 
-                    selectSpecies={this.selectSpecies.bind(this)}
-                    togglePlayState={this.togglePlayState.bind(this)}
+                );
+              case GAME_MODE_SETUP:
+                const simulDispatch = game.simulation.dispatch;
+                const simulPlay = game.simulation.resume;
+                const simulPause = game.simulation.pause;
+                const getCurrStep = game.simulation.getCurrStep;
+                return (
+                  <Game
+                    engine={game.engine} 
+                    universe={game.universe} 
+                    simulation={game.simulation}
+                    simulDispatch={simulDispatch} 
+                    simulPlay={simulPlay}
+                    simulPause={simulPause}
                     getCurrStep={getCurrStep}
-                    viewportBoundingBox={viewportBoundingBox}
-                    mapSize={mapSize}
-                    updateViewportBB={this.updateViewportBB}
-                    {...this.state}
-                />
-            </div>
-    		
-    	)
-    }
+                  />
+                );
+            }
+          })()
+        }
+      </div>
+
+
+    )
+  }
+
+
 }
-
-//<Map mapState={this.props.mapState}></Map>
-
-// Which props do we want to inject, given the global state?
-// Note: use https://github.com/faassen/reselect for better performance.
-function select(state) {
-  return state;
-}
-
-export default connect(select)(App);
-
-
-
-
-
-

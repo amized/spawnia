@@ -7,6 +7,7 @@ import {
   SYNC_STATUS_SYNCED
 } from "../constants"
 
+import gameState from "./gameState";
 
 function client(state, action) {
 
@@ -54,6 +55,7 @@ function client(state, action) {
 
 
 
+
 function syncStatus(state = SYNC_STATUS_WAITING, action) {
   switch(action.type) {
     case "SYNCED":
@@ -67,7 +69,8 @@ function syncStatus(state = SYNC_STATUS_WAITING, action) {
 
 var app = combineReducers({
   client: client,
-  syncStatus: syncStatus
+  syncStatus: syncStatus,
+  gameState: gameState
 });
 
 export default app

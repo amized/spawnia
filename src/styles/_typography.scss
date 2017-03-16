@@ -1,8 +1,29 @@
 
 
 
+
+$font-family-big: fantasy;
+$font-family-normal: 'Raleway', sans-serif;
+
+
 @mixin type_h1 {
-	
+	font-family: $font-family-big;
+}
+
+
+
+@mixin type-modal-h1 {
+	font-family: $font-family-big;
+}
+
+@mixin type-modal-h2 {
+	font-family: $font-family-big;
+	font-size: 30px;
+}
+
+@mixin type-modal-h3 {
+	font-family: $font-family-big;
+	font-size: 23px;
 }
 
 

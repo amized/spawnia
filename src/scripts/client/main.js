@@ -15,7 +15,7 @@ import TransitionClass from '../lib/utils/TransitionClass.js'
 
 import reducers from '../reducers'
 
-import makeWorld from "../mock/mockworldA";
+
 import { synced, lostSync } from "../actions";
 
 
@@ -34,29 +34,19 @@ function runClient() {
 
 
 function runStandAlone() {
-	const store = createStore(reducers, {});
-	const game = new GameStandalone(makeWorld);
+	const store = createStore(
+		reducers,
+		window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+	);
 	store.dispatch(synced());
 	const rootEl = document.getElementById("root");
-	const simulDispatch = game.simulation.dispatch;
-	const simulPlay = game.simulation.resume;
-	const simulPause = game.simulation.pause;
-	const getCurrStep = game.simulation.getCurrStep;
+
 	render(
 		<Provider store={store}>
-	    	<App 
-	    		engine={game.engine} 
-	    		universe={game.universe} 
-	    		simulation={game.simulation}
-	    		simulDispatch={simulDispatch} 
-	    		simulPlay={simulPlay}
-	    		simulPause={simulPause}
-	    		getCurrStep={getCurrStep}
-	    	/>
+	    	<App />
 	  	</Provider>,
 	  rootEl
 	)
-	game.run();
 }
 
 runStandAlone();

@@ -30,7 +30,6 @@ class SpeciesManager {
 			id = ids++;
 			this.species[id] = new Species(encodedDna);
 		}
-		this.species[id].unitIsBorn();
 		return id;
 	}
 
@@ -50,7 +49,9 @@ class SpeciesManager {
 		return DNA.getCellCount(this.species[speciesId].decodedDna.seedCell);
 	}
 
-
+	getSpeciesArr() {
+		return Object.keys(this.species).map(key => this.species[key]).filter(species => species.population > 0); 
+	}
 
 	getSampleBody(speciesId) {
 		return this.species[speciesId].sampleBody;

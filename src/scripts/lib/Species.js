@@ -38,12 +38,15 @@ export default class Species {
 	unitIsBorn(unit) {
 		this.population++;
 		this.totalPopulation++;		
+
+	}
+
+	unitMatured(unit) {
+
 	}
 
 	unitDies(unit) {
-		if (unit.isMature()) {
-			this.population = (this.population > 0) ? this.population - 1 : 0;
-		}
+		this.population = (this.population > 0) ? this.population - 1 : 0;
 	}
 
 	countCellsOfType(type) {

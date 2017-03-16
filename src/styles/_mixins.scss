@@ -9,7 +9,30 @@
     text-align: center;
     cursor: pointer;
     background: #00a568;
-    color: #FFF;
     text-decoration: none;
     display: inline-block;
+    font-size: 14px;
+    letter-spacing: 0.03em;
+
+    &:hover {
+        background: #1c825c;
+    }
+}
+
+
+
+
+@mixin button-outline {
+    @include button;
+    border: 1px solid #00a568;
+    color: #00a568;
+    background-color: transparent;
+}
+
+
+@mixin button-outline-white {
+    @include button;
+    border: 1px solid #FFF;
+    color: #FFF;
+    background-color: transparent;
 }

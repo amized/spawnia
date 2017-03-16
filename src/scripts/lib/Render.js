@@ -479,7 +479,7 @@ import { Common, Composite, Bounds, Events, Grid, Vector, Mouse } from "matter-j
         if (selected.length > 0) {
             c.globalAlpha = 0.7;
             c.fillStyle = "#FFFFFF";
-            c.fillRect(0, 0, render.options.width, render.options.height);
+            c.fillRect(render.bounds.min.x, render.bounds.min.y, render.bounds.max.x, render.bounds.max.y);
             c.globalAlpha = 1;            
             for (i = 0; i < selected.length; i++) {
                 body = selected[i];

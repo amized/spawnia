@@ -5,7 +5,7 @@
 body {
 	background: #EEE;
 
-	font-family: 'Raleway', sans-serif;
+	font-family: $font-family-normal;
 
 	/* Prep for add class */
 	&.someclass-add {

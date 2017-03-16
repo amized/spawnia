@@ -28,3 +28,6 @@ export function getCanvasDimensions() {
     	height: window.innerHeight - 252
     }  
 }
+
+
+
