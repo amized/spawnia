@@ -57,19 +57,19 @@ export default class Game {
 	}
 
 	buildMap(makeWorld) {
+
+		makeWorld(this.simulation.immediateDispatch);
+		// Runs all the dispatches issued in make world;
+
 		const mapSize = this.universe.getMapSize();
 		const barriers = getBarriers(mapSize.width, mapSize.height);
 		const mapObjs = barriers;
-		makeWorld(this.simulation.dispatch);
-		// Runs all the dispatches issued in make world;
-
-
 		mapObjs.forEach((m, index) => {
 			this.universe.add(m);
 		});
 
-		this.simulation._step();	
-		this.simulation._step();		
+		//this.simulation._step();	
+		//this.simulation._step();		
 	}
 
 	reset() {

@@ -9,6 +9,15 @@
 	height: 100vh;
 	background: #333;
 	color: #FFF;
+
+	 -webkit-user-select: none;  /* Chrome all / Safari all */
+	  -moz-user-select: none;     /* Firefox all */
+	  -ms-user-select: none;      /* IE 10+ */
+	  user-select: none;          /* Likely future */
+
+	 &--dragging {
+	 	cursor: grabbing;
+	 }
 }
 
 
@@ -73,6 +82,7 @@ $canvas-background: #222;
 
 .species-editor__info {
 	flex: 0 0 200px;
+	width: 200px;
 	//max-width: 200px;
 	background: #444;
 	h2 {
@@ -89,6 +99,7 @@ $canvas-background: #222;
 	text-align: center;
 	//margin-bottom: 10px;
 	border-top: 1px solid #555;
+
 	&:last-child {
 		border-bottom: 1px solid #555;
 	}
@@ -101,8 +112,13 @@ $canvas-background: #222;
 
 	span {
 		font-size: 40px;
+		max-width: 100%;
+		padding: 0px 10px;
+		display: block;
+		line-height: 1.3;
 		&.species-editor__info-sm {
-			font-size: 20px;
+			font-size: 13px;
+			word-wrap: break-word;
 		}
 	}
 }
@@ -116,8 +132,9 @@ $canvas-background: #222;
 	fill: $canvas-background;
 	stroke-dasharray: 3, 3;
 	cursor: pointer;
+	transition: stroke 0.3s;
 	&--hover {
-		stroke: #BBB;
+		stroke: #FFF;
 	}
 }
 
@@ -148,6 +165,10 @@ $canvas-background: #222;
 	@include align-items(center);
 	font-size: 30px;
 	margin: 5px;
+	cursor: grab;
+	.species-editor--dragging & {
+		cursor: grabbing;
+	}
 }
 
 
@@ -159,6 +180,34 @@ $canvas-background: #222;
 .species-editor__path--connected {
 	stroke: #FFF;
 	stroke-width: 5px;
+}
+
+
+/***** ---- Drag previee *****/
+
+
+.cell-drag-preview {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 100;
+	background: orange;
+	pointer-events: none;
+	display: none;
+
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	border: 2px solid #222;
+	color: #222;
+	text-align: center;
+	line-height: 50px;
+	font-size: 30px;
+	margin: 5px;
+	opacity: 0.5;
+	margin-top: -25px;
+	margin-left: -25px;
+
 }
 
 

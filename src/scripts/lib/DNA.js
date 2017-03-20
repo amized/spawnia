@@ -1,6 +1,6 @@
 
 import CellTypes from "./CellTypes";
-
+import { getNewCellPosFromParent, DIR } from "./Geometry";
 
 function CoinFlip() {
     return (Math.random() < 0.5);
@@ -238,6 +238,41 @@ class DNA {
                 return newCell;
         }
     }
+
+    static getCells(decodeDna) {
+        const cells = [];
+        this.getCellsRecurse(decodeDna.seedCell, null, 0, 0, DIR.NORTH, cells);
+        return cells;
+    }
+
+    static getCellsRecurse(currNode, parentCell, x, y, direction, allCells) {
+        // Make sure it doesnt intrsect any current
+
+        let newCell = {
+          type: currNode.type,
+          x: x,
+          y: y,
+          direction: direction,
+          parent: parentCell,
+          children: allCells.length === 0 ? [null,null,null,null] : [null,null,null]
+        }
+
+        allCells.push(newCell);
+
+        // Recursively create bodies of all the children cells
+        if (currNode.children) {
+          currNode.children.forEach((childNode, index) => {
+            if (!childNode) {
+              return;
+            }
+            let { pos, dir } = getNewCellPosFromParent(x, y, direction, index, 1);
+            let childCell = this.getCellsRecurse(childNode, newCell, pos.x, pos.y, dir, allCells);
+            newCell.children[index] = childCell;
+          });
+        }
+        return newCell;
+    }
+
 
     // Returns new DNA copy
     static copyDNA(DNA) {

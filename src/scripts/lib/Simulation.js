@@ -130,6 +130,12 @@ export default class Simulation {
 		return this.running;
 	}
 
+	// Used to change state while simulation is paused
+	immediateDispatch = (action) => {
+		if (this.running === false) {
+			runAction(action, this.universe, this.curr);
+		}
+	}
 
 	// Dispatch
 	// Delay is default 1 step, meaning any dispatch calls

@@ -16,7 +16,7 @@ import UnitBuilder from '../lib/UnitBuilder';
 import { getNewCellPosFromParent, DIR } from '../lib/Geometry.js';
 import Species from "../lib/Species";
 import DNA from '../lib/DNA';
-
+import Dna from "../lib/DnaClass";
 
 
 const resetCellState = [
@@ -37,6 +37,22 @@ const resetCellState = [
 ]
 
 
+
+function makeCell(parent, type, x, y, index, direction) {
+    return {
+    	parent,
+    	type,
+    	x,
+    	y,
+    	index,
+    	direction
+    }
+}
+
+
+const initialCellsState = [makeCell(null, "S", 0, 0, 0, DIR.NORTH)];
+
+
 export default class SpeciesEditor extends React.Component {
 
 	static defaultProps = {
@@ -44,40 +60,24 @@ export default class SpeciesEditor extends React.Component {
 
 	constructor(props) {
 		super(props);
-		
-		let dna = {
-			seedCell: 
-				{ 
-					type: "S", 
-					x:0, 
-					y:0, 
-					angle: 0,
-					direction: DIR.NORTH
-				}
-		}
-
-		let encodedDna = DNA.encodeDna(dna);
+	
+		console.log("The initial species", props.initialSpecies);
+		let dna = props.initialSpecies ? props.initialSpecies.dna : new Dna();
+		let encodedDna = dna.getEncodedDna();
+		let species = new Species(encodedDna);
 
 		this.state = {
-			seedCell: { type: "S", x:0, y:0, angle: 0 },
-			cells: [
-				{ 
-					type: "S", 
-					x:0, 
-					y:0, 
-					angle: 0,
-					direction: DIR.NORTH
-				}
-			],
+			dna: dna,
 			cellMenuOpen: false,
 			currDraggingCellType: null,
-			currSpecies: new Species(encodedDna)
+			currDraggingBranch: null,
+			currSpecies: species
 		}
 	}
 
 	save() {
 		
-		this.props.saveSpecies(this.state.cells);
+		this.props.saveSpecies(this.state.currSpecies);
 	}
 
 
@@ -89,11 +89,33 @@ export default class SpeciesEditor extends React.Component {
 	}
 
 	dragCellType(cellType) {
-		console.log("draging!", cellType);
 		this.setState({
 			currDraggingCellType: cellType
 		});
+		window.addEventListener("mouseup", this.stopDragCellType);
 	}
+
+	stopDragCellType = () => {
+		window.removeEventListener("mouseup", this.stopDragCellType);
+		this.setState({
+			currDraggingCellType: null
+		})
+	}
+
+	onDragBranch = (cell) => {
+		window.addEventListener("mouseup", this.onStopDragBranch);
+		this.setState({
+			currDraggingBranch: cell
+		})
+	}
+
+	onStopDragBranch = () => {
+		window.removeEventListener("mouseup", this.onStopDragBranch);
+		this.setState({
+			currDraggingBranch: null
+		});
+	}
+
 
 	addCell() {
 
@@ -112,63 +134,28 @@ export default class SpeciesEditor extends React.Component {
 
 	}
 
-	dropOnCell(cell) {
+	dropOnCell(parentCell, cellIndex) {
+		console.log("Cropping on cell", parentCell, cellIndex);
 		if (this.state.currDraggingCellType) {
-
-			let newCell = Object.assign({}, cell, { type: this.state.currDraggingCellType.id });
-			let parentChildren = newCell.parent.children || [null,null];
-
-			parentChildren[newCell.index] = newCell;
-			
-			
-			let arr = this.state.cells;
-			arr.push(newCell);
-
-			let encodedDna = DNA.encodeDna({seedCell: arr[0]});
-			let species = new Species(encodedDna);
-
+			let { dna } = this.state;
+			dna.addChild(parentCell, this.state.currDraggingCellType.id, cellIndex);
+			let species = new Species(dna.getEncodedDna());
 			this.setState({
-				cells: arr,
+				dna: dna,
 				currDraggingCellType: null,
-				currSpecies: species 
+				currSpecies: species
 			});
-
 		}
 
+		else if (this.state.currDraggingBranch) {
+
+			console.log("dropped branch!!!");
+
+
+		}
 	}
 
 
-	getChildFromParent(parentCell, index) {
-		let cellMargin = 100;
-		let angle = parentCell.angle;
-		let angleOffset;
-
-		//let newPos = UnitBuilder.transformPosFromIndex(parentCell.x, parentCell.y, index, cellMargin); 	
-		let { pos, dir } = getNewCellPosFromParent(parentCell.x, parentCell.y, parentCell.direction, index, cellMargin);
-
-        // Check if already exists
-        let cells = this.state.cells;
-
-        for (let i = 0; i < cells.length; i++) {
-        	let cell = cells[i];
-        	if (Math.round(cell.x) ===  Math.round(pos.x) &&
-        		Math.round(cell.y) ===  Math.round(pos.y)) {
-        		console.log("found intersecting");
-        		return null;
-        	}
-        }
-       
-        let cell = {
-        	parent: parentCell,
-        	type: null,
-        	x: pos.x,
-        	y: pos.y,
-        	angle: angleOffset,
-        	index: index,
-        	direction: dir
-        }
-        return cell;
-	}
 
 	// Factory function for rendering svg components to draw the cells
 	// in the species preview
@@ -178,40 +165,48 @@ export default class SpeciesEditor extends React.Component {
 		let { currDraggingCellType } = this.state;
 		let cellEls = [];
 		let connectionEls = [];
-
+		let cellMargin = 100;
 		let cellKey = 0;
 
 		cells.forEach((cell, cellIndex)=>{
-			cellEls.push(<CellFilled cell={cell} key={cellKey}/>);
-			if (!cell.children) {
-				cell.children = (cellIndex === 0) ? [null,null,null,null] : [null, null,null];
-			}
+			const parentCoord = { x: cell.x*cellMargin, y: cell.y*cellMargin }
+			cellEls.push(
+				<CellFilled 
+					x={parentCoord.x} 
+					y={parentCoord.y} 
+					type={cell.type} 
+					key={cellKey}
+					cell={cell}
+					onDrag={this.onDragBranch}
+				/>
+			);
 			cell.children.forEach((child, index)=> {
-				if (child) {
-					connectionEls.push(<path className="species-editor__path--connected" d={"M" + cell.x + " " + cell.y + " L" + child.x + " " + child.y}></path>);
-					return;
-				}
-				else {
+				
+// Check if the cell type allows children here
+				let parentCellType = CellTypes[cell.type];
+				if (parentCellType.connections && parentCellType.connections[index]) {
+					const { pos, dir } = getNewCellPosFromParent(parentCoord.x, parentCoord.y, cell.direction, index, cellMargin);
+					connectionEls.push(
+						<path 
+							className={ child ? "species-editor__path--connected" : "species-editor__path" }
+							d={"M" + parentCoord.x + " " + parentCoord.y + " L" + pos.x + " " + pos.y}>
+						</path>
+					);
 
-					cellKey++;
-
-					// Check if the cell type allows children here
-					let parentCellType = CellTypes[cell.type];
-
-					if (parentCellType.connections && parentCellType.connections[index]) {
-						let newChild = this.getChildFromParent(cell, index);
-						if (newChild) {
-							connectionEls.push(<path className="species-editor__path"  d={"M" + cell.x + " " + cell.y + " L" + newChild.x + " " + newChild.y}></path>);
-							cellEls.push(
-								<CellEmpty 
-								cell={newChild}
+					if (child === null) {
+						cellKey++;
+						cellEls.push(
+							<CellEmpty 
+								x={pos.x}
+								y={pos.y}
+								cellIndex={index}
+								parentCell={cell}
 								onClick={this.openCellMenu.bind(this)} 
 								onDrop={this.dropOnCell.bind(this)}
 								isDragging={currDraggingCellType !== null}
 								key={cellKey} 
-								/>
-							)
-						}
+							/>
+						)
 					}
 				}
 			});
@@ -224,18 +219,32 @@ export default class SpeciesEditor extends React.Component {
 
 	render() {
 
-		let { cells, seedCell, currSpecies } = this.state;
+		let { 
+			cells, 
+			seedCell, 
+			currSpecies,
+			currDraggingBranch,
+			currDraggingCellType, 
+			dna 
+		} = this.state;
 		//let { cellTypes } = this.props;
 
-		let cellComps = this.getCellComps(cells);
+		let cellComps = this.getCellComps(dna.cells);
 
 		let cellTypes = Object.keys(CellTypes).map((k) => CellTypes[k]).filter(type => type.id !== "S");
 		let classnames = ClassNames({
 			"species-editor": true,
-			"species-editor--cell-menu-open": this.state.cellMenuOpen
+			"species-editor--cell-menu-open": this.state.cellMenuOpen,
+			"species-editor--dragging": currDraggingBranch || currDraggingCellType
 		})
+
+		let currDraggingType = currDraggingCellType ? currDraggingCellType.id : null;
+
 		return (
 			<div className={classnames}>
+				<CellDragPreview
+					cellType={currDraggingType}
+				/>
 				<div className="species-editor__close" onClick={this.props.closeSpeciesEditor}>&#215;</div>
 				<div className="species-editor__heading">
 					<h1>Species Editor</h1>
@@ -250,7 +259,7 @@ export default class SpeciesEditor extends React.Component {
 
 							cellTypes.map((cellType, index) => {
 								return (
-									<CellMenuItem key={index} onDrag={this.dragCellType.bind(this)} addCell={this.addCell.bind(this)} cellType={cellType} key={cellType.id} />
+									<CellMenuItem onDrag={this.dragCellType.bind(this)} addCell={this.addCell.bind(this)} cellType={cellType} key={cellType.id} />
 								)
 							})
 						}
@@ -316,7 +325,7 @@ class CellEmpty extends React.Component {
 		}
 	}
 
-	onDragEnter = (e) => {
+	onMouseOver = (e) => {
 		if (this.props.isDragging && !this.state.draggingOver) {
 			this.setState({
 				draggingOver: true
@@ -325,8 +334,7 @@ class CellEmpty extends React.Component {
 	}
 
 
-	onDragLeave = (e) => {
-		console.log("mouse leave");
+	onMouseOut = (e) => {
 		if (this.props.isDragging) {
 			this.setState({
 				draggingOver: false
@@ -340,14 +348,16 @@ class CellEmpty extends React.Component {
 
 	onDrop(e) {
 		e.preventDefault();
-		this.props.onDrop(this.props.cell);
+		e.stopPropagation();
+		console.log("mouse up that fucker");
+		this.props.onDrop(this.props.parentCell, this.props.cellIndex);
 		this.setState({
 			draggingOver: false
 		})
 	}
 
 	render() {
-		let cell = this.props.cell;
+		let { x, y } = this.props;
 		let classnames = ClassNames({
 			'species-editor__cell-empty': true,
 			'species-editor__cell-empty--hover': this.state.draggingOver
@@ -355,14 +365,12 @@ class CellEmpty extends React.Component {
 		return (
 			<circle 
 				className={classnames}
-				cx={cell.x}
-				cy={cell.y}
+				cx={x}
+				cy={y}
 				r="40" 
-				onDragEnter={this.onDragEnter}
-				onDragLeave={this.onDragLeave}
-				onDragOver={this.onDragOver}
-				onClick={this.props.onClick} 
-				onDrop={this.onDrop.bind(this)}
+				onMouseUp={this.onDrop.bind(this)}
+				onMouseOver={this.onMouseOver}
+				onMouseOut={this.onMouseOut}
 			/>
 		);
 	}
@@ -370,25 +378,32 @@ class CellEmpty extends React.Component {
 
 
 class CellFilled extends React.Component {
-	
+
+	onDragStart = (e) => {
+		console.log("drag start goddamit");
+		this.props.onDrag(this.props.cell);
+	}	
 
 	onDragOver(e) {
 		e.preventDefault();
 	}
 	render() {
-		let cell = this.props.cell;
-		let color = CellTypes[cell.type].bodyColor;
-
+		//let cell = this.props.cell;
+		//let color = CellTypes[cell.type].bodyColor;
+		let { x, y, type } = this.props;
+		let color = CellTypes[type].bodyColor;
 		return (
 			<circle 
 				className="species-editor__cell" 
-				cx={cell.x}
-				cy={cell.y}
+				cx={x}
+				cy={y}
 				r="40"
 				fill={color} 
 				onDragOver={this.onDragOver}
+				onMouseDown={this.onDragStart}
 				onClick={this.props.onClick} 
 				onDrop={this.props.onDrop}
+				draggable={true}
 			/>
 		);
 	}
@@ -410,7 +425,7 @@ class CellMenuItem extends React.Component {
 		let { cellType } = this.props;
 		let color = cellType.bodyColor;
 		return (
-			<div className="species-editor__cell-menu-item" onDragStart={this.onDragStart.bind(this)} draggable={true}>
+			<div className="species-editor__cell-menu-item" onMouseDown={this.onDragStart.bind(this)}>
 				<div className="species-editor__cell-menu-cell" style={{ background: color }} onClick={this.props.onClick}>
 					{ cellType.id }
 				</div>
@@ -418,3 +433,69 @@ class CellMenuItem extends React.Component {
 		)
 	}
 }
+
+
+class CellDragPreview extends React.Component {
+
+	constructor(props) {
+		super(props);
+		this.isFollowing = false;
+		this.pos = {
+			x:0, y: 0
+		}
+	}
+
+	componentDidMount() {
+		window.addEventListener("mousemove", this.windowMouseMove);
+		if (this.props.cellType) {
+			this.startFollow();
+		}
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener("mousemove", this.windowMouseMove);
+		this.stopFollow();
+	}
+
+	componentWillReceiveProps(nextProps) {
+		if (this.props.cellType !== nextProps.cellType) {
+			if (nextProps.cellType === null) {
+				this.stopFollow();
+			}
+			else {
+				this.startFollow();
+			}
+		}
+	}
+
+	startFollow() {
+		this.isFollowing = true;
+		this.el.style.transform = "translate(" + this.pos.x + "px," + this.pos.y +"px)";
+		this.el.style.display = "block";
+	}
+	stopFollow() {
+		this.isFollowing = false;
+		this.el.style.display = "none"; 
+	}
+
+	windowMouseMove = (e) => {
+		this.pos = {x: e.pageX, y: e.pageY};
+		if (this.isFollowing) {
+			this.el.style.transform = "translate(" + this.pos.x + "px," + this.pos.y +"px)";
+		}
+	}
+
+
+	render() {
+		const style = this.props.cellType ? {
+			background: CellTypes[this.props.cellType].bodyColor
+		} : null;
+		return(
+			<div className="cell-drag-preview" ref={(el)=> {this.el = el}} style={style}>
+				{this.props.cellType}
+			</div>
+		)
+	}
+}
+
+

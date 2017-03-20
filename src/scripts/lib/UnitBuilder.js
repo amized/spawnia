@@ -7,6 +7,7 @@ import { Body, Bodies, Query, Composite } from "matter-js"
 import DNA from "./DNA"
 import _ from 'underscore'
 import { getNewCellPosFromParent, DIR } from "./Geometry";
+import Dna from "./DnaClass";
 export default class UnitBuilder {
 
 
@@ -48,7 +49,7 @@ export default class UnitBuilder {
    * Method for creating a matter js body object that wraps some child cells
    */
   static buildParentBody(cells) {
-  let body = Body.create({
+    let body = Body.create({
       label: "unit:",
       restitution: 0.5,
       friction: 0.0,
@@ -67,8 +68,8 @@ export default class UnitBuilder {
       render: {}
     });
 
-  //let cellBodies = cells.map(item => { return item.body });
-  //let c = Composite.create();
+    //let cellBodies = cells.map(item => { return item.body });
+    //let c = Composite.create();
 
     Body.setParts(body, cells);
     /*
@@ -93,21 +94,30 @@ export default class UnitBuilder {
     return body;
   }
 
- /**
+  /**
    * Creates a matured body from the given dna
    */
   static buildBody(dna, x, y) {
-
     if (typeof dna === "string") {
       // Decode
-      dna = DNA.decodeDna(dna);
+      let encodedDna = dna;
+      dna = new Dna(encodedDna);
     }
-
-    let cells = this.buildAllCells(dna, x, y);
-
-   let body = this.buildParentBody(this.buildCellBodies(cells, x, y));
-   return body;
+    let cells = dna.cells;
+    let body = this.buildParentBody(this.buildCellBodies(cells, x, y));
+    return body;
   }
+
+  /**
+   * Creates bodies from the cells blueprint
+   */
+  static buildCellBodies(cells, x, y) {
+    const cellMargin = 10;
+    return cells.map(cell=> {
+      return this.buildCellBody(cell, x + (cell.x * cellMargin), y + (cell.y * cellMargin))
+    })
+  }
+
 
   /**
    * Creates bodies for this cell and all it's decendant cells in the dna tree
@@ -137,19 +147,12 @@ export default class UnitBuilder {
   /**
    * Creates a cell object for the seed
    */
-  static buildSeedCell(dna, x, y) {
-    let cell = dna.seedCell;
-    //let newCell = new Cell(x, y, cell.type, 0);
+  static buildSeedCell(x, y) {
+    let cell = {
+      type: "S"
+    }
     let newCell = this.buildCellBody(cell, x, y);
     return this.buildParentBody([newCell]);      
-  }
-
-  
-
-  static buildCellBodies(cells, x, y) {
-    return cells.map(cell=> {
-      return this.buildCellBody(cell, x + cell.offsetX, y + cell.offsetY)
-    })
   }
 
 
@@ -157,6 +160,7 @@ export default class UnitBuilder {
    * Create body for the cell
    */
   static buildCellBody(cell, x, y) {
+
     let cellType = CellTypes[cell.type];
     let color = cellType ? cellType.bodyColor : "#FFFFFF";
     let cellMargin = 10;
@@ -336,44 +340,7 @@ export default class UnitBuilder {
     return vertices;
   }
 
-
-
-  static transformPosFromIndex(x, y, index, cellMargin) {
-    switch (index) {
-      // left
-      case 0:
-        return {
-          x: x - cellMargin,
-          y: y
-        }
-      // up
-      case 1:
-        return {
-          x: x,
-          y: y - cellMargin
-        }            
-      // right
-      case 2:
-        return {
-          x: x + cellMargin,
-          y: y
-        }            
-      // down   
-      case 3: 
-        return {
-          x: x,
-          y: y + cellMargin
-        }                                 
-      default:
-        console.log("Transforming index to position: INDEX INVALID - ", index);
-        return {
-          x, y
-        }       
-    }      
-  }
-
-
- /**
+  /**
    * Creates bodies for this cell and all it's decendant cells in the dna tree
    */
   static buildCellRecurse(cell, x, y, angle, direction, allCells, cellBodies) {
@@ -408,8 +375,6 @@ export default class UnitBuilder {
         }
 
         let angleOffset = 0;
-
-        //let newPos = this.transformPosFromIndex(x, y, index, cellMargin);
         let { pos, dir } = getNewCellPosFromParent(x, y, direction, index, cellMargin);
         /*
         let newPos = {

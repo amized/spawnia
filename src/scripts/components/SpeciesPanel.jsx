@@ -42,8 +42,7 @@ export default class SpeciesPanel extends React.Component {
 		*/
 		
 		//let allSpecies = this.props.universe.speciesData.getSpeciesArr();
-		let allSpecies = speciesManager.getSpeciesArr(); 
-		console.log("HEres all species:", allSpecies);
+		let allSpecies = speciesManager.getSpeciesArr();
 		return (
 			<div className="species-panel">
 				<div className="species-panel__heading">Species</div>

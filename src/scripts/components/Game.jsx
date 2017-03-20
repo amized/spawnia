@@ -19,9 +19,10 @@ import {
 } from "../constants";
 import { getCanvasDimensions } from "../lib/Utils/utils";
 import Modal from "./Modal";
-import { startGame, startSpeciesPlacement } from "../actions";
+import { startGame, startSpeciesPlacement, startSimulation } from "../actions";
 import SpeciesEditor from "./SpeciesEditor.jsx"
-
+import NotificationBar from "./NotificationBar"
+import DnaBlueprint from "./DnaBlueprint"
 
 class Game extends React.Component {
 
@@ -65,6 +66,13 @@ class Game extends React.Component {
             this.setState({
                 speciesPlacementHelperOpen: true
             })
+        }
+        else if (nextProps.gameState.gameStage === GAME_STAGE_WATCHING) {
+            this.setState({
+                showStartSimulationDialog: false
+            });
+
+            this.props.simulation.start();
         }
     }
 
@@ -205,27 +213,6 @@ class Game extends React.Component {
 
     onMapClick(pos) {
 
-        if (this.state.newSpecies) {
-
-            let dna = {
-                seedCell: this.state.newSpecies[0]
-            }
-
-            let encodedDna = DNA.encodeDna(dna);
-
-            this.props.simulDispatch({
-                type: "ADD_UNIT",
-                dna: encodedDna,
-                x: pos.x,
-                y: pos.y,
-                id: uuid.v1()
-            });
-            
-            this.setState({
-                newSpecies: null
-            })
-            
-        }
         
 
 
@@ -235,6 +222,36 @@ class Game extends React.Component {
                 selectedSpecies: null
             })
         }
+    }
+
+
+    onMapDoubleClick(pos) {
+        if (this.state.newSpecies) {
+            let encodedDna = this.state.newSpecies.encodedDna;
+            this.props.simulation.immediateDispatch({
+                type: "ADD_UNIT",
+                dna: encodedDna,
+                x: pos.x,
+                y: pos.y,
+                id: uuid.v1()                
+            })
+            /*
+            this.props.simulDispatch({
+                type: "ADD_UNIT",
+                dna: encodedDna,
+                x: pos.x,
+                y: pos.y,
+                id: uuid.v1()
+            });
+            */
+
+            //this.props.dispatch(startSimulation());
+            
+            this.setState({
+                newSpecies: null,
+                showStartSimulationDialog: true
+            })   
+        }        
     }
 
 
@@ -262,10 +279,15 @@ class Game extends React.Component {
 
     saveNewSpecies = (species) => {
         console.log("saving species", species);
+
         this.setState({
             newSpecies: species
         });
         this.props.dispatch(startSpeciesPlacement(species));
+    }
+
+    editSelectedSpecies = () => {
+        this.startGame();
     }
 
     closeSpeciesEditor = () => {
@@ -295,13 +317,14 @@ class Game extends React.Component {
         this.props.dispatch(startSpeciesPlacement());
     }
 
+    startSimulation = () => {
+        this.props.dispatch(startSimulation());
+    }
+
     render () {
 
         let { dispatch, getCurrStep, universe, gameState } = this.props;
         const { gameStage } = gameState;
-
-        console.log("The gamestate is!", gameState);
-
         let mapSize = universe.getMapSize();
         let { 
             selectedUnit, 
@@ -319,12 +342,26 @@ class Game extends React.Component {
         const showNewGameDialog = gameStage === GAME_STAGE_NOGAME;
         const speciesEditorOpen = gameStage === GAME_STAGE_BUILDINGSPECIES;
         const showPlaceSpeciesDialog = gameStage === GAME_STAGE_PLACESPECIES;
+        const showStartSimulationDialog = this.state.showStartSimulationDialog;
+
+        const editInitialSpecies = newSpecies;
+
         if (hoveredUnit) {
             style.cursor="pointer";
         }
 
     	return (
             <div style={style}>
+                {
+                    newSpecies ?
+                        <NotificationBar show={gameStage === GAME_STAGE_PLACESPECIES}>
+                           <DnaBlueprint dna={newSpecies.encodedDna} width={40} height={40} /> 
+                           Double click on the map to place your new species!
+                           <button onClick={this.editSelectedSpecies}>Edit</button>
+                        </NotificationBar>
+                    :
+                        null
+                }
                 <World 
                     universe={this.props.universe}
                     engine={this.props.engine}
@@ -332,6 +369,7 @@ class Game extends React.Component {
                     onUnitClick={this.onUnitClick.bind(this)}
                     onUnitHover={this.onUnitHover.bind(this)}
                     onMapClick={this.onMapClick.bind(this)}  
+                    onMapDoubleClick={this.onMapDoubleClick.bind(this)}
                     mapSize={mapSize}  
                     updateViewportBB={this.updateViewportBB}  
                     onZoom={this.onZoom} 
@@ -358,6 +396,7 @@ class Game extends React.Component {
                         <SpeciesEditor 
                             closeSpeciesEditor={this.closeSpeciesEditor}
                             saveSpecies={this.saveNewSpecies}
+                            initialSpecies={editInitialSpecies}
                         />
                     :
                         null
@@ -380,6 +419,16 @@ class Game extends React.Component {
                 </Modal>
 
                 <Modal
+                    show={showStartSimulationDialog}
+                >
+                  <h2>We're ready to go!</h2>
+                  <p>Congratulations you have now placed your first species into 
+                  the world of Spawnia. When you're ready to start, click below.
+                  </p>
+                  <button onClick={this.startSimulation}>Start</button>
+                </Modal>
+
+                {/*<Modal
                     show={speciesPlacementHelperOpen}
                 >
                   <h2>You have designed your first species!</h2>
@@ -387,7 +436,7 @@ class Game extends React.Component {
                   how well it can thrive.</p>
                   <hr />
                   <button onClick={this.closeSpeciesPlacementHelper}>Place my species</button>
-                </Modal>
+                </Modal>*/}
 
             </div>
     		

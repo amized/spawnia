@@ -199,6 +199,10 @@ export default class SpawniaWorld extends React.Component {
         window.addEventListener("mouseup", this.onStopMouseDrag);
     }
 
+    onDoubleClick = (e) => {
+        this.props.onMapDoubleClick(this.currMousePos);
+    }
+
     onStopMouseDrag = (e) => {
         window.removeEventListener("mousemove", this.onMapDrag);
         window.removeEventListener("mouseup", this.onStopMouseDrag);
@@ -244,16 +248,21 @@ export default class SpawniaWorld extends React.Component {
         }
     	return (
             <div className="map-wrapper">
-                <div className="map" ref="container" key={1}>
+                <div 
+                    className="map" 
+                    ref="container" 
+                    key={1}
+                    onMouseDown={this.onMouseDown}
+                    onMouseUp={this.onMouseUp}
+                    onMouseMove={this.onMouseMove}
+                    onDoubleClick={this.onDoubleClick}
+                >
                     <div className="map-bg-1" style={bg1style}>
                     </div>
                     <canvas 
                         width={canvasWidth} 
                         height={canvasHeight} 
                         ref={(el)=>{this.canvas=el;}} 
-                        onMouseDown={this.onMouseDown}
-                        onMouseUp={this.onMouseUp}
-                        onMouseMove={this.onMouseMove}
                     />
                 </div>
                 {

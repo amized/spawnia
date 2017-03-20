@@ -22,3 +22,10 @@ export function startSpeciesPlacement(species) {
 		species: species
 	}
 }
+
+export function startSimulation() {
+	return {
+		type: "SET_GAME_STAGE",
+		value: GAME_STAGE_WATCHING
+	}
+}

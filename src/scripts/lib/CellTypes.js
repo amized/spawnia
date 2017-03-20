@@ -137,13 +137,13 @@ CellTypes.R = {
 
 
     if (startedReproductionAt < step - reproductionSteps) {
-      let dna = DNA.copyDNA(speciesManager.getDecodedDna(unit.speciesId));
+      let dna = speciesManager.getSpecies(unit.speciesId).dna;
       dispatch({
         type: "REPRODUCE_UNIT",
         unitId: unit.id,
         cellIndex: cellIndex,
         newId: uuid.v1(),
-        dna: DNA.encodeDna(dna),
+        dna: dna.getEncodedDna(),
         bornAt: step
       });
 

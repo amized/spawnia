@@ -46,43 +46,6 @@ export default function makeWorld(dispatch) {
 
 
 	*/
-	dispatch({
-		type: "ADD_STATIC_BLOCK",
-		x: 500,
-		y: 300,
-		width: 20,
-		height: 200
-	});
-
-	dispatch({
-		type: "ADD_STATIC_BLOCK",
-		x: 200,
-		y: 200,
-		width: 20,
-		height: 200
-	});
-
-	dispatch({
-		type: "ADD_STATIC_BLOCK",
-		x: 500,
-		y: 500,
-		width: 300,
-		height: 30
-	});
-
-	dispatch({
-		type: "ADD_STATIC_CIRCLE",
-		x: 200,
-		y: 300,
-		r: 20
-	});
-
-	dispatch({
-		type: "ADD_STATIC_CIRCLE",
-		x: 100,
-		y: 400,
-		r: 20
-	});	
 
 	let unitid = uuid.v1();
 	let now = Date.now();
@@ -273,6 +236,47 @@ export default function makeWorld(dispatch) {
 		y: 700,
 		id: uuid.v1()
 	});
+
+
+	dispatch({
+		type: "ADD_STATIC_BLOCK",
+		x: 500,
+		y: 300,
+		width: 20,
+		height: 200
+	});
+
+	dispatch({
+		type: "ADD_STATIC_BLOCK",
+		x: 200,
+		y: 200,
+		width: 20,
+		height: 200
+	});
+
+	dispatch({
+		type: "ADD_STATIC_BLOCK",
+		x: 500,
+		y: 500,
+		width: 300,
+		height: 30
+	});
+
+	dispatch({
+		type: "ADD_STATIC_CIRCLE",
+		x: 200,
+		y: 300,
+		r: 20
+	});
+
+	dispatch({
+		type: "ADD_STATIC_CIRCLE",
+		x: 100,
+		y: 400,
+		r: 20
+	});	
+
+
 
 	/*
 

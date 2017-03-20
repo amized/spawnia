@@ -150,33 +150,11 @@ class Unit extends MapObject {
         return this.body.parts[index+1];
     }
 
-
-    /*
-    build(dna, x, y) {
-        this.DNA = dna;
-        this.encodedDna = DNA.encodeDna(dna);
-        // Builds all the cells and ads them into bodies array
-        this.cells = [UnitBuilder.buildSeedCell(dna, x, y)];
-
-        this.body = UnitBuilder.buildParentBody(this.cells);
-
-        this.body.label = "unit:" + this.id;
-        this.body.render.encodedDna = this.encodedDna;
-
-        this.energy = UNIT_START_ENERGY_PER_CELL * this.getCellCount();
-        // The initial storage is their start energy, they cant get more storage
-        // until the unit matures with fat cells
-        this.energyStorage = 0;
-        this.lifeState = LIFESTATE_CHILD;
-        this.bornAt = Date.now();
-        return this.body;
-    }
-    */
-
-
     // Creates the cells
-    mature(newCells, body) {
-        this.cells = newCells;
+    mature(body) {
+        // Clone the cells on the dna
+        this.cells = this.species.dna.cells.map(cell => Object.assign({},cell));
+        //this.cells = newCells;
         this.cells.forEach(cell => {
             if (CellTypes[cell.type].onCreate) {
                 CellTypes[cell.type].onCreate(cell, this);

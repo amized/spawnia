@@ -41,10 +41,6 @@ class SpeciesManager {
 		return this.species[speciesId].encodedDna;
 	}
 
-	getDecodedDna(speciesId) {
-		return this.species[speciesId].decodedDna;
-	}
-
 	getCellCount(speciesId) {
 		return DNA.getCellCount(this.species[speciesId].decodedDna.seedCell);
 	}

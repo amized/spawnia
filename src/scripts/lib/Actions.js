@@ -179,9 +179,7 @@ function runAction(action, universe, currStep) {
 		case "ADD_UNIT": {
 			
 			const { dna, x, y } = action;
-
-			let dcdDna = DNA.decodeDna(dna);
-			let body = UnitBuilder.buildSeedCell(dcdDna, x, y);
+			let body = UnitBuilder.buildSeedCell(x, y);
 			let unit = new Unit(body, action.id);
 			let speciesId = speciesManager.add(dna);
 			unit.spawn(speciesId, [], null, currStep);
@@ -197,10 +195,10 @@ function runAction(action, universe, currStep) {
 				return;
 			}
 	    	const v = unit.body.velocity;
-			const cells = UnitBuilder.buildAllCells(unit.getDecodedDna());
-			const cellBodies = UnitBuilder.buildCellBodies(cells, unit.body.position.x, unit.body.position.y);
-            const newBody = UnitBuilder.buildParentBody(cellBodies);
-	    	unit.mature(cells, newBody);	    	      
+			const species = unit.getSpecies();
+			const newBody = UnitBuilder.buildBody(species.dna, unit.body.position.x, unit.body.position.y);
+
+	    	unit.mature(newBody);	    	      
 			universe.replaceMapObjectBody(unit.id, newBody);
 
 			Body.setMass(newBody, 20);
@@ -243,9 +241,8 @@ function runAction(action, universe, currStep) {
 		    cell.startedReproductionAt = null;
 
 		    let speciesId = speciesManager.add(dna);
-			let decodedDna = speciesManager.getDecodedDna(speciesId);
 			let cellBody = unit.getCellBody(cellIndex);
-			let body = UnitBuilder.buildSeedCell(decodedDna, cellBody.position.x, cellBody.position.y);
+			let body = UnitBuilder.buildSeedCell(cellBody.position.x, cellBody.position.y);
 
 			let angle = getAngleOfDirection(cell.direction);
 			
