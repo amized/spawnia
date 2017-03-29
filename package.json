@@ -111,6 +111,7 @@
     "react-overlays": "^0.6.12",
     "sockjs": "^0.3.18",
     "sockjs-client": "^1.1.1",
+    "tinycolor2": "^1.4.1",
     "underscore": "^1.8.3",
     "uuid": "^2.0.3"
   }

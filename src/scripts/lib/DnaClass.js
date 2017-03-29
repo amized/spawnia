@@ -59,6 +59,11 @@ function decodeDna(encodedDna) {
 
 class Dna {
 
+
+    static makeCell(type) {
+        return new Cell(type, 0, 0, DIR.NORTH, null, [null,null,null]);
+    }
+
     constructor(encodedDna) {
 
         const seedCell = new Cell("S", 0,0,DIR.NORTH, null, [null,null,null,null]);
@@ -96,6 +101,8 @@ class Dna {
         return this.cells.length;
     }
 
+
+
     addChild(cell, type, index) {
         let { pos, dir } = getNewCellPosFromParent(cell.x, cell.y, cell.direction, index, 1);
         
@@ -115,6 +122,103 @@ class Dna {
         return newChild;     
     }
 
+    detachChild(cell) {
+        let parent = cell.parent;
+        if (parent) {
+            let oldIndex = parent.children.indexOf(cell);
+            parent.children[oldIndex] = null;  
+            cell.parent = null;         
+        }
+        this.removeBranch(cell);
+        return cell;
+    }
+
+    removeBranch(branch) {
+        
+        if (branch === null) {
+            return;
+        }
+        
+        let index = this.cells.indexOf(branch);
+        if (index !== -1) {
+            this.cells.splice(index, 1);
+        }
+
+        branch.children.forEach(child=> {
+            this.removeBranch(child);
+        })
+    }
+
+    isBranchInCells(branch) {
+        if (!branch) {
+            return false;
+        }
+        if (this.cells.indexOf(branch) !== -1) {
+            return true;
+        }
+
+        let i;
+        let result = false;
+
+        for (i = 0; i < branch.children.length; i++) {
+            let child = branch.children[i];
+            result = result || this.isBranchInCells(child);
+        }
+        return result
+    }
+
+    attachBranchToCell(branch, cell, index) {
+
+        // Don't override
+        if (cell.children && cell.children[index] !== null) {
+            return false;
+        }
+
+        // Not allowed to add a branch to one of it's children
+        if (this.isBranchInCells(branch)) {
+            console.log("Branch is already is cellls!!!!");
+            return false;
+        }
+
+        // Remove branch
+        cell.children[index] = branch;
+        branch.parent = cell;
+        this.recalculateBranchPositions(branch, cell, index);
+        return true;
+    }
+
+    posOccupied(pos) {
+        let index = this.cells.findIndex(cell => cell.x == pos.x && cell.y == pos.y);
+        return index !== -1;
+    }
+
+    recalculateBranchPositions(branch, parent, cellIndex) {
+        if (!branch) {
+            return;
+        }
+        let { pos, dir } = getNewCellPosFromParent(parent.x, parent.y, parent.direction, cellIndex, 1);
+        
+        if (this.posOccupied(pos)) {
+            // If the position is occupied we need to debranch this
+            //this.detachChild(branch);
+            console.log("Recalculate branch positions: Is position occupied, TRUE ", pos);
+            parent.children[cellIndex] = null;
+            branch.parent = null;
+            return;
+        }
+
+        branch.direction = dir;
+        branch.x = pos.x;
+        branch.y = pos.y;
+        // Make sure it's registered
+        if (this.cells.indexOf(branch) === -1) {
+            this.cells.push(branch);
+        }
+        branch.children.forEach((child, index) => {
+            this.recalculateBranchPositions(child, branch, index);
+        })
+    } 
+
 }
 
 
@@ -128,6 +232,26 @@ class Cell {
         this.direction = direction;
         this.parent = parent;
         this.children = children;
+    }
+
+    copy() {
+        let newCell = new Cell(this.type, this.x, this.y, this.direction, this.parent, null);
+        let children = this.children.map(child=> {
+            if (!child) {
+                return null
+            }
+            let newChild = child.copy();
+            newChild.parent = newCell;
+            return newChild;
+        });
+        newCell.children = children;
+        return newCell;
+    }
+
+    getIndex() {
+        return this.parent ? 
+            this.parent.children.findIndex(c => c === this)
+            : null;
     }
 }
 

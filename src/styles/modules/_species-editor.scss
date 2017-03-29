@@ -69,11 +69,11 @@ $canvas-background: #222;
 
 
 .species-editor__cell-menu {
-	flex: 0 0 200px;
 	//max-width: 200px;
 	background: #444;
-	padding: 30px;
+	padding: 15px;
 	box-shadow: 2px 2px 2px 1px rgba(#000, 0.2);
+	position: relative;
 	.species-editor--cell-menu-open & {
 		display: block;
 	}
@@ -128,9 +128,9 @@ $canvas-background: #222;
 
 .species-editor__cell-empty {
 	stroke: #999;
-	stroke-width: 3px;
+	stroke-width: 2px;
 	fill: $canvas-background;
-	stroke-dasharray: 3, 3;
+	stroke-dasharray: 3, 8;
 	cursor: pointer;
 	transition: stroke 0.3s;
 	&--hover {
@@ -138,19 +138,60 @@ $canvas-background: #222;
 	}
 }
 
+@keyframes cellPopIn {
+	0% {
+		opacity: 0;
+		transform: scale(1);
+	}
+
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes cellTextPopIn {
+	0% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
+}
+
+.species-editor__cell-wrapper {
+	cursor: grab;
+	.species-editor--dragging & {
+		cursor: grabbing;
+	}
+}
+
 .species-editor__cell {
 	stroke: #000;
 	stroke-width: 3px;
-	cursor: pointer;
+	cursor: inherit;
+	animation: cellPopIn 0.5s;
+	transform-origin: 50% 50%;
+}
+
+.species-editor__cell-text {
+	font-size: 30px;
+	cursor: inherit;
+	opacity: 0;
+	animation: cellTextPopIn 0.5s 0.3s forwards;
+	transform-origin: 50% 50%;
+	pointer-events: none;
 }
 
 
 
 .species-editor__cell-menu-list {
-	margin-top: 20px;
+	margin-top: 0px;
 	@include display(flex);
 	@include justify-content(center);
-	@include flex-wrap(wrap);
+	@include flex-direction(column);
+	//@include flex-wrap(wrap);
 	width: 100%;
 }
 
@@ -174,12 +215,52 @@ $canvas-background: #222;
 
 .species-editor__path {
 	stroke: #999;
-	stroke-width: 5px;
+	stroke-width: 3px;
+    stroke-dasharray: 3, 3;
+
 }
 
 .species-editor__path--connected {
 	stroke: #FFF;
 	stroke-width: 5px;
+}
+
+
+/***** ---- Tooltip ---- *****/
+
+
+.species-editor__cell-menu-tooltip {
+	background: #000;
+	color: #FFF;
+	padding: 30px;
+	position: absolute;
+	top: 0;
+	left: 90px;
+	min-width: 300px;
+	p {
+		line-height: 1.5;
+		color: rgba(#fff, 0.5);
+		letter-spacing: 0.5px;
+	}
+
+	h2 {
+		font-size: 25px;
+		margin-bottom: 15px;
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+	}
+
+	.species-editor__cell-menu-cell {
+		//position: absolute;
+		top: 15px;
+		right: 15px;
+		font-size: 20px;
+		width: 30px;
+		height: 30px;
+		margin: 0px;
+		margin-right: 20px;
+	}
 }
 
 

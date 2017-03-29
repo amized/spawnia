@@ -263,6 +263,22 @@ export default function makeWorld(dispatch) {
 	});
 
 	dispatch({
+		type: "ADD_STATIC_BLOCK",
+		x: 800,
+		y: 500,
+		width: 40,
+		height: 1000
+	});
+
+	dispatch({
+		type: "ADD_STATIC_BLOCK",
+		x: 1200,
+		y: 300,
+		width: 30,
+		height: 600
+	});
+
+	dispatch({
 		type: "ADD_STATIC_CIRCLE",
 		x: 200,
 		y: 300,

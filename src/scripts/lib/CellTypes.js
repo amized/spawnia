@@ -6,6 +6,7 @@ import uuid from "uuid"
 import { Body, Query, Composite, Vector, World } from "matter-js"
 import { 
   ENERGY_COST_PER_CELL, 
+  ENERGY_STORAGE_PER_FAT,
   FOOD_GROWTH_RATE, 
   FOOD_EAT_RATE, 
   MATURATION_TIME, 
@@ -47,7 +48,8 @@ CellTypes.X = {
     true,
     true
   ],
-  allowedChildCellTypes: ALLOWED_CELLTYPE_ANY
+  allowedChildCellTypes: ALLOWED_CELLTYPE_ANY,
+  description: "The X joint allows you to connect an additional 3 cells."
 }
 
 
@@ -55,6 +57,8 @@ CellTypes.X = {
 // Grounding cell
 CellTypes.G = {
   name: "Grounding",
+  description: "The grounding cell will make your units to stick to the map, and slow to a halt if floating. " +
+              "The more grounding cells your unit has over all, the stronger the slowing effect.",
   id: "G",
   bodyColor: "#95969e",
   onCreate: function(cell, unit) {
@@ -66,6 +70,8 @@ CellTypes.G = {
 
 CellTypes.E = {
   name: "Eat",
+  description: "Eating cells allow your units to consume energy from energy pods (the big circles on the map). " +
+    "One eating cell will consume " + FOOD_EAT_RATE + " units of energy per cycle when it is placed over an energy pod.",
   id: "E",
   bodyColor: "#b2d572",
   onStep: function (step, cell, cellBody, unit, state, dispatch) {
@@ -104,6 +110,10 @@ CellTypes.E = {
 
 CellTypes.R = {
   name: "Reproduce",
+  description: "The reproduce cell is needed for your species to multiply. " +
+    "Each cell requires energy and time to reproduce, both which are proportional to " +
+    "the species's size. ",
+
   id: "R",
   bodyColor: "#cb8dbd",
   onStep: function (step, cell, cellBody, unit, state, dispatch) {
@@ -154,6 +164,8 @@ CellTypes.R = {
 
 CellTypes.F = {
   name: "Fat",
+  description: "Fat cells are needed for your units to store energy. Units cannot consume more " +
+    "than the maximum energy storage. Each fat cell stores " + ENERGY_STORAGE_PER_FAT + " units of energy.",
   id: "F",
   bodyColor: "#e4d088"
 }

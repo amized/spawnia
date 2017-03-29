@@ -5,6 +5,7 @@ import ReactDOM from "react-dom"
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import _ from "underscore"
 import DnaBlueprint from "./DnaBlueprint"
+import CellMenu from "./SpeciesEditor/CellMenu"
 import { 
 	ENERGY_COST_PER_CELL, 
 	UNIT_START_ENERGY_PER_CELL, 
@@ -17,7 +18,7 @@ import { getNewCellPosFromParent, DIR } from '../lib/Geometry.js';
 import Species from "../lib/Species";
 import DNA from '../lib/DNA';
 import Dna from "../lib/DnaClass";
-
+import tinycolor from "tinycolor2"
 
 const resetCellState = [
 	{
@@ -60,8 +61,6 @@ export default class SpeciesEditor extends React.Component {
 
 	constructor(props) {
 		super(props);
-	
-		console.log("The initial species", props.initialSpecies);
 		let dna = props.initialSpecies ? props.initialSpecies.dna : new Dna();
 		let encodedDna = dna.getEncodedDna();
 		let species = new Species(encodedDna);
@@ -69,9 +68,10 @@ export default class SpeciesEditor extends React.Component {
 		this.state = {
 			dna: dna,
 			cellMenuOpen: false,
-			currDraggingCellType: null,
 			currDraggingBranch: null,
-			currSpecies: species
+			currSpecies: species,
+			dragOrigin: null,
+			justPlacedLocation: null
 		}
 	}
 
@@ -88,71 +88,104 @@ export default class SpeciesEditor extends React.Component {
 		});
 	}
 
-	dragCellType(cellType) {
+	dragCellFromMenu(cellType) {
 		this.setState({
-			currDraggingCellType: cellType
+			currDraggingBranch: Dna.makeCell(cellType.id),
+			dragOrigin: "menu"
 		});
-		window.addEventListener("mouseup", this.stopDragCellType);
+		window.addEventListener("mouseup", this.onStopDrag);
 	}
 
-	stopDragCellType = () => {
-		window.removeEventListener("mouseup", this.stopDragCellType);
+	onStopDrag = () => {
+		window.removeEventListener("mouseup", this.onStopDrag);
+		// need to reattch branch
+		let { dragOrigin, dna, currDraggingBranch, toDetach } = this.state;
+
+		if (toDetach) {
+			dna.detachChild(toDetach);
+		}
+
+		if (typeof dragOrigin === "object") {
+			dna.attachBranchToCell(currDraggingBranch, dragOrigin.parent, dragOrigin.index);
+		}
+
 		this.setState({
-			currDraggingCellType: null
+			currDraggingBranch: null,
+			dna: dna, 
+			currSpecies: new Species(dna.getEncodedDna()),
+			dragOrigin: null,
+			toDetach: null
 		})
+	}
+
+	onCellMouseUp = (e, cell) => {
+		let { toDetach, currDraggingBranch } = this.state;
+		// In this case we leave toDetach
+		if (cell === toDetach) {
+			e.stopPropagation();
+			e.preventDefault();
+			this.setState({
+				currDraggingBranch: null,
+				currSpecies: new Species(this.state.dna.getEncodedDna()),
+				dragOrigin: null,
+				toDetach: null
+			})
+		}
+		// Otherwise event bubbles up to onStopDrag
 	}
 
 	onDragBranch = (cell) => {
-		window.addEventListener("mouseup", this.onStopDragBranch);
+		window.addEventListener("mouseup", this.onStopDrag);
+		let dragOrigin = this.state.dragOrigin;
+		if (dragOrigin === null) {
+			dragOrigin = { parent: cell.parent, index: cell.getIndex() }
+		}
+
 		this.setState({
-			currDraggingBranch: cell
+			currDraggingBranch: cell,
+			dragOrigin: dragOrigin,
+			toDetach: cell
 		})
 	}
 
-	onStopDragBranch = () => {
-		window.removeEventListener("mouseup", this.onStopDragBranch);
-		this.setState({
-			currDraggingBranch: null
-		});
-	}
+	onPullOffCell = (cell) => {
+		let { dna, toDetach } = this.state;
 
-
-	addCell() {
-
-	}
-
-	createCell(cellType, x, y, angle) {
-		console.log("attempting to create new cell");
-		let cell = {
-			cellType: cellType,
-			x: x,
-			y: y,
-			angle: angle
+		if (toDetach && cell === toDetach) {	
+			dna.detachChild(toDetach);
+			this.setState({
+				dna: dna,
+				toDetach: null
+			});
 		}
-
-		return cell;
-
 	}
 
 	dropOnCell(parentCell, cellIndex) {
-		console.log("Cropping on cell", parentCell, cellIndex);
-		if (this.state.currDraggingCellType) {
-			let { dna } = this.state;
-			dna.addChild(parentCell, this.state.currDraggingCellType.id, cellIndex);
-			let species = new Species(dna.getEncodedDna());
+		if (this.state.currDraggingBranch) {
+			let { dna, toDetach, currDraggingBranch } = this.state;
+			let branch = currDraggingBranch;
+			let copy = branch.copy();
+			let to = parentCell;
+			// This is a workaround for a weird ui quirk where
+			// if you drag really fast the event missfires and the cell
+			// doesn't detach
+			if (toDetach) {
+				dna.detachChild(toDetach);
+			} 
+			let result = dna.attachBranchToCell(copy, to, cellIndex);
+			if (!result) {
+				return;
+			}
 			this.setState({
 				dna: dna,
-				currDraggingCellType: null,
-				currSpecies: species
+				justPlacedLocation: { x: branch.x, y: branch.y },
+				toDetach: copy
 			});
 		}
+	}
 
-		else if (this.state.currDraggingBranch) {
-
-			console.log("dropped branch!!!");
-
-
-		}
+	onCanvasMouseMove = (e) => {
+		//console.log("cnvas mouse move!", e.target);
 	}
 
 
@@ -162,30 +195,44 @@ export default class SpeciesEditor extends React.Component {
 	getCellComps(cells) {
 
 		//let items = [<CellFilled cell={cell} />];
-		let { currDraggingCellType } = this.state;
+		let { currDraggingBranch } = this.state;
 		let cellEls = [];
 		let connectionEls = [];
 		let cellMargin = 100;
 		let cellKey = 0;
+		let usedPositions = [];
 
 		cells.forEach((cell, cellIndex)=>{
 			const parentCoord = { x: cell.x*cellMargin, y: cell.y*cellMargin }
+			const key = cell.x + "-" + cell.y;
 			cellEls.push(
 				<CellFilled 
 					x={parentCoord.x} 
 					y={parentCoord.y} 
 					type={cell.type} 
-					key={cellKey}
+					key={key}
 					cell={cell}
 					onDrag={this.onDragBranch}
+					onPullOff={this.onPullOffCell}
+					onMouseUp={this.onCellMouseUp}
+					isDragging={currDraggingBranch !== null}
 				/>
 			);
+			usedPositions.push(parentCoord);
 			cell.children.forEach((child, index)=> {
 				
-// Check if the cell type allows children here
+				// Check if the cell type allows children here
 				let parentCellType = CellTypes[cell.type];
 				if (parentCellType.connections && parentCellType.connections[index]) {
 					const { pos, dir } = getNewCellPosFromParent(parentCoord.x, parentCoord.y, cell.direction, index, cellMargin);
+					
+					
+					if (usedPositions.findIndex(p => p.x === pos.x && p.y === pos.y) !== -1) {
+						return;
+					}
+
+					//usedPositions.push(pos);
+					
 					connectionEls.push(
 						<path 
 							className={ child ? "species-editor__path--connected" : "species-editor__path" }
@@ -195,16 +242,17 @@ export default class SpeciesEditor extends React.Component {
 
 					if (child === null) {
 						cellKey++;
+						const key = pos.x + "-" + pos.y + "-empty-" + cellKey;
 						cellEls.push(
 							<CellEmpty 
+								key={key}
 								x={pos.x}
 								y={pos.y}
 								cellIndex={index}
 								parentCell={cell}
 								onClick={this.openCellMenu.bind(this)} 
 								onDrop={this.dropOnCell.bind(this)}
-								isDragging={currDraggingCellType !== null}
-								key={cellKey} 
+								isDragging={currDraggingBranch !== null}
 							/>
 						)
 					}
@@ -224,26 +272,21 @@ export default class SpeciesEditor extends React.Component {
 			seedCell, 
 			currSpecies,
 			currDraggingBranch,
-			currDraggingCellType, 
 			dna 
 		} = this.state;
 		//let { cellTypes } = this.props;
 
 		let cellComps = this.getCellComps(dna.cells);
-
-		let cellTypes = Object.keys(CellTypes).map((k) => CellTypes[k]).filter(type => type.id !== "S");
 		let classnames = ClassNames({
 			"species-editor": true,
 			"species-editor--cell-menu-open": this.state.cellMenuOpen,
-			"species-editor--dragging": currDraggingBranch || currDraggingCellType
+			"species-editor--dragging": currDraggingBranch
 		})
-
-		let currDraggingType = currDraggingCellType ? currDraggingCellType.id : null;
 
 		return (
 			<div className={classnames}>
 				<CellDragPreview
-					cellType={currDraggingType}
+					cellType={currDraggingBranch ? currDraggingBranch.type : null}
 				/>
 				<div className="species-editor__close" onClick={this.props.closeSpeciesEditor}>&#215;</div>
 				<div className="species-editor__heading">
@@ -253,20 +296,10 @@ export default class SpeciesEditor extends React.Component {
 					</div>
 				</div>
 				<div className="species-editor__main">
-					<div className="species-editor__cell-menu">
-						<div className="species-editor__cell-menu-list">
-						{
 
-							cellTypes.map((cellType, index) => {
-								return (
-									<CellMenuItem onDrag={this.dragCellType.bind(this)} addCell={this.addCell.bind(this)} cellType={cellType} key={cellType.id} />
-								)
-							})
-						}
-						</div>
-					</div>
+					<CellMenu onDrag={this.dragCellFromMenu.bind(this)} />
 					<div className="species-editor__map-container">
-						<svg width="100%" height="100%" viewBox="0 0 1000 1000">
+						<svg width="100%" height="100%" viewBox="0 0 1000 1000" onMouseMove={this.onCanvasMouseMove}>
 							<g transform="translate(500, 500)">
 
 							 	{ cellComps }
@@ -325,35 +358,23 @@ class CellEmpty extends React.Component {
 		}
 	}
 
-	onMouseOver = (e) => {
-		if (this.props.isDragging && !this.state.draggingOver) {
+	onMouseEnter = (e) => {
+		if (this.props.isDragging) {
+			/*
 			this.setState({
 				draggingOver: true
 			})
+			*/
+			this.props.onDrop(this.props.parentCell, this.props.cellIndex);
 		}		
 	}
 
-
-	onMouseOut = (e) => {
+	onMouseLeave = (e) => {
 		if (this.props.isDragging) {
 			this.setState({
 				draggingOver: false
 			})
 		}		
-	}
-
-	onDragOver = (e) => {
-		e.preventDefault();
-	}
-
-	onDrop(e) {
-		e.preventDefault();
-		e.stopPropagation();
-		console.log("mouse up that fucker");
-		this.props.onDrop(this.props.parentCell, this.props.cellIndex);
-		this.setState({
-			draggingOver: false
-		})
 	}
 
 	render() {
@@ -368,9 +389,8 @@ class CellEmpty extends React.Component {
 				cx={x}
 				cy={y}
 				r="40" 
-				onMouseUp={this.onDrop.bind(this)}
-				onMouseOver={this.onMouseOver}
-				onMouseOut={this.onMouseOut}
+				onMouseEnter={this.onMouseEnter}
+				onMouseLeave={this.onMouseLeave}
 			/>
 		);
 	}
@@ -380,59 +400,77 @@ class CellEmpty extends React.Component {
 class CellFilled extends React.Component {
 
 	onDragStart = (e) => {
-		console.log("drag start goddamit");
 		this.props.onDrag(this.props.cell);
 	}	
 
 	onDragOver(e) {
 		e.preventDefault();
 	}
+
+	onMouseUp = (e) => {
+		this.props.onMouseUp(e, this.props.cell);
+	}
+
+	onMouseLeave = (e) => {
+		if (this.props.isDragging) {
+			this.props.onPullOff(this.props.cell);
+		}
+	}
+
 	render() {
 		//let cell = this.props.cell;
 		//let color = CellTypes[cell.type].bodyColor;
 		let { x, y, type } = this.props;
 		let color = CellTypes[type].bodyColor;
+		let c = tinycolor(color);
+		let rgb = c.toRgb();
+		let dim = 0.8;
+		let stroke = tinycolor({
+			r: rgb.r * dim,
+			g: rgb.g * dim,
+			b: rgb.b * dim
+		}).toString();
+
+		let style = {
+			fill: color,
+			stroke: stroke
+		}
+
 		return (
-			<circle 
-				className="species-editor__cell" 
-				cx={x}
-				cy={y}
-				r="40"
-				fill={color} 
-				onDragOver={this.onDragOver}
+			<g className="species-editor__cell-wrapper" 
 				onMouseDown={this.onDragStart}
-				onClick={this.props.onClick} 
-				onDrop={this.props.onDrop}
-				draggable={true}
-			/>
+				onMouseUp={this.onMouseUp}>
+				<circle 
+					className="species-editor__cell" 
+					cx={x}
+					cy={y}
+					r="40"
+					style={style}
+					fill={color} 
+					stroke={stroke}
+					onDragOver={this.onDragOver}
+					onMouseLeave={this.onMouseLeave}
+					onClick={this.props.onClick} 
+					onDrop={this.props.onDrop}
+					draggable={true}
+				/>
+				<text 
+					className="species-editor__cell-text"  
+					x={x} 
+					y={y+10} 
+					fill={stroke} 
+					textAnchor="middle"
+					dominantBaseline="central"
+				>
+					{type}
+				</text>
+			</g>
 		);
 	}
 }
 
 
 
-
-class CellMenuItem extends React.Component {
-	onClick() {
-		this.props.addCell(this.props.cellType);
-	}
-
-	onDragStart(e) {
-		this.props.onDrag(this.props.cellType);
-	}
-
-	render() {
-		let { cellType } = this.props;
-		let color = cellType.bodyColor;
-		return (
-			<div className="species-editor__cell-menu-item" onMouseDown={this.onDragStart.bind(this)}>
-				<div className="species-editor__cell-menu-cell" style={{ background: color }} onClick={this.props.onClick}>
-					{ cellType.id }
-				</div>
-			</div>
-		)
-	}
-}
 
 
 class CellDragPreview extends React.Component {
