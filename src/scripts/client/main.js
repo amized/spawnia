@@ -14,7 +14,7 @@ import DelayChain from '../lib/utils/DelayChain.js'
 import TransitionClass from '../lib/utils/TransitionClass.js'
 
 import reducers from '../reducers'
-
+import makeWorld from "../mock/mockworldA";
 
 import { synced, lostSync } from "../actions";
 
@@ -39,11 +39,15 @@ function runStandAlone() {
 		window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 	);
 	store.dispatch(synced());
+	
+    const game = new GameStandalone(store, makeWorld);
 	const rootEl = document.getElementById("root");
+
+
 
 	render(
 		<Provider store={store}>
-	    	<App />
+	    	<App game={game} />
 	  	</Provider>,
 	  rootEl
 	)

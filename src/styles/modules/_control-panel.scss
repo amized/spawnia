@@ -45,6 +45,16 @@
 	overflow: hidden;	
 }
 
+.control-panel__status {
+	@include flex-grow(1);
+	height: $species-panel-height;
+	display: flex;
+	align-items: center;
+    background: #333;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
 
 
 .unit-panel,
@@ -232,13 +242,8 @@
 $species-item-width: 50px;
 
 .species-panel {
-	@include flex-grow(1);
-	height: $species-panel-height;
-	display: flex;
-	align-items: center;
-    background: #333;
-    border-left: 1px solid #000;
-    border-right: 1px solid #000;
+    display: flex;
+    width: 500px;
 }
 
 .species-panel__name {
@@ -256,7 +261,7 @@ $species-item-width: 50px;
 	max-width: 200px;
 	font-size: 20px;
 	color: #AAA;
-	margin-right: 20px;
+	margin-right: 0px;
 }
 
 .species-panel__list {
@@ -316,6 +321,15 @@ $species-item-width: 50px;
 	}
 }
 
+.species-panel__item-player {
+	position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+
+}
 
 .species-panel__item-inner{
 	@include display(flex);

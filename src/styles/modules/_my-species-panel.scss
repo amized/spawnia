@@ -1,0 +1,82 @@
+
+
+.my-species-panel {
+
+}
+
+
+
+.my-species-panel__list {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.my-species-panel__item {
+	margin: 5px;
+}
+
+$color-dimmed: #76b79e;
+
+@keyframes mutation-appear {
+	0% {
+		border-color: $color-dimmed;
+		color: $color-dimmed;
+	}
+
+	20% {
+
+		border-color: $color-hilight;
+		color: $color-hilight;
+
+	}
+
+	40% {
+		border-color: $color-dimmed;
+		color: $color-dimmed;
+	}
+
+}
+
+.my-species-panel__mutation {
+	position: relative;
+	margin: 5px;
+	width: 50px;
+	height: 50px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 23px;
+	border-radius: 5px;
+	animation: mutation-appear 2s linear infinite;
+	border: 1px solid $color-dimmed;
+	color: $color-dimmed;
+	background: #000;
+	cursor: pointer;
+	transition: transform 0.3s;
+	&:hover {
+		//background: #333;
+		border-color: $color-hilight;
+		color: $color-hilight;
+		animation: none;
+		transform: scale(1.2);
+
+	}
+}
+
+
+.my-species-panel__mutation-count {
+	position: absolute;
+    top: -2px;
+    right: -2px;
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    background: blue;
+    line-height: 16px;
+    border-radius: 50%;
+    background: #d2345f;
+    color: #FFF;
+}
+
+
+

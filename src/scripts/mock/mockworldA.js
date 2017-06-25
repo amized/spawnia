@@ -49,7 +49,7 @@ export default function makeWorld(dispatch) {
 
 	let unitid = uuid.v1();
 	let now = Date.now();
-	
+	/*
 	dispatch({
 		type: "ADD_UNIT",
 		dna: "S(X(,X(F,E,R),G),F,E,R)",
@@ -58,6 +58,7 @@ export default function makeWorld(dispatch) {
 		id: unitid,
 		bornAt: 0
 	});
+	*/
 /*
 	dispatch({
 		type: "ADD_UNIT",
@@ -136,7 +137,7 @@ export default function makeWorld(dispatch) {
 
 	dispatch({
 		type: "ADD_FOOD",
-		amount: 100,
+		amount: 500,
 		x: 300,
 		y: 400,
 		id: uuid.v1()
@@ -231,9 +232,9 @@ export default function makeWorld(dispatch) {
 	});
 	dispatch({
 		type: "ADD_FOOD",
-		amount: 800,
-		x: 1100,
-		y: 700,
+		amount: 1000,
+		x: 200,
+		y: 800,
 		id: uuid.v1()
 	});
 
@@ -267,7 +268,7 @@ export default function makeWorld(dispatch) {
 		x: 800,
 		y: 500,
 		width: 40,
-		height: 1000
+		height: 300
 	});
 
 	dispatch({

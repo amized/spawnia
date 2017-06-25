@@ -1,0 +1,19 @@
+
+.health-bar {
+	position: relative;
+	//top: 0;
+	//left: -10px;
+	height: 100%;
+	width: 10px;
+	background: #444;
+}
+
+
+.health-bar__inner {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	background: green;
+	transition: height 0.2s linear, background-color 0.2s linear;
+}
+

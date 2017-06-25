@@ -1,0 +1,107 @@
+
+.score-board {
+	display: flex;
+	margin-right: 20px;
+
+
+	.dna-blueprint {
+		cursor: pointer;
+		margin-right: 5px;
+	}
+
+}
+
+.score-board__list {
+	display: flex;
+}
+
+.score-board__player {
+	position: relative;
+	//display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	margin-right: 20px;
+	border-left: 1px solid rgba(255,255,255,0.2);
+    padding-left: 10px;
+}
+
+.score-board__top {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 4px;
+}
+
+.score-board__player-flag {
+	flex: 0 0 5px;
+	width: 5px;
+	height: 11px;
+	display: inline-block;
+	border-radius: 2px;
+	display: none;
+}
+
+.score-board__player-name {
+	font-size: 10px;
+	width: 100%;
+	text-align: center;
+	padding: 3px;
+	text-align: left;
+	display: inline-block;
+
+}
+
+.score-board__bottom {
+	height: 44px;
+	display: flex;
+	align-items:  flex-end;
+
+}
+
+.score-board__score {
+	font-size: 25px;
+	color: #AAA;
+	text-align: left;
+	height: 20px;
+	height: 100%;
+	line-height: 44px;
+	min-width: 50px;
+	color: $color-hilight;
+	color: #AAA;
+}
+
+.score-board__bar {
+	position: relative;
+	flex: 0 0 5px;
+    background: rgba($color-hilight, 0.1);
+	height: 100%;
+	display: none;
+}
+
+.score-board__bar-inner {
+	flex: 0 0 5px;
+    background: $color-hilight;
+	transition: height 0.2s linear; 
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+}
+
+
+.score-board__species {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	margin-left: 10px;
+}
+
+.score-board__species-score {
+	position: absolute;
+	color: rgba(#FFF, 0.5);
+	top: 50%;
+	left: 5px;
+}
+
+

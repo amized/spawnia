@@ -2,8 +2,6 @@
 // species that currently exist on the map. It gets updated when
 // units are added or deleted.
 
-import speciesManager from "./speciesManager";
-
 export default class SpeciesData {
 
 

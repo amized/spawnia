@@ -1,4 +1,5 @@
 $control-panel-height: 250px;
 $species-panel-height: 70px;
+$control-panel-info-height: $control-panel-height - $species-panel-height;
 
 $color-hilight: rgb(166, 255, 221);

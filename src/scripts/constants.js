@@ -29,7 +29,9 @@ export const GAME_MODE_STARTED = "STARTED";
 export const GAME_STAGE_NOGAME = 0;
 export const GAME_STAGE_BUILDINGSPECIES = 1;
 export const GAME_STAGE_PLACESPECIES = 2;
-export const GAME_STAGE_WATCHING= 3;
+export const GAME_STAGE_READY_TO_START = 3;
+export const GAME_STAGE_WATCHING = 4;
+export const GAME_STAGE_ENDED = 5;
 
 export const CONN_STATUS_WAITING = 1
 

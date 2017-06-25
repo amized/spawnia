@@ -9,12 +9,6 @@ const UPDATE = 'UPDATE'
 
 export * from "./gameState";
 
-export function updateMap(mapState) {
-  return {
-    type: UPDATE,
-    mapState: mapState
-  }
-}
 
 
 export function	socketConnected() {

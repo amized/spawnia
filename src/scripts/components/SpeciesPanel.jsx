@@ -11,50 +11,27 @@ import {
 	UNIT_START_ENERGY_PER_CELL, 
 	ENERGY_STORAGE_PER_FAT 
 } from "../settings"
-import speciesManager from "../lib/SpeciesManager"
+import { connect } from "react-redux"
+import throttle from 'react-throttle-render'
 
-
-export default class SpeciesPanel extends React.Component {
-
-	componentDidMount() {
-		this.refreshTimer = setInterval(()=>{
-			this.forceUpdate();
-		}, 1000);
-	}
-
-	componentWillUnmount() {
-		clearInterval(this.refreshTimer);
-	}
-
-
+class SpeciesPanel extends React.Component {
 	render() {
-
-		// Sort the list by population and save the sorted index as a property on each item to allow ordering via css
-		/*
-		let sortByPop = _.sortBy(this.props.allSpecies, (species)=>{
-			return -species.population;
-		}).map((species,index) => {
-			species.sortedIndex = index;
-			return species;
-		});
-		// Re-sort the list by it's key, this will ensure that React never reorders the DOM elements
-		let allSpecies = _.sortBy(sortByPop, "encodedDna");
-		*/
-		
-		//let allSpecies = this.props.universe.speciesData.getSpeciesArr();
-		let allSpecies = speciesManager.getSpeciesArr();
+		let { species, players } = this.props;
 		return (
 			<div className="species-panel">
 				<div className="species-panel__heading">Species</div>
 				<div className="species-panel__list">
 					<ReactCSSTransitionGroup transitionName="species-panel__item-wrapper" transitionEnterTimeout={600} transitionLeaveTimeout={600}>
 					{
-						allSpecies.map((species, index) => {
+						species.map((speciesItem, index) => {
+							let player = players.find(p => p.id === speciesItem.playerId);
 							return (
 								<SpeciesItem 
+									players={players}
 									dispatch={this.props.dispatch} 
-									species={species} 
-									key={species.encodedDna} 
+									player={player}
+									species={speciesItem} 
+									key={index} 
 									index={index}
 									selectSpecies={this.props.selectSpecies}
 									isSelected={this.props.selectedSpecies === species}
@@ -151,7 +128,7 @@ class SpeciesItem extends React.Component {
 
 	render() {
 
-		let { species, index, isSelected } = this.props;
+		let { species, index, isSelected, player } = this.props;
 		let isEdit = this.state.mode === "edit";
 		let style = {
 			transform: "translateX(" + index * 120	 + "px)"	
@@ -167,7 +144,8 @@ class SpeciesItem extends React.Component {
 				onMouseLeave={this.onMouseLeave.bind(this)}
 			>
 				<div className={classnames}>   
-					
+					<div className="species-panel__item-player" style={{background: "#" + player.color}}>
+					</div>
 					<div className="species-panel__item-inner" onClick={this.onClick.bind(this)}>
 						<DnaBlueprint dna={species.encodedDna} width={50} height={50} />
 						<div className="species-panel__stats">
@@ -203,5 +181,15 @@ class SpeciesItem extends React.Component {
        	);
 	}
 }
+
+function select(state) {
+  const { gameState } = state;
+  return {
+    species: gameState.species,
+    players: gameState.players
+  };
+}
+
+export default connect(select)(throttle(500)(SpeciesPanel));
 
 

@@ -23,9 +23,7 @@ export default class MapEvents extends React.Component {
 
         let { engine } = this.props;
         let canvas = $("canvas")[0];
-
-        console.log("The canvas", canvas);
-
+        
         this.mouse = Mouse.create(canvas);
         this.mouseConstraint = MouseConstraint.create(engine, {
             mouse: this.mouse

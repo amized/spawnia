@@ -3,13 +3,15 @@ import DNA from './DNA';
 import Dna from './DnaClass';
 import UnitBuilder from './UnitBuilder';
 import { UNIT_START_ENERGY_PER_CELL, ENERGY_STORAGE_PER_FAT, ENERGY_COST_PER_CELL } from "../settings"
+import { stateChange } from '../../../../react-oo';
 
 export default class Species {
 
 
-	constructor(encodedDna) {
+	constructor(encodedDna, playerId = 0) {
 
 		this.encodedDna = encodedDna;
+		this.playerId = playerId;
 		this.dna = new Dna(encodedDna);
 		this.sampleBody = UnitBuilder.buildBody(
     		this.dna, 
@@ -28,20 +30,30 @@ export default class Species {
 
         this.population = 0;
         this.totalPopulation = 0;
+        this.maturedPopulation = 0;
+        this.mutatingTo = null;
 	}
 
+	isSameAs(species) {
+		return this.encodedDna === species.encodedDna;
+	}
 
+	@stateChange
 	unitIsBorn(unit) {
 		this.population++;
 		this.totalPopulation++;		
-
 	}
-
+	
+	@stateChange
 	unitMatured(unit) {
-
+		this.maturedPopulation++;
 	}
 
-	unitDies(unit) {
+	@stateChange
+	unitDies(isMature) {
+		if (isMature) {
+			this.maturedPopulation = (this.maturedPopulation > 0) ? this.maturedPopulation - 1 : 0;
+		}
 		this.population = (this.population > 0) ? this.population - 1 : 0;
 	}
 
@@ -55,6 +67,13 @@ export default class Species {
 
 	getStartEnery() {
 		return this.startEnergy;
+	}
+	getScore() {
+		return this.cellCount * this.maturedPopulation;
+	}
+
+	isAlive() {
+		return this.population > 0;
 	}
 
 

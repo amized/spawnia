@@ -6,6 +6,7 @@
 import { World, Body, Bodies, Composite, Constraint, Query } from "matter-js"
 import Unit from "./Unit";
 import Food from "./Food";
+import Species from "./Species";
 import MapObject from "./MapObject"
 import Cell from "./Cell";
 import CellTypes from "./CellTypes";
@@ -13,9 +14,9 @@ import DNA from "./DNA";
 import UnitBuilder from "./UnitBuilder";
 import { buildStaticCircle, buildStaticBlock } from "./MapBuilder";
 import _ from "underscore";
-import speciesManager from "./speciesManager";
 import { getAngleOfDirection } from "./Geometry";
-
+import { getPlayerScore, getPlayersStillIn } from "./Utils/storeUtils";
+import { updateOnce } from '../../../../react-oo';
 
 import { 
 	ENERGY_COST_PER_CELL, 
@@ -32,43 +33,9 @@ import {
 } from "../constants"
 
 
-function runAction(action, universe, currStep) {
-
+function runAction(action, universe, currStep, store, game) {
+			
 	switch (action.type) {
-
-		case "BUILD_WORLD":
-
-			let bodies = [];
-
-			/*
-			var boundsWidth = 50;
-			var mapWidth = universe.getMapSize().width;
-			var mapHeight = universe.getMapSize().width;
-
-			const propsBarriers = {
-				isStatic: true,
-				restitution: 1,
-				collisionFilter: {
-	                category: COLLISION_CATEGORY_UNITS
-	            },
-	            render: {
-					fillStyle: "#999",
-					strokeStyle: "#999",
-					wireframes: true
-				}
-            }
-
-            bodies.push(Bodies.rectangle(mapWidth/2, 0, mapWidth, boundsWidth, propsBarriers));
-            bodies.push(Bodies.rectangle(mapWidth/2, mapHeight, mapWidth, boundsWidth, propsBarriers));
-            bodies.push(Bodies.rectangle(0, mapHeight/2, boundsWidth, mapHeight, propsBarriers));
-            bodies.push(Bodies.rectangle(mapWidth, mapHeight/2, boundsWidth, mapHeight, propsBarriers));
-
-			bodies.forEach((body, index) => {
-				const m = new MapObject(body, index);
-				universe.add(m);
-			});
-			*/
-			return;
 
 		case "UPDATE_UNITS_ENERGY": {
 			// Update all of the units
@@ -138,53 +105,32 @@ function runAction(action, universe, currStep) {
 
 			return;
 		}
-		/*
-		case "STEP":
-			// Update all of the units
-			for(var unitId in universe.units) {
 
-				var unit = universe.units[unitId];
-				if (unit) {
-					// Update the units energy
-					unit.energy = unit.energy - (unit.cells.length * ENERGY_COST_PER_CELL);
-					if (unit.cells.length === 1) {
-					}
-					// Go through the cells
-					unit.cells.forEach((cell, index) => {
-						var cellType = CellTypes[cell.type];
-						if (cellType) {
-							cellType.onStep(cell, unit, universe, dispatch);
-						}
-					});
-
-					if (unit.energy <= 0) {
-						unit.energy = 0;
-						dispatch({
-							type: "KILL_UNIT",
-							unitId: unit.id
-						})
-					}
-				}
-
-
-			}
-			// Update the food
-			var foods = universe.foods;
-
-			foods.forEach((food, index)=>{
-				food.grow(FOOD_GROWTH_RATE);
-			});
-			return;
-		*/
 		case "ADD_UNIT": {
 			
-			const { dna, x, y } = action;
+			const { dna, x, y, playerId, speciesId } = action;
+			//const gameState = store.getState().gameState;
+			const species = game.getSpecies(speciesId);
+			console.log("trying to add unit", species);
+			if (!species) {
+				return false;
+			}
+
 			let body = UnitBuilder.buildSeedCell(x, y);
 			let unit = new Unit(body, action.id);
-			let speciesId = speciesManager.add(dna);
-			unit.spawn(speciesId, [], null, currStep);
+
+			unit.spawn(species, [], null, currStep);
 			//console.log("World before add unit", universe.world.bodies.map(body=>body.id));
 			universe.add(unit);
+			let player = game.getPlayer(species.playerId);
+			player.updateScore(game);
+			/*
+			store.dispatch({
+				type: "ADD_TO_SPECIES",
+				speciesId: speciesId
+			})
+			*/
+
 			//console.log("World after add unit", universe.world.bodies.map(body=>body.id));
 			return;
 		}
@@ -226,11 +172,12 @@ function runAction(action, universe, currStep) {
 	    }
 	   	case "REPRODUCE_UNIT": {
 
-		    const { unitId, cellIndex, newId, dna, bornAt } = action;
+		    const { unitId, cellIndex, newId, bornAt, speciesId } = action;
 
 			let unit = universe.getMapObject(unitId);
    		    if (!unit) return;
-   
+		    let species =  game.getSpecies(speciesId);
+		    if (!species) return;
 		    let cell = unit.cells[cellIndex];
 
 		    if (!cell) {
@@ -240,10 +187,8 @@ function runAction(action, universe, currStep) {
 		    
 		    cell.startedReproductionAt = null;
 
-		    let speciesId = speciesManager.add(dna);
 			let cellBody = unit.getCellBody(cellIndex);
 			let body = UnitBuilder.buildSeedCell(cellBody.position.x, cellBody.position.y);
-
 			let angle = getAngleOfDirection(cell.direction);
 			
 			Body.setVelocity(body, {
@@ -253,9 +198,32 @@ function runAction(action, universe, currStep) {
 
 			//console.log("The unit body", body);
 			let newUnit = new Unit(body, newId);
-			newUnit.spawn(speciesId, [], unit, bornAt);
+			newUnit.spawn(species, [], unit, bornAt);
 			universe.add(newUnit);
+
+			let player = game.getPlayer(species.playerId);
+			player.updateScore(game);
+
+			/*
+			store.dispatch({
+				type: "ADD_TO_SPECIES",
+				speciesId: species.id
+			})
+			*/
 		    return;
+		}
+
+		case "APPLY_MUTATION": {
+
+			let { ancestorSpeciesId, newDna } = action;
+			game.applyMutation(ancestorSpeciesId, newDna);
+			return;
+		}
+
+		case "STOP_MUTATION": {
+			let { ancestorSpeciesId } = action;
+			game.stopMutation(ancestorSpeciesId);
+			return;
 		}
 
 		case "EAT": {
@@ -272,11 +240,25 @@ function runAction(action, universe, currStep) {
 		}
 
 		case "KILL_UNIT": {
-			console.log("Killing unit");
 			const unit = universe.getMapObject(action.unitId);
 			if (unit) {
+
+				const species = unit.species;
+				console.log("The units species in dies", species);
 				unit.energy = 0;
 				universe.deleteUnit(unit);
+
+				if (!species.isAlive()) {
+					let player = game.getPlayer(species.playerId);
+					let score = player.score;
+					if (score === 0) {
+						game.playerOut(unit.species.playerId);
+					}
+					else {
+						game.speciesOut(unit.species.id);
+					}
+				}
+
 			}
 			return;
 		}
@@ -345,5 +327,5 @@ function runAction(action, universe, currStep) {
 
 }
 
-export default runAction;
+export default updateOnce(runAction);
 

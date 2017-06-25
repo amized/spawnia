@@ -5,10 +5,7 @@ import {
   GAME_MODE_SETUP,
   GAME_MODE_STARTED
 } from "../constants";
-import GameStandalone from "../lib/GameStandalone";
 import Game from "./Game.jsx"
-import makeWorld from "../mock/mockworldA";
-
 
 
 export default class App extends React.Component {
@@ -24,9 +21,9 @@ export default class App extends React.Component {
   }
 
   onNewGame = () => {
-    const game = new GameStandalone(makeWorld);
+
     this.setState({
-      game: game,
+      game: this.props.game,
       gameMode: GAME_MODE_SETUP
     })
   }
@@ -34,7 +31,6 @@ export default class App extends React.Component {
 
   render() {
     const { gameMode, game } = this.state;
-    console.log("The game", game);
     return (
       <div className="app-wrapper">
         {
@@ -57,12 +53,8 @@ export default class App extends React.Component {
                 const getCurrStep = game.simulation.getCurrStep;
                 return (
                   <Game
-                    engine={game.engine} 
-                    universe={game.universe} 
-                    simulation={game.simulation}
-                    simulDispatch={simulDispatch} 
-                    simulPlay={simulPlay}
-                    simulPause={simulPause}
+                    game={game}
+                    gameStage={game.gameStage}
                     getCurrStep={getCurrStep}
                   />
                 );

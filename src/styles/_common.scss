@@ -7,25 +7,7 @@ body {
 
 	font-family: $font-family-normal;
 
-	/* Prep for add class */
-	&.someclass-add {
-		transition: background-color 1s;
-		background: green;
-	} 
-	/* Class added */
-	&.someclass {
-		background: yellow;
-	}
-
-	/* Prep for remove class */
-	&.someclass-remove {
-		transition: background-color 1s;
-	}
-
-	/* Default (no class) */
-	&:not(.someclass),
-	&:not(.someclass-remove),
-	&:not(.someclass-add) {
-		//background: white;
-	}
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
 }

@@ -7,11 +7,18 @@ import {
 } from "../constants"
 
 
-export function startGame() {
+export function startSpeciesBuild() {
 	return {
 		type: "SET_GAME_STAGE",
 		value: GAME_STAGE_BUILDINGSPECIES
 
+	}
+}
+
+export function newGame() {
+	return {
+		type: "NEW_GAME",
+		numPlayers: 2
 	}
 }
 

@@ -13,22 +13,24 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import WorldTimer from './WorldTimer.js';
 import { PLAYSTATE_PLAYING, PLAYSTATE_PAUSED } from "../constants";
 import MiniMap from './MiniMap.js';
+import MySpeciesPanel from './MySpeciesPanel'
+import ScoreBoard from './ScoreBoard'
+import MutationPanel from './MutationPanel'
 
 class ControlPanel extends Component {
 
     static propTypes = {
-        dispatch: PropTypes.func,
+        game: PropTypes.object,
         selectedUnit: PropTypes.object,
         selectedSpecies: PropTypes.object,
-        newSpecies: PropTypes.object,
-        saveNewSpecies: PropTypes.func,
         unselectUnit:PropTypes.func,
         selectSpecies: PropTypes.func,
         togglePlayState: PropTypes.func,
         getCurrStep: PropTypes.func,
         viewportBoundingBox: PropTypes.object,
         mapSize: PropTypes.object,
-        updateViewportBB: PropTypes.func
+        updateViewportBB: PropTypes.func,
+        notificationEl: PropTypes.element
     }
 
     static defaultProps = {
@@ -60,27 +62,26 @@ class ControlPanel extends Component {
         })
     }
 
-    saveSpecies(species) {
-        this.closeSpeciesEditor();
-        this.props.saveNewSpecies(species);
-    }
-
-
     render() {
 
-        let allSpecies = this.props.universe.speciesData.getSpeciesArr();
         let { 
+            game,
             selectedUnit, 
             selectedSpecies, 
             unselectUnit, 
             selectSpecies, 
-            universe, 
             playState, 
             getCurrStep, 
             viewportBoundingBox,
             mapSize,
-            updateViewportBB
+            updateViewportBB,
+            newSpecies,
+            myPlayer,
+            notificationEl
         } = this.props;
+
+        const { universe } = game;
+        const speciess = game.speciess;
 
     	return (
             <div className="control-panel">
@@ -88,13 +89,13 @@ class ControlPanel extends Component {
                 <div className="control-panel__main">
                     <MiniMap updateViewportBB={updateViewportBB} viewportBoundingBox={viewportBoundingBox} mapSize={mapSize} />
                     <div className="control-panel__middle">
-                        
-                        <SpeciesPanel 
-                            universe={this.props.universe}
-                            selectedSpecies={selectedSpecies} 
-                            selectSpecies={this.props.selectSpecies} 
-                            dispatch={this.props.dispatch} 
-                        />
+                        <div className="control-panel__status">
+                            <ScoreBoard 
+                                speciess={speciess}
+                                players={game.players}
+                                selectSpecies={this.props.selectSpecies}
+                            />
+                        </div>
                         <ReactCSSTransitionGroup 
                             transitionName="panel__left" 
                             transitionEnterTimeout={500} 
@@ -117,17 +118,24 @@ class ControlPanel extends Component {
                         {
                             selectedSpecies ?
                                 <SpeciesViewerPanel 
-                                key={ 5 }
+                                key={ 0 }
                                 species={selectedSpecies} 
                                 selectSpecies={this.props.selectSpecies} 
-                                universe={this.props.universe} />
+                                universe={this.props.game.universe} />
                             :
                                 null
                         }
+                        { notificationEl }
+                         <MutationPanel game={game} key={1}/>                        
                         </ReactCSSTransitionGroup>
                     </div>
                     <div className="command-panel">
-                        <a href="#" className="command-panel__create" onClick={this.openSpeciesEditor.bind(this)}>Create unit...</a>
+
+                        <MySpeciesPanel 
+                            mySpecies={game.getMySpecies()}
+                            myPlayer={game.myPlayer}
+                            onEditMutation={this.props.onEditMutation}
+                        />
                         <div className="command-panel__play" onClick={this.props.togglePlayState}>
                         { playState === PLAYSTATE_PLAYING ? 
                             <div>

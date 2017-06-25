@@ -58,8 +58,7 @@ export default class UnitPanel extends React.Component {
 
 	selectSpecies = (e) => {
 		// TODO PUT THS BACK IN
-		let species = this.props.unit.getSpecies();// this.props.universe.getSpeciesOfUnit(this.props.unit);
-		console.log("The units species! (maybe?)", species);
+		let species = this.props.unit.getSpecies();
 		this.props.selectSpecies(species);
 	}
 

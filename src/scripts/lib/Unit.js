@@ -4,7 +4,6 @@ import MapObject from "./MapObject";
 import Cell from "./Cell";
 import CellTypes from "./CellTypes";
 import UnitBuilder from "./UnitBuilder";
-import speciesManager from "./speciesManager";
 
 var unitIds = 0;
 
@@ -54,23 +53,24 @@ class Unit extends MapObject {
     }
 
     getEncodedDna() {
-        return speciesManager.getEncodedDna(this.speciesId);
+        return this.species.encodedDna;
     }
 
     getDecodedDna() {
-        return speciesManager.getDecodedDna(this.speciesId);
+        return this.species.dna;
     }
 
     getSpecies() {
-        return speciesManager.getSpecies(this.speciesId);
+        return this.species;
     }
 
 
-    spawn(speciesId, cells, parent = null, bornAt = 0) {
+    spawn(species, cells, parent = null, bornAt = 0) {
 
-        this.speciesId = speciesId;
-        this.species = speciesManager.getSpecies(speciesId);
+        //this.speciesId = speciesId;
+        this.species = species;
         this.cells = [];
+        this.mutatingSpecies = null;
 
         this.body.render.encodedDna = this.encodedDna;
 
@@ -83,10 +83,8 @@ class Unit extends MapObject {
 
         // Born at is number of game steps since start of simulation
         this.bornAt = bornAt;
-        this.species.unitIsBorn(this);        
-
-
         this.children = [];
+
         // The chicken or the egg?
         if (parent) {
             this.parentId = parent.id;
@@ -96,6 +94,16 @@ class Unit extends MapObject {
             this.parentId = null;
             this.generation = 0;
         }
+
+        this.species.unitIsBorn(this);
+    }
+
+    applyMutation(species) {
+        this.mutatingSpecies = species;
+    }
+
+    stopMutation(species) {
+        this.mutatingSpecies = null;
     }
 
     toString(){
@@ -167,7 +175,7 @@ class Unit extends MapObject {
     }
 
     die() {
-        this.species.unitDies(this);
+        this.species.unitDies(this.isMature()); 
         this.DNA = null;
         this.cells = null;
         this.lifeState = LIFESTATE_DEAD;

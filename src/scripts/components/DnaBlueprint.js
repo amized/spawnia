@@ -49,7 +49,7 @@ export default class DnaBlueprint extends React.Component {
 	render() {
 		let {width, height} = this.props;
 		return (
-			<div className="dna-blueprint" style={{width: width, height: height }} ref="canvas">
+			<div className="dna-blueprint" style={{width: width, height: height }} ref="canvas" onClick={this.props.onClick}>
 			</div>
 		);
 	}

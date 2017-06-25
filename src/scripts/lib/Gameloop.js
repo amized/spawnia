@@ -11,8 +11,7 @@ import {
 
 import CellTypes from "./CellTypes"
 import UnitBuilder from "./UnitBuilder"
-import DNA from "./DNA"
-import speciesManager from "./speciesManager";
+import DNA from "./DNA";
 
 import { Query, Body } from "matter-js"
 import { msToSteps } from "./Utils/utils";
@@ -46,7 +45,7 @@ const Gameloop = {
 
 					let currBody = unit.body;
 
-			    	let sampleBody = speciesManager.getSampleBody(unit.speciesId);
+			    	let sampleBody = unit.species.sampleBody;
 			    	Body.setPosition(sampleBody, { x: currBody.position.x, y: currBody.position.y});
 			    	// Check collision
 			    	var bounds  = sampleBody.bounds;

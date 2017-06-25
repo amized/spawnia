@@ -50,10 +50,7 @@ function client(state, action) {
     default: 
       return state;
   }  
-
 }
-
-
 
 
 function syncStatus(state = SYNC_STATUS_WAITING, action) {

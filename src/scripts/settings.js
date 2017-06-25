@@ -14,6 +14,7 @@ export const REPRODUCTION_COST_THRESHOLD = 2 // A unit require's REPRODUCTION_CO
 // Times (all in ms)
 export const MATURATION_TIME = 5000
 export const REPRODUCTION_TIME = 8000
+export const MUTATION_TIME = 15000
 
 // Simulation settings
 export const ENGINE_STEP_TIMEOUT = 15 // ms to run engine loop step

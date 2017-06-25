@@ -19,7 +19,6 @@ import {
 
 import { MAP_OBJ_FOOD, ALLOWED_CELLTYPE_ANY } from "../constants";
 import { msToSteps } from "./Utils/utils";
-import speciesManager from "./speciesManager";
 
 const CellTypes = {}
 
@@ -147,13 +146,21 @@ CellTypes.R = {
 
 
     if (startedReproductionAt < step - reproductionSteps) {
-      let dna = speciesManager.getSpecies(unit.speciesId).dna;
+      let dna, speciesId;
+      if (unit.species.mutatingTo !== null) {
+        speciesId = unit.species.mutatingTo;
+      }
+      else {
+        dna = unit.species.dna;
+        speciesId = unit.species.id;
+      }
+      
       dispatch({
         type: "REPRODUCE_UNIT",
         unitId: unit.id,
         cellIndex: cellIndex,
         newId: uuid.v1(),
-        dna: dna.getEncodedDna(),
+        speciesId: speciesId,
         bornAt: step
       });
 

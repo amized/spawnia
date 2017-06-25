@@ -1,6 +1,7 @@
 					
 import React from "react"
 import CellTypes from "../../lib/CellTypes";
+import classNames from "classnames";
 
 export default class CellMenu extends React.Component {
 	constructor(props) {
@@ -31,16 +32,58 @@ export default class CellMenu extends React.Component {
 			<div className="species-editor__cell-menu">
 				<CellMenuTooltip type={tooltipCelltype} />
 				<div className="species-editor__cell-menu-list">
-				{
+					{
 
-					cellTypes.map((cellType, index) => {
-						return (
-							<CellMenuItem onHoverOn={this.showTooltip} onHoverOff={this.hideTooltip} onDrag={onDrag} cellType={cellType} key={cellType.id} />
-						)
-					})
-				}
+						cellTypes.map((cellType, index) => {
+							return (
+								<CellMenuItem onHoverOn={this.showTooltip} onHoverOff={this.hideTooltip} onDrag={onDrag} cellType={cellType} key={cellType.id} />
+							)
+						})
+					}
+					<CellBin onMouseUp={this.props.onBinDrop} />
 				</div>
 			</div>
+		)
+	}
+}
+
+class CellBin extends React.Component {
+
+	constructor(props) {
+		super(props);
+		this.state = {
+			hover: false
+		}
+	}
+
+	onHoverOn = () => {
+		this.setState({
+			hover: true
+		})
+	}
+
+	onHoverOff = () => {
+		this.setState({
+			hover: false
+		})
+	}
+
+	render () {
+
+		const classnames = classNames({
+			"cell-trash": true,
+			"cell-trash--active": this.state.hover
+		});
+
+		return (
+
+			<div className={classnames} onMouseUp={this.props.onMouseUp}
+			    onMouseEnter={this.onHoverOn} 
+				onMouseLeave={this.onHoverOff}>
+				<i className="fa fa-trash-o"></i>
+				Trash
+			</div>
+
 		)
 	}
 }

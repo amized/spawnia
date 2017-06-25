@@ -11,7 +11,7 @@ const GAME_STEP_INTERVAL = GAME_STEP_TIMEOUT / ENGINE_STEP_TIMEOUT;
 export default class Simulation {
 
 
-	constructor (engine, universe, options) {
+	constructor (engine, game, store) {
 
 		const defaults = {
 			runGameLoop: true,
@@ -19,9 +19,10 @@ export default class Simulation {
 			cachePastEventsTo: 5000
 		}
 
-		Object.assign(this, defaults, options);
+		Object.assign(this, defaults);
 
-		this.universe = universe;
+		this.game = game;
+		this.universe = game.universe;
 		this.events = [];
 		this.pastEvents = [];
 		this.timer = null;
@@ -30,12 +31,13 @@ export default class Simulation {
 
 		// create an engine
 		this.engine = engine;
+		this.store = store;
 		this.dispatch = this.dispatch.bind(this);
+
 
 	}
 
 	_step() {
-
 
 		// Consume any outstanding events
 		let evt = this.events[0];
@@ -45,7 +47,7 @@ export default class Simulation {
 		while (evt && evt.timeout < this.curr) {
 			if (evt.timeout === this.curr - 1) {
 				//console.log("running: " + evt.timeout + " " + evt.action.type);
-				runAction(evt.action, this.universe, this.curr);
+				runAction(evt.action, this.universe, this.curr, this.store, this.game);
 			}
 			else {
 				console.log("Warning we are trying to run an event of the past: ", this.curr, evt.timeout);
@@ -113,7 +115,6 @@ export default class Simulation {
 	}
 
 	start () {
-		console.log("Starting simulation");
 		clearInterval(this.timer);
 		this.running = true;
         this.timer = setInterval(() => {
@@ -133,7 +134,7 @@ export default class Simulation {
 	// Used to change state while simulation is paused
 	immediateDispatch = (action) => {
 		if (this.running === false) {
-			runAction(action, this.universe, this.curr);
+			runAction(action, this.universe, this.curr, this.store, this.game);
 		}
 	}
 

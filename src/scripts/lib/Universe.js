@@ -22,8 +22,8 @@ class Universe {
 		}
 
 		this.mapSize = {
-			width: 3200,
-			height: 3200
+			width: 1000,
+			height: 1000
 		}
 
 		this.speciesData = new SpeciesData();
@@ -55,18 +55,8 @@ class Universe {
 
 
 	deleteUnit(unit) {
-		this.speciesData.unitDies(unit);	
 		unit.die();
 		this.deleteMapObject(unit.id);
-
-		// We only add species data once the unit matures, so remove it only
-		// if the unit is mature
-
-		/*
-
-		*/
-
-
 	}
 
 	clear() {

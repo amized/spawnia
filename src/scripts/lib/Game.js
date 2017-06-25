@@ -7,12 +7,12 @@ import { default as C } from "../constants"
 import MapObject from "./MapObject"
 import uuid from 'uuid';
 import { getBarriers } from "./MapBuilder"
+import storeUtils from "./Utils/storeUtils"
 import { 
 	GAME_STAGE_NOGAME, 
 	GAME_STAGE_BUILDINGSPECIES, 
 	GAME_STAGE_WATCHING
 } from "../constants"
-
 
 let gameIds = 0;
 
@@ -29,9 +29,10 @@ const GAME_STAGES = [
 
 export default class Game {
 
-	constructor (makeWorld, numPlayers = 2) {
+	constructor (store, makeWorld, numPlayers = 2) {
 		console.log("initialising the game");
 		this.id = gameIds++;
+		this.speciesIds = 0;
 		this.engine = Engine.create({
 			timing: {
 				timeScale: 0.3
@@ -41,20 +42,30 @@ export default class Game {
 		let world = this.engine.world;
 		
 		this.universe = new Universe(this.engine.world);
-		this.simulation = new Simulation(this.engine, this.universe);
+		this.simulation = new Simulation(this.engine, this, store);
+		this.store = store;
+		this.speciess = [];
 		this.players = [];
 
-		this.gameStage = GAME_STAGE_NOGAME;
+		// Initialises a bunch of utility functions from the storeUtils module
+		// with this store
+		storeUtils(this.store);
 
-		for (var i = 0; i < numPlayers; i++) {
-			this.players.push(new Player(i))
-		}
+	}
+
+	resetGame() {
+		this.simulation.reset();
+		this.universe.clear();
+
+		this.speciesIds = 0;
 
 		if (makeWorld) { 
 			this.buildMap(makeWorld);
-		}
+		}	
+
 
 	}
+
 
 	buildMap(makeWorld) {
 
