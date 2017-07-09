@@ -4,10 +4,10 @@ import Species from './Species'
 import Gameloop from './Gameloop'
 import uuid from 'uuid'
 import { stateChange } from '../../../../react-oo';
-import { ENGINE_STEP_TIMEOUT, GAME_STEP_TIMEOUT, ACTION_BROADCAST_TIMEOUT } from "../settings"
+import { ENGINE_STEP_TIMEOUT, GAME_STEP_TIMEOUT, ACTION_BROADCAST_TIMEOUT, MUTATION_DEAL_INTERVAL } from "../settings"
 
 const GAME_STEP_INTERVAL = GAME_STEP_TIMEOUT / ENGINE_STEP_TIMEOUT;
-const MUTATION_ALLOCATION_TIMEOUT = Math.floor(10000 / ENGINE_STEP_TIMEOUT);
+const MUTATION_ALLOCATION_TIMEOUT = Math.floor(MUTATION_DEAL_INTERVAL / ENGINE_STEP_TIMEOUT);
 const ACTION_BROADCAST_INTERVAL = ACTION_BROADCAST_TIMEOUT / ENGINE_STEP_TIMEOUT;
 
 import { 
@@ -173,7 +173,7 @@ export default class GameStandalone extends Game {
 			this.simulation.immediateDispatch({
 				type: "ADD_UNIT",
 				x: 250,
-				y: 750,
+				y: 450,
 				playerId: player.id,
 				speciesId: species[0].id,
 				id: uuid.v1()                
@@ -185,11 +185,15 @@ export default class GameStandalone extends Game {
 	}
 
 	dealMutations() {
-		this.players.forEach(player => { player.dealMutation(); });
-		this.nm.notify({
-			type: "DEAL_MUTATION",
-			msg: "New Mutations Received!"
-		})
+		this.players.forEach(player => { 
+			let dealt = player.dealMutation();
+			if (player === this.myPlayer && dealt) {
+				this.nm.notify({
+					type: "DEAL_MUTATION",
+					msg: "New Mutation Received!"
+				});			
+			} 
+		});
 	}
 	
 	@stateChange
