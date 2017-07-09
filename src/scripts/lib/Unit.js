@@ -175,7 +175,6 @@ class Unit extends MapObject {
     }
 
     die() {
-        this.species.unitDies(this.isMature()); 
         this.DNA = null;
         this.cells = null;
         this.lifeState = LIFESTATE_DEAD;

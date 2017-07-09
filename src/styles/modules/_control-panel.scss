@@ -47,6 +47,7 @@
 
 .control-panel__status {
 	@include flex-grow(1);
+	position: relative;
 	height: $species-panel-height;
 	display: flex;
 	align-items: center;
@@ -55,13 +56,17 @@
     border-right: 1px solid #000;
 }
 
+.control-panel__middle-lower {
+	position: relative;
+	height: $control-panel-info-height;
+}
 
 
 .unit-panel,
 .species-viewer-panel {
 	background: transparent;
 	position: absolute;
-	bottom: 0px;
+	top: 0px;
 	left: 0px;
 	width: 100%;
 	height: calc(100% - #{$species-panel-height});
@@ -99,8 +104,7 @@
 
 }
 
-.unit-panel__heading,
-.species-panel__heading {
+.unit-panel__heading {
 	@include type_h2;
 	text-align: center;
 	padding: 10px 5px 0px 5px;
@@ -252,7 +256,8 @@ $species-item-width: 50px;
 
 
 
-.species-panel__heading {
+.species-panel__heading,
+.game-timer__heading {
 	@include type_h2;
 	padding: 0 20px;
 	text-align: left;
@@ -478,5 +483,9 @@ $species-item-width: 50px;
 }
 
 
+/********** Command Panel *************/
 
+.command-panel {
+	position: relative;
+}
 

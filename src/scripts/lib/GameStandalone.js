@@ -15,12 +15,19 @@ import {
 	GAME_STAGE_BUILDINGSPECIES,
 	GAME_STAGE_PLACESPECIES,
 	GAME_STAGE_ENDED,
+	GAME_STAGE_ENDED_TIMEOUT,
+	GAME_STAGE_ENDED_DEATH,
 	GAME_STAGE_WATCHING,
 	GAME_STAGE_READY_TO_START 
 } from "../constants";
 
+import _ from "underscore";
+
+import { stepsToMs } from "./Utils/utils";
+
 import { newGame, startSpeciesPlacement, startSimulation } from "../actions";
 import Player from "./Player"
+import NotificationManager from "./NotificationManager"
 
 export default class GameStandalone extends Game {
 
@@ -28,6 +35,14 @@ export default class GameStandalone extends Game {
 		super(store, makeWorld, numPlayers);
 		
 		this.simulation.onAfterUpdate = (currStep) => {
+			
+			let gameTime = stepsToMs(currStep);
+			// Check end game
+			if (gameTime > this.gameDuration) {
+				this.timeOut();
+				return;
+			}
+
 			if (currStep % GAME_STEP_INTERVAL === 0) {
 				//let state = this.universe.getState();
 				let state = this.universe;
@@ -39,37 +54,26 @@ export default class GameStandalone extends Game {
 			}
 		}
 
-		this.currentStage = this.store.getState().gameState.gameStage;
-		this.store.subscribe(() => {
-			const state = this.store.getState();
-			let nextStage = state.gameState.gameStage;
-			if (nextStage !== this.currentStage) {
-				this.currentStage = nextStage;
-				switch(nextStage) {
-					case GAME_STAGE_BUILDINGSPECIES: {
-						this.simulation.reset();
-						this.universe.clear();
-						break;
-					}
-					
-					case GAME_STAGE_WATCHING: {
-						this.simulation.start();
-						break;
-					}
-					case GAME_STAGE_ENDED: {
-						this.simulation.pause();
-						break;
-					}
-				}
-			}
-		})
-
+		this.gameDuration = 300000; // Game time in seconds
+		this.nm = new NotificationManager();
 		this.myPlayerId = 0;
+		this.makeWorld = makeWorld;
 		this.newGame(2, makeWorld);
 	}
 
 	@stateChange
+	reset() {
+		this.nm = new NotificationManager();
+		this.myPlayerId = 0;
+		this.speciess = [];
+		this.simulation.reset();
+		this.universe.clear();		
+		this.newGame(2, this.makeWorld);
+	}
+
+	@stateChange
 	newGame(numPlayers, makeWorld) {
+		this.players = [];
 		for (let i = 0; i < numPlayers; i++) {
 			this.players.push(new Player(i));
 		}
@@ -107,6 +111,10 @@ export default class GameStandalone extends Game {
 
 	@stateChange
 	removeFromSpecies() {
+	}
+
+	isEnded() {
+		return this.gameStage === GAME_STAGE_ENDED_DEATH || this.gameStage === GAME_STAGE_ENDED_TIMEOUT;
 	}
 	
 	getSpecies(id) {
@@ -164,8 +172,8 @@ export default class GameStandalone extends Game {
 			let species = this.getSpeciesForPlayer(player.id);
 			this.simulation.immediateDispatch({
 				type: "ADD_UNIT",
-				x: 450,
-				y: 450,
+				x: 250,
+				y: 750,
 				playerId: player.id,
 				speciesId: species[0].id,
 				id: uuid.v1()                
@@ -178,6 +186,10 @@ export default class GameStandalone extends Game {
 
 	dealMutations() {
 		this.players.forEach(player => { player.dealMutation(); });
+		this.nm.notify({
+			type: "DEAL_MUTATION",
+			msg: "New Mutations Received!"
+		})
 	}
 	
 	@stateChange
@@ -199,23 +211,47 @@ export default class GameStandalone extends Game {
     	player.goOut();
 		let stillIn = this.players.filter(player => !player.isOut);
 		if (stillIn.length < 2) {
+			this.endedEarly = true;
 			this.endGame();
 		}
     }
 
     @stateChange
-    speciesOut(playerId) {
-    	let player = this.players.find(player=> player.id === playerId);
-    	player.goOut();
-		let stillIn = this.players.filter(player => !player.isOut);
-		if (stillIn.length < 2) {
-			this.endGame();
-		}
+    speciesOut(speciesId) {
+    	let species = this.speciess.find(species => species.id === speciesId);
+    	this.nm.notify({
+    		type: "SPECIES_OUT",
+    		msg: "A species has just died!",
+    		species: species
+    	});
+    }
+
+    @stateChange
+    timeOut() {
+    	this.endGame();
     }
 
     @stateChange
     endGame() {
-    	this.gameStage = GAME_STAGE_ENDED;
+    	
+    	let stillIn = this.players.filter(player => !player.isOut);
+    	console.log("Still in", this.players);
+    	if (stillIn.length === 1) {
+    		this.gameStage = GAME_STAGE_ENDED_DEATH;
+    		this.winner = stillIn[0];
+    	}
+
+    	else if (stillIn.length > 1) {
+    		this.gameStage = GAME_STAGE_ENDED_TIMEOUT;
+    		this.winner = _.max( stillIn, p => p.getScore() );
+    	}
+
+    	else {
+    		throw new Error("Spawnia: No players on end game!");
+    	}
+
+    	console.log("The winner issss...", this.winner);
+    	this.simulation.pause();
     }
 
     @stateChange
@@ -223,6 +259,10 @@ export default class GameStandalone extends Game {
 		this.gameStage = GAME_STAGE_WATCHING;
 		this.simulation.reset();
 		this.simulation.start();	
+		this.nm.notify({
+			type: "GAME_STARTED",
+			msg: "The game has begun!"
+		})
 	}
 }
 

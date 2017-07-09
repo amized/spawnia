@@ -27,10 +27,14 @@
 	background: #39a03d;
 	border-radius: 25px;
 	color: #FFF;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 .modal-content {
-	padding: 30px;
+	padding: 50px;
 	text-align: center;
 
 	hr {

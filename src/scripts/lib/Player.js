@@ -23,9 +23,15 @@ const playerColors = [
 		this.isOut = false;
 		this.score = 0;
  	}
+ 	
+ 	getScore() {
+ 		return this.score;
+ 	}
+ 	
 
- 	getScore(speciess) {
-		const playerSpecies = speciess.filter(s=>s.playerId === this.id);
+ 	@stateChange
+ 	updateScore(game) {
+ 		let playerSpecies = game.getSpeciesForPlayer(this.id);
 		let score = 0;
 		if (playerSpecies.length > 0) {
 			score = playerSpecies.map(species => {
@@ -34,13 +40,8 @@ const playerColors = [
 				return acc + cur;
 			});
 		}
-		return score;
- 	}
 
- 	@stateChange
- 	updateScore(game) {
- 		let playerSpecies = game.getSpeciesForPlayer(this.id);
- 		this.score = this.getScore(playerSpecies);
+		this.score = score;
  	}
 
  	@stateChange

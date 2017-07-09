@@ -149,10 +149,10 @@ function runAction(action, universe, currStep, store, game) {
 
 			Body.setMass(newBody, 20);
 	    	Body.setVelocity(newBody, v);
-			universe.speciesData.addToSpecies(unit);
-	    	
+
+	    	let player = game.getPlayer(species.playerId);
+			player.updateScore(game);
 			
-		    //let parts = _.partition(unit.cells, (cell) => cell.type === "G");
 	    	return;
 	    }
 
@@ -244,13 +244,13 @@ function runAction(action, universe, currStep, store, game) {
 			if (unit) {
 
 				const species = unit.species;
-				console.log("The units species in dies", species);
+				species.unitDies(unit.isMature()); 
 				unit.energy = 0;
 				universe.deleteUnit(unit);
-
+				let player = game.getPlayer(species.playerId);
+				player.updateScore(game);
 				if (!species.isAlive()) {
-					let player = game.getPlayer(species.playerId);
-					let score = player.score;
+					let score = player.getScore();
 					if (score === 0) {
 						game.playerOut(unit.species.playerId);
 					}

@@ -60,6 +60,7 @@
 }
 
 .score-board__score {
+	@include type-number;
 	font-size: 25px;
 	color: #AAA;
 	text-align: left;

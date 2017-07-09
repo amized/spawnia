@@ -55,9 +55,6 @@ class MutationPanel extends React.Component {
 		if (progress >= 1) {
 			window.clearInterval(this.intervalId);
 		}
-
-		console.log("This is the progress!", duration, progress);
-
 	}
 
 	render() {

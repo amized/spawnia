@@ -17,7 +17,10 @@ import {
 	GAME_STAGE_BUILDINGSPECIES,
 	GAME_STAGE_PLACESPECIES,
 	GAME_STAGE_READY_TO_START,
-	GAME_STAGE_WATCHING
+	GAME_STAGE_WATCHING,
+	GAME_STAGE_ENDED,
+	GAME_STAGE_ENDED_DEATH,
+	GAME_STAGE_ENDED_TIMEOUT
 } from "../constants";
 
 import {
@@ -25,7 +28,7 @@ import {
 } from "../settings";
 
 import { getCanvasDimensions } from "../lib/Utils/utils";
-import Modal from "./Modal";
+import Modals from "./Modals";
 import { newGame, startSpeciesPlacement, startSimulation } from "../actions";
 import SpeciesEditor from "./SpeciesEditor.jsx"
 import NotificationBar from "./NotificationBar"
@@ -84,34 +87,6 @@ class Game extends React.Component {
 		});
 		
 		window.onresize = this.onWindowResize;
-	}
-
-	componentWillReceiveProps(nextProps) {
-
-		const nextStage = nextProps.gameStage;
-		const currStage = this.props.gameStage;
-
-		if (nextStage !== currStage) {
-			switch (nextStage) {
-				case GAME_STAGE_PLACESPECIES:
-					this.setState({
-						primaryModalOpen: true
-					})
-					return;
-				case GAME_STAGE_BUILDINGSPECIES:
-					this.setState({
-						primaryModalOpen: false
-					})
-					return;
-			}
-		}
-
-		if (nextStage === GAME_STAGE_PLACESPECIES && currStage !== GAME_STAGE_PLACESPECIES) {
-			this.setState({
-				speciesPlacementHelperOpen: true,
-				primaryModalOpen: true
-			})
-		}
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -348,17 +323,8 @@ class Game extends React.Component {
 		);
 	}
 
-	startGame = () => {
-		//this.props.dispatch(newGame());
-		//this.props.game.newGame();
-	}
-
 	startSpeciesPlacement = () => {
 		this.props.game.changeGameStage(GAME_STAGE_BUILDINGSPECIES);
-	}
-
-	startSimulation = () => {
-		this.props.game.run();
 	}
 
 	onEditMutation = () => {
@@ -424,19 +390,8 @@ class Game extends React.Component {
 			primaryModalOpen
 		} = this.state;
 		
-
 		let style = {};
-
 		let myAliveSpecies = mySpecies.filter(s => s.isAlive());
-
-		const showNewGameDialog = primaryModalOpen && gameStage === GAME_STAGE_NOGAME;
-		const showPlaceSpeciesDialog = primaryModalOpen && gameStage === GAME_STAGE_PLACESPECIES;
-		const showStartSimulationDialog = primaryModalOpen && gameStage === GAME_STAGE_READY_TO_START;
-		const showImOutDialog = primaryModalOpen && myPlayer.isOut; 
-
-		const isBuildingSpecies = gameStage === GAME_STAGE_BUILDINGSPECIES;
-
-		
 
 		if (hoveredUnit) {
 			style.cursor="pointer";
@@ -444,6 +399,10 @@ class Game extends React.Component {
 
 		let newSpecies;
 		let notification = null;
+
+		const isBuildingSpecies = gameStage === GAME_STAGE_BUILDINGSPECIES;
+		const showPlaceSpeciesDialog = gameStage === GAME_STAGE_PLACESPECIES;
+
 		if (showPlaceSpeciesDialog && mySpecies.length > 0) {
 			newSpecies = mySpecies[0];
 			notification = (
@@ -512,48 +471,7 @@ class Game extends React.Component {
 					:
 						null
 				}
-
-				<Modal
-					show={showImOutDialog}
-				>
-				  <h2>You're dead!</h2>
-				  <p>Too bad, it looks like all your units have died.</p>
-				  <button onClick={this.startGame}>Another game</button>
-				</Modal>
-				<Modal
-					show={showNewGameDialog}
-				>
-				  <h2>New Game</h2>
-				  <p>Looks like you're new, so I'll take you through how the game
-				  works.</p>
-				  <hr />
-				  <h3>Step 1: Design a species</h3>
-				  <p>The first step is to design a species that you will
-				  plant into the world of Spawnia. To get started
-				  click below!</p>
-
-				  <button onClick={this.startGame}>Create a species</button>
-				</Modal>
-				<Modal
-					show={showStartSimulationDialog}
-				>
-				  <h2>We're ready to go!</h2>
-				  <p>Congratulations you have now placed your first species into 
-				  the world of Spawnia. When you're ready to start, click below.
-				  </p>
-				  <button onClick={this.startSimulation}>Start</button>
-				</Modal>
-
-				{/*<Modal
-					show={speciesPlacementHelperOpen}
-				>
-				  <h2>You have designed your first species!</h2>
-				  <p>You are now ready to place it into the world and see
-				  how well it can thrive.</p>
-				  <hr />
-				  <button onClick={this.closeSpeciesPlacementHelper}>Place my species</button>
-				</Modal>*/}
-
+				<Modals game={game} gameStage={game.gameStage} />
 			</div>
 			
 		)

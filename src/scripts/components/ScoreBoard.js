@@ -18,7 +18,7 @@ class ScoreBoard extends Component {
 
 	render() {
 		const { speciess, players } = this.props;
-		const playerScores = players.map(player => player.getScore(speciess));
+		const playerScores = players.map(player => player.getScore());
 		//const total = Math.max.apply(null, playerScores);
 		const total = playerScores.reduce((a,b)=> a + b , 0);
 		const maxSpeciesScore = Math.max.apply(null, speciess.map(s => s.getScore()));

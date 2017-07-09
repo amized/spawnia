@@ -16,6 +16,8 @@ import MiniMap from './MiniMap.js';
 import MySpeciesPanel from './MySpeciesPanel'
 import ScoreBoard from './ScoreBoard'
 import MutationPanel from './MutationPanel'
+import NotificationPanel from './NotificationPanel'
+import GameTimer from './GameTimer'
 
 class ControlPanel extends Component {
 
@@ -95,61 +97,51 @@ class ControlPanel extends Component {
                                 players={game.players}
                                 selectSpecies={this.props.selectSpecies}
                             />
+                            <GameTimer game={game} />
                         </div>
-                        <ReactCSSTransitionGroup 
-                            transitionName="panel__left" 
-                            transitionEnterTimeout={500} 
-                            transitionLeaveTimeout={500}
-                        >
-                        {
-                            selectedUnit ? (
-                                <UnitPanel 
-                                    key={"unit:" + selectedUnit.id }
-                                    unit={ selectedUnit } 
-                                    unselectUnit={ unselectUnit} 
-                                    selectSpecies={ selectSpecies} 
-                                    universe={ universe} 
-                                    getCurrStep={getCurrStep}
-                                />
-                            )
-                            :
-                                null
-                        }
-                        {
-                            selectedSpecies ?
-                                <SpeciesViewerPanel 
-                                key={ 0 }
-                                species={selectedSpecies} 
-                                selectSpecies={this.props.selectSpecies} 
-                                universe={this.props.game.universe} />
-                            :
-                                null
-                        }
-                        { notificationEl }
-                         <MutationPanel game={game} key={1}/>                        
-                        </ReactCSSTransitionGroup>
+                        <div className="control-panel__middle-lower">
+                            <ReactCSSTransitionGroup 
+                                transitionName="panel__left" 
+                                transitionEnterTimeout={500} 
+                                transitionLeaveTimeout={500}
+                            >
+                                {
+                                    selectedUnit ? (
+                                        <UnitPanel 
+                                            key={"unit:" + selectedUnit.id }
+                                            unit={ selectedUnit } 
+                                            unselectUnit={ unselectUnit} 
+                                            selectSpecies={ selectSpecies} 
+                                            universe={ universe} 
+                                            getCurrStep={getCurrStep}
+                                        />
+                                    )
+                                    :
+                                        null
+                                }
+                                {
+                                    selectedSpecies ?
+                                        <SpeciesViewerPanel 
+                                        key={ 0 }
+                                        species={selectedSpecies} 
+                                        selectSpecies={this.props.selectSpecies} 
+                                        universe={this.props.game.universe} />
+                                    :
+                                        null
+                                }
+                                { notificationEl }
+                                <NotificationPanel manager={game.nm} key={2} />
+                                                     
+                            </ReactCSSTransitionGroup>
+                        </div>
                     </div>
                     <div className="command-panel">
-
                         <MySpeciesPanel 
                             mySpecies={game.getMySpecies()}
                             myPlayer={game.myPlayer}
                             onEditMutation={this.props.onEditMutation}
                         />
-                        <div className="command-panel__play" onClick={this.props.togglePlayState}>
-                        { playState === PLAYSTATE_PLAYING ? 
-                            <div>
-                                <i className="fa fa-pause"></i>
-                            </div>
-                            :
-                            <div>
-                                <i className="fa fa-play"></i>
-                            </div>
-                        }
-                        </div>
-                        <div className="command-panel__timer">
-                            <WorldTimer getCurrStep={getCurrStep} />
-                        </div>
+                        <MutationPanel game={game} key={1}/>   
                     </div>
                 </div>
             </div>
