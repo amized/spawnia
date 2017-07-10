@@ -107,7 +107,7 @@ export default class Modals extends React.Component {
         </Modal>
 
         <Modal show={showImOutDialog} >
-          <h2>You're dead!</h2>
+          <h2>Game over!</h2>
           <p>Too bad, it looks like all your units have died.</p>
           <button onClick={this.startGame}>Another game</button>
         </Modal>

@@ -338,7 +338,7 @@ class Game extends React.Component {
 		let startAction = {
             type: "APPLY_MUTATION",
             newDna: newSpecies.encodedDna,
-            ancestorSpeciesId: ancestorSpeciesId              
+            ancestorSpeciesId: ancestorSpeciesId
         }
 
         let stopAction = {

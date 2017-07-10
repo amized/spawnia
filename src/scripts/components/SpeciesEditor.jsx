@@ -113,7 +113,9 @@ class SpeciesEditor extends React.Component {
 	}
 
 	applyMutation() {
-		this.props.saveSpecies(this.state.currSpecies, this.state.ancestorSpeciesId);
+		if (this.state.moves.length > 0) {
+			this.props.saveSpecies(this.state.currSpecies, this.state.ancestorSpeciesId);
+		}
 	}
 
 	openCellMenu(cell) {

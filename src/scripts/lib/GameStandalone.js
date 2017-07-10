@@ -155,6 +155,11 @@ export default class GameStandalone extends Game {
 	  }
 	}
 
+	isMutationInProgress(playerId) {
+		let mutatingSpecies = this.speciess.find(s=> s.mutatingTo !== null);
+		return (mutatingSpecies && mutatingSpecies.playerId === playerId);
+	}
+
 	@stateChange
 	placeUnit(pos, speciesId) {
 		this.simulation.immediateDispatch({
@@ -186,6 +191,12 @@ export default class GameStandalone extends Game {
 
 	dealMutations() {
 		this.players.forEach(player => { 
+
+			// No dealing mutations if in progress
+			if (this.isMutationInProgress(player.id)) {
+				return;
+			}
+
 			let dealt = player.dealMutation();
 			if (player === this.myPlayer && dealt) {
 				this.nm.notify({
@@ -197,10 +208,12 @@ export default class GameStandalone extends Game {
 	}
 	
 	@stateChange
-	applyMutation (ancestorSpeciesId, newDna) {
+	applyMutation (ancestorSpeciesId, newDna, numChanges) {
 		let ancestorSpecies = this.getSpecies(ancestorSpeciesId);
+		let player = this.getPlayer(ancestorSpecies.playerId);
 		let newSpecies = this.addSpecies(newDna, ancestorSpecies.playerId);
 		ancestorSpecies.mutatingTo = newSpecies.id;
+		player.useMutations(numChanges);
     }
 
     @stateChange

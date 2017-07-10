@@ -215,8 +215,8 @@ function runAction(action, universe, currStep, store, game) {
 
 		case "APPLY_MUTATION": {
 
-			let { ancestorSpeciesId, newDna } = action;
-			game.applyMutation(ancestorSpeciesId, newDna);
+			let { ancestorSpeciesId, newDna, numChanges } = action;
+			game.applyMutation(ancestorSpeciesId, newDna, numChanges);
 			return;
 		}
 

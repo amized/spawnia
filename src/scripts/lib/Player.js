@@ -58,6 +58,15 @@ const playerColors = [
 		return false;
  	}
 
+ 	@stateChange
+ 	useMutations(num) {
+ 		if (num < this.mutations.length) {
+ 			throw new Error("Spawnia: Trying to use more mutations than available")
+ 		}
+ 		//this.mutations = this.mutations.slice(-1 * num);
+ 		this.mutations = [];
+ 	}
+
  }
 
 
