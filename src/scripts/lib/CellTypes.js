@@ -26,7 +26,7 @@ const CellTypes = {}
 CellTypes.S = {
   name: "Seed",
   id: "S",
-  bodyColor: "#333",
+  bodyColor: "#333333",
   connections: [
     true,
     true,
@@ -60,6 +60,11 @@ CellTypes.G = {
               "The more grounding cells your unit has over all, the stronger the slowing effect.",
   id: "G",
   bodyColor: "#95969e",
+  connections: [
+    ['G'],
+    ['G'],
+    ['G']
+  ],
   onCreate: function(cell, unit) {
     unit.body.frictionAir = Math.min(unit.body.frictionAir + 0.1, 1);
   }
@@ -72,7 +77,13 @@ CellTypes.E = {
   description: "Eating cells allow your units to consume energy from energy pods (the big circles on the map). " +
     "One eating cell will consume " + FOOD_EAT_RATE + " units of energy per cycle when it is placed over an energy pod.",
   id: "E",
-  bodyColor: "#b2d572",
+  bodyColor: "#9ccb3b",
+  connections: [
+    ['E'],
+    ['E'],
+    ['E']
+  ],
+
   onStep: function (step, cell, cellBody, unit, state, dispatch) {
 
     return;
@@ -114,7 +125,8 @@ CellTypes.R = {
     "the species's size. ",
 
   id: "R",
-  bodyColor: "#cb8dbd",
+  bodyColor: "#d4519d",
+
   onStep: function (step, cell, cellBody, unit, state, dispatch) {
     /*
     if (cell.isReproducing === true) {
@@ -174,7 +186,13 @@ CellTypes.F = {
   description: "Fat cells are needed for your units to store energy. Units cannot consume more " +
     "than the maximum energy storage. Each fat cell stores " + ENERGY_STORAGE_PER_FAT + " units of energy.",
   id: "F",
-  bodyColor: "#e4d088"
+  connections: [
+    ['F'],
+    ['F'],
+    ['F']
+  ],
+
+  bodyColor: "#e2b832"
 }
 
 

@@ -49,11 +49,17 @@ class MapObject {
             body: this.body
         }   
     }
-
+    /*
     reconstruct(props) {
         if (props) {
             Object.assign(this, props);
         }
+    }
+    */
+
+    static reconstruct(props) {
+        const mapObject = new MapObject(props.body, props.id, props);
+        return mapObject;
     }
 
     makeBody() {

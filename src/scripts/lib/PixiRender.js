@@ -44,6 +44,20 @@ import { Common, Composite, Bounds, Events, Grid, Vector, Mouse } from "matter-j
      * @return {render} A new renderer
      */
     Render.create = function(options) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         var defaults = {
             controller: Render,
             engine: null,
@@ -87,7 +101,7 @@ import { Common, Composite, Bounds, Events, Grid, Vector, Mouse } from "matter-j
 
 
         //Setup PIXI Canvas in componentDidMount
-       render.renderer = PIXI.autoDetectRenderer(options.width, options.height);
+       let renderer = PIXI.autoDetectRenderer(options.width, options.height, {view:document.getElementById("game-canvas")});
        render.element.appendChild(this.renderer.view);
        
        // create the root of the scene graph
@@ -95,7 +109,19 @@ import { Common, Composite, Bounds, Events, Grid, Vector, Mouse } from "matter-j
        render.stage.width = options.width;
        render.stage.height = options.height;
 
-       return;
+       renderer.render(stage);
+
+       return render;
+
+
+
+
+
+
+
+
+
+       /* --- old ---- */
 
         if (render.canvas) {
             render.canvas.width = render.options.width || render.canvas.width;

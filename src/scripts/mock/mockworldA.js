@@ -49,7 +49,7 @@ export default function makeWorld(dispatch) {
 
 	let unitid = uuid.v1();
 	let now = Date.now();
-	/*
+	
 	dispatch({
 		type: "ADD_UNIT",
 		dna: "S(X(,X(F,E,R),G),F,E,R)",
@@ -58,8 +58,8 @@ export default function makeWorld(dispatch) {
 		id: unitid,
 		bornAt: 0
 	});
-	*/
-/*
+	
+
 	dispatch({
 		type: "ADD_UNIT",
 		dna: DNA.encodeDna(Dna3),
@@ -68,7 +68,7 @@ export default function makeWorld(dispatch) {
 		id: uuid.v1(),
 		bornAt: 0
 	});
-	*/
+	
 
 	dispatch({
 		type: "BUILD_WORLD"
@@ -244,7 +244,8 @@ export default function makeWorld(dispatch) {
 		x: 500,
 		y: 300,
 		width: 20,
-		height: 200
+		height: 200,
+		id: uuid.v1()
 	});
 
 	dispatch({
@@ -252,7 +253,8 @@ export default function makeWorld(dispatch) {
 		x: 200,
 		y: 200,
 		width: 20,
-		height: 200
+		height: 200,
+		id: uuid.v1()
 	});
 
 	dispatch({
@@ -260,7 +262,8 @@ export default function makeWorld(dispatch) {
 		x: 500,
 		y: 500,
 		width: 300,
-		height: 30
+		height: 30,
+		id: uuid.v1()
 	});
 
 	dispatch({
@@ -268,7 +271,8 @@ export default function makeWorld(dispatch) {
 		x: 800,
 		y: 500,
 		width: 40,
-		height: 300
+		height: 300,
+		id: uuid.v1()
 	});
 
 	dispatch({
@@ -276,21 +280,24 @@ export default function makeWorld(dispatch) {
 		x: 1200,
 		y: 300,
 		width: 30,
-		height: 600
+		height: 600,
+		id: uuid.v1()
 	});
 
 	dispatch({
 		type: "ADD_STATIC_CIRCLE",
 		x: 200,
 		y: 300,
-		r: 20
+		r: 20,
+		id: uuid.v1()
 	});
 
 	dispatch({
 		type: "ADD_STATIC_CIRCLE",
 		x: 100,
 		y: 400,
-		r: 20
+		r: 20,
+		id: uuid.v1()
 	});	
 
 

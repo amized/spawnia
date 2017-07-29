@@ -68,7 +68,7 @@ export default class GameStandalone extends Game {
 		this.speciess = [];
 		this.simulation.reset();
 		this.universe.clear();		
-		this.newGame(2, this.makeWorld);
+		//this.newGame(2, this.makeWorld);
 	}
 
 	@stateChange
@@ -79,7 +79,16 @@ export default class GameStandalone extends Game {
 		}
 		this.myPlayer = this.players[this.myPlayerId];
 		this.gameStage = GAME_STAGE_BUILDINGSPECIES;
-		this.buildMap(makeWorld);
+		if (makeWorld) {
+			this.buildMap(makeWorld);
+		}
+
+	}
+
+	@stateChange
+	setStateAndRun(state) {
+		this.universe.hydrate(state);
+		this.run();
 	}
 
 	@stateChange

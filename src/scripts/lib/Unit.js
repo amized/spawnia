@@ -64,6 +64,10 @@ class Unit extends MapObject {
         return this.species;
     }
 
+    getHealth () {
+        return Math.min(this.energy / this.species.startEnergy, 1);
+    }
+
 
     spawn(species, cells, parent = null, bornAt = 0) {
 

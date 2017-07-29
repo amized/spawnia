@@ -340,6 +340,7 @@ class SpeciesEditor extends React.Component {
 					);
 
 					if (child === null) {
+						let allowedTypes = parentCellType.connections[index];
 						cellKey++;
 						const key = pos.x + "-" + pos.y + "-empty-" + cellKey;
 						cellEls.push(
@@ -349,6 +350,7 @@ class SpeciesEditor extends React.Component {
 								y={pos.y}
 								cellIndex={index}
 								parentCell={cell}
+								allowedTypes={allowedTypes}
 								onClick={this.openCellMenu.bind(this)} 
 								onDrop={this.dropOnCell.bind(this)}
 								isDragging={currDraggingBranch !== null}
@@ -514,6 +516,11 @@ export default Roo.connect()(SpeciesEditor);
 
 class CellEmpty extends React.Component {
 	
+	static propTypes = {
+		allowedTypes : PropTypes.array
+	}
+
+
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -541,20 +548,37 @@ class CellEmpty extends React.Component {
 	}
 
 	render() {
-		let { x, y } = this.props;
+		let { x, y, allowedTypes } = this.props;
 		let classnames = ClassNames({
 			'species-editor__cell-empty': true,
 			'species-editor__cell-empty--hover': this.state.draggingOver
 		});
 		return (
-			<circle 
-				className={classnames}
-				cx={x}
-				cy={y}
-				r="40" 
-				onMouseEnter={this.onMouseEnter}
-				onMouseLeave={this.onMouseLeave}
-			/>
+			<g className="species-editor__cell-wrapper">
+				<circle 
+					className={classnames}
+					cx={x}
+					cy={y}
+					r="40" 
+					onMouseEnter={this.onMouseEnter}
+					onMouseLeave={this.onMouseLeave}
+				/>
+				{
+					allowedTypes !== true && allowedTypes.length > 0 ?
+						<text 
+							className="species-editor__cell-text"  
+							x={x} 
+							y={y+10} 
+							fill={"#FFFFFF"} 
+							style={{opacity: 0.3}}
+							textAnchor="middle"
+							dominantBaseline="central"
+						>
+							{allowedTypes[0]}
+						</text>
+					: null
+				}
+			</g>
 		);
 	}
 }

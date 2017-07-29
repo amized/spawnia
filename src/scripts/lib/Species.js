@@ -20,18 +20,18 @@ export default class Species {
     	);
 
 		this.cellCount = this.dna.getCellCount();
-    	this.startEnergy = UNIT_START_ENERGY_PER_CELL * this.cellCount;
-    	this.energyCostPerStep = ENERGY_COST_PER_CELL * this.cellCount;
+    this.startEnergy = UNIT_START_ENERGY_PER_CELL * this.cellCount;
+    this.energyCostPerStep = ENERGY_COST_PER_CELL * this.cellCount;
 
-        this.energyStorage = this.countCellsOfType("F") * ENERGY_STORAGE_PER_FAT;
-        this.bodyFrictionAir = this.countCellsOfType("G") * 0.03;
-        this.reproductionCost = this.startEnergy;
-        this.reproductionTime = this.cellCount * 1000;
+    this.energyStorage = this.countCellsOfType("F") * ENERGY_STORAGE_PER_FAT;
+    this.bodyFrictionAir = this.countCellsOfType("G") * 0.03;
+    this.reproductionCost = this.startEnergy;
+    this.reproductionTime = this.cellCount * 1000;
 
-        this.population = 0;
-        this.totalPopulation = 0;
-        this.maturedPopulation = 0;
-        this.mutatingTo = null;
+    this.population = 0;
+    this.totalPopulation = 0;
+    this.maturedPopulation = 0;
+    this.mutatingTo = null;
 	}
 
 	isSameAs(species) {

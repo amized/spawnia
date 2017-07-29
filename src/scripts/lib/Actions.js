@@ -108,7 +108,7 @@ function runAction(action, universe, currStep, store, game) {
 
 		case "ADD_UNIT": {
 			
-			const { dna, x, y, playerId, speciesId } = action;
+			const { id, dna, x, y, speciesId } = action;
 			//const gameState = store.getState().gameState;
 			const species = game.getSpecies(speciesId);
 			console.log("trying to add unit", species);
@@ -117,7 +117,7 @@ function runAction(action, universe, currStep, store, game) {
 			}
 
 			let body = UnitBuilder.buildSeedCell(x, y);
-			let unit = new Unit(body, action.id);
+			let unit = new Unit(body, id);
 
 			unit.spawn(species, [], null, currStep);
 			//console.log("World before add unit", universe.world.bodies.map(body=>body.id));
@@ -270,7 +270,7 @@ function runAction(action, universe, currStep, store, game) {
 			unit.energy = unit.energy - (unit.cells.length * ENERGY_COST_PER_CELL);
 
 			return;
-
+			/*
 		case "ADD_STATIC_BLOCK": {
 
 			const { x, y, width, height } = action;
@@ -282,21 +282,22 @@ function runAction(action, universe, currStep, store, game) {
 		            //mask: COLLISION_CATEGORY_DEFAULT | COLLISION_CATEGORY_UNITS
 		        }
 		    }
-
+		    const id = 
 		    const m = new MapObject(Bodies.rectangle(x, y, width, height, props), -1);
-			universe.add(m);
-			return
+				universe.add(m);
+				return
 		}
+		*/
 
 		case "ADD_STATIC_BLOCK": {
-			const { x, y, width, height } = action;
-			const m = new MapObject(buildStaticBlock(x, y, width, height), -1);
+			const { x, y, width, height, id } = action;
+			const m = new MapObject(buildStaticBlock(x, y, width, height), id);
 			universe.add(m);			
 			return
 		}
 		case "ADD_STATIC_CIRCLE": {
-			const { x, y, r } = action;
-			const m = new MapObject(buildStaticCircle(x, y, r), -1);
+			const { x, y, r, id } = action;
+			const m = new MapObject(buildStaticCircle(x, y, r), id);
 			universe.add(m);			
 			return
 		}

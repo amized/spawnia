@@ -19,7 +19,7 @@ function goStraight(dir) {
 function turnRight(dir) {
   return dir + 1 > 3 ? dir - 3 : dir + 1;
 }  
-function goBack(dir) {
+export function goBack(dir) {
   return dir - 2 < 0 ? dir + 2 : dir - 2;
 } 
 
@@ -70,6 +70,8 @@ export function transformPosInDirection(x, y, dir, cellMargin) {
 	}
 }
 
+
+// Calculates the position of a child cell given the parent properties and index
 export function getNewCellPosFromParent(parentX, parentY, parentDir, childIndex, cellMargin) {
 	let newDir;
 	switch (childIndex) {

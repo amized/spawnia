@@ -14,7 +14,8 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      gameMode: GAME_MODE_INTRO,
+      //gameMode: GAME_MODE_INTRO,
+      gameMode: GAME_MODE_SETUP,
       currGame: null
     }
 
@@ -30,7 +31,8 @@ export default class App extends React.Component {
 
 
   render() {
-    const { gameMode, game } = this.state;
+    const { game } = this.props;
+    const { gameMode } = this.state;
     return (
       <div className="app-wrapper">
         {

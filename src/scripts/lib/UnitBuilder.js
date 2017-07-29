@@ -113,7 +113,7 @@ export default class UnitBuilder {
    */
   static buildCellBodies(cells, x, y) {
     const cellMargin = 10;
-    return cells.map(cell=> {
+    return cells.map((cell, index)=> {
       return this.buildCellBody(cell, x + (cell.x * cellMargin), y + (cell.y * cellMargin))
     })
   }
@@ -170,7 +170,8 @@ export default class UnitBuilder {
          fillStyle: color,
          strokeStyle: '#333333',
          lineWidth: 1,
-         cellType: cellType
+         cellType: cellType,
+         cell: cell
       }
     });
   }

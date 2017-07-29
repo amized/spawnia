@@ -15,7 +15,8 @@ import TransitionClass from '../lib/utils/TransitionClass.js'
 
 import reducers from '../reducers'
 import makeWorld from "../mock/mockworldA";
-
+import { gameStateA } from "../mock/startStates.js";
+import { kickStart } from "../lib/Utils/fixtures.js";
 import { synced, lostSync } from "../actions";
 
 
@@ -33,6 +34,8 @@ function runClient() {
 }
 
 
+
+
 function runStandAlone() {
 	const store = createStore(
 		reducers,
@@ -44,13 +47,12 @@ function runStandAlone() {
 	const rootEl = document.getElementById("root");
 
 
-
 	render(
-		<Provider store={store}>
-	    	<App game={game} />
-	  	</Provider>,
+	    <App game={game} />,
 	  rootEl
 	)
+
+	//kickStart(game, gameStateA());
 }
 
 runStandAlone();

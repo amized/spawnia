@@ -180,6 +180,16 @@ class Dna {
             return false;
         }
 
+        // Check this is an allowed cell type
+        let connections = CellTypes[cell.type].connections;
+        let allowedTypes = connections[index];
+
+        if (allowedTypes === true) {
+
+        } else if (allowedTypes.indexOf(branch.type) === -1) {
+            return false;
+        }
+
         // Remove branch
         cell.children[index] = branch;
         branch.parent = cell;

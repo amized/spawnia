@@ -5,6 +5,7 @@ var ClassNames = require('classnames');
 // module aliases
 import { Composite, Mouse, MouseConstraint, World, Events, Bounds, Vertices } from "matter-js"
 import Render from "../lib/Render.js"
+import PixiRenderer from "../lib/PixiRenderer.js";
 import $ from "jquery"
 import { SYNC_STATUS_WAITING, SYNC_STATUS_SYNCED, MAP_OBJ_GENERAL, MAP_OBJ_UNIT } from "../constants"
 import { getCanvasDimensions } from "../lib/Utils/utils";
@@ -14,6 +15,7 @@ import { getCanvasDimensions } from "../lib/Utils/utils";
 export default class SpawniaWorld extends React.Component {
 
     static propTypes = {
+        universe: PropTypes.object,
         viewportBoundingBox: PropTypes.object,
         updateViewportBB: PropTypes.func,
         mapSize: PropTypes.object,
@@ -37,9 +39,10 @@ export default class SpawniaWorld extends React.Component {
         let { engine, viewportBoundingBox } = this.props;
         const canvasSize = getCanvasDimensions();
 
+
+        
         this.mapRender = Render.create({
             //element: this.refs.container,
-            canvas: this.canvas,
             engine: engine,
             bounds: viewportBoundingBox,
             options: {
@@ -71,14 +74,24 @@ export default class SpawniaWorld extends React.Component {
             }
         });
 
-        let canvas = this.canvas;
-        Events.on(engine, 'afterUpdate', this.onTick);
-        this.canvas.addEventListener("wheel", this.onMouseWheel);
-        Render.run(this.mapRender);
-
+       // let canvas = this.canvas;
+        //this.canvas.addEventListener("wheel", this.onMouseWheel);
+        //Render.run(this.mapRender);
+        /*
         if (this.props.onRenderCreate) {
             this.props.onRenderCreate(this.mapRender);
         }
+        */
+        this.renderer = new PixiRenderer({
+            canvas: this.canvas,
+            width: canvasSize.width,
+            height: canvasSize.height,
+            universe: this.props.universe
+        });
+
+        this.renderer.run();
+
+        Events.on(engine, 'afterUpdate', this.onTick);
 
     }
 
@@ -98,9 +111,12 @@ export default class SpawniaWorld extends React.Component {
         }
 
         if (viewportBoundingBox !== prevProps.viewportBoundingBox) {
+            this.renderer.updateBounds(viewportBoundingBox, this.canvas.width, this.canvas.height);
+            /*
             this.mapRender.bounds = viewportBoundingBox;
             this.mapRender.options.width = this.canvas.width;
             this.mapRender.options.height = this.canvas.height;
+            */
         }
 
     }
